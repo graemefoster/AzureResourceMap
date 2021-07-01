@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -79,6 +78,7 @@ namespace DrawIo.Azure.Core
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
 {string.Join(Environment.NewLine, directResources.Value.SelectMany((v, idx) => v.ToDrawIo(idx % 5, idx / 5)))}
+{string.Join(Environment.NewLine, directResources.Value.SelectMany((v, idx) => v.Link(directResources.Value)))}
 	</root>
 </mxGraphModel>";
 

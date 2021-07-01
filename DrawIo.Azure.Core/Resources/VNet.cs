@@ -10,6 +10,8 @@ namespace DrawIo.Azure.Core.Resources
         public override bool FetchFull => true;
         public override string ApiVersion => "2021-02-01";
         public Subnet[] Subnets { get; set; }
+        
+        public override string Image => "img/lib/azure2/networking/Virtual_Networks.svg";
 
         public override void Enrich(JObject full)
         {
@@ -30,22 +32,11 @@ namespace DrawIo.Azure.Core.Resources
         {
             var subnetIndex = 1;
             return base.ToDrawIo(x, y)
-                .Union(new[]
-                {
-                    @$"
-<mxCell id=""{Id}-image"" value=""""  parent=""{Id}"" style=""html=1;image;image=img/lib/azure2/networking/Virtual_Networks.svg;fontSize=12;labelPosition=bottom"" vertex=""1"">
-<mxGeometry x=""10"" y=""10"" width=""148"" height=""30"" as=""geometry"" />
-</mxCell>"
-                })
                 .Union(Subnets.Select(s =>
                     @$"
-<mxCell id=""{Id}.{subnetIndex++}"" value=""{s.Name}"" parent=""{Id}"" style=""text"" vertex=""1""><mxGeometry x=""10"" y=""{subnetIndex * 25}"" width=""148"" height=""30"" as=""geometry"" />
+<mxCell id=""{Id}.{subnetIndex++}"" value=""{s.Name}"" parent=""{1}"" style=""text"" vertex=""1""><mxGeometry x=""10"" y=""{subnetIndex * 25}"" width=""148"" height=""30"" as=""geometry"" />
 </mxCell>"));
         }
 
-        protected override int ExpectedHeight()
-        {
-            return Height * Subnets.Length;
-        }
     }
 }
