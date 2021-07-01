@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawIo.Azure.Core", "DrawIo.Azure.Core\DrawIo.Azure.Core.csproj", "{14A836C1-11F2-49F4-846C-E50134CD86AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
