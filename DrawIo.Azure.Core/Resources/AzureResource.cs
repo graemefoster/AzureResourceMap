@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
+using Edge = Microsoft.Msagl.Core.Layout.Edge;
+using Node = Microsoft.Msagl.Core.Layout.Node;
 
 namespace DrawIo.Azure.Core.Resources
 {
@@ -15,6 +17,7 @@ namespace DrawIo.Azure.Core.Resources
         public string Type { get; set; }
         public string Location { get; set; }
         public virtual string ApiVersion => "2020-11-01";
+        public Node Node { get; set; }
 
         public virtual void Enrich(JObject full)
         {
@@ -28,45 +31,28 @@ namespace DrawIo.Azure.Core.Resources
             return new[]
             {
                 @$"<mxCell id=""{Id}"" value=""{Name}"" style=""{cellStyle}"" vertex=""1"" parent=""1"">
-                <mxGeometry x=""{ExpectedX(x)}"" y=""{ExpectedY(y)}"" width=""{ExpectedWidth()}"" height=""{ExpectedHeight()}"" as=""geometry"" />
+                <mxGeometry x=""{Node.Center.X}"" y=""{Node.Center.Y}"" width=""{Node.Width}"" height=""{Node.Height}"" as=""geometry"" />
                 </mxCell>"
             };
         }
 
-        public virtual IEnumerable<string> Link(IEnumerable<AzureResource> allResources)
+        public virtual IEnumerable<string> Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
         {
             return Array.Empty<string>();
         }
 
-        protected const int Width = 50;
-        protected const int Height = 50;
-
-        protected int ExpectedX(int x)
+        public string Link(AzureResource to, GeometryGraph graph)
         {
-            return x * (Width + 10);
-        }
-
-        protected int ExpectedY(int y)
-        {
-            return y * (Height + 10);
-        }
-
-        protected virtual int ExpectedWidth()
-        {
-            return Width;
-        }
-
-        protected virtual int ExpectedHeight()
-        {
-            return Height;
-        }
-
-        protected string Link(AzureResource to)
-        {
+            graph.Edges.Add(new Edge(Node, to.Node) { Length = 200});
             return $@"
 <mxCell id=""{Guid.NewGuid().ToString().Replace("-", "")}"" style=""edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.047;entryY=0.476;entryDx=0;entryDy=0;entryPerimeter=0;"" edge=""1"" parent=""1"" source=""{Id}"" target=""{to.Id}"">
     <mxGeometry relative=""1"" as=""geometry"" />
 </mxCell>";
         }
+    }
+
+    internal interface IContainResources
+    {
+        void Group(GeometryGraph graph, IEnumerable<AzureResource> allResources);
     }
 }

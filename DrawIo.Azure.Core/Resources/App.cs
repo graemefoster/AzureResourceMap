@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -29,11 +28,6 @@ namespace DrawIo.Azure.Core.Resources
                 full["properties"]["privateEndpointConnections"]
                     .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
                     .ToArray();
-        }
-
-        public bool IsInAppService(ASP asp)
-        {
-            return String.Equals(asp.Id, Properties.ServerFarmId, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)

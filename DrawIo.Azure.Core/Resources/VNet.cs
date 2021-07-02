@@ -28,15 +28,15 @@ namespace DrawIo.Azure.Core.Resources
             public string AddressPrefix { get; set; }
         }
 
-        public override IEnumerable<string> ToDrawIo(int x, int y)
-        {
-            var subnetIndex = 1;
-            return base.ToDrawIo(x, y)
-                .Union(Subnets.Select(s =>
-                    @$"
-<mxCell id=""{Id}.{subnetIndex++}"" value=""{s.Name}"" parent=""{1}"" style=""text"" vertex=""1""><mxGeometry x=""10"" y=""{subnetIndex * 25}"" width=""148"" height=""30"" as=""geometry"" />
-</mxCell>"));
-        }
+//         public override IEnumerable<string> ToDrawIo(int x, int y)
+//         {
+//             var subnetIndex = 1;
+//             return base.ToDrawIo(x, y)
+//                 .Union(Subnets.Select(s =>
+//                     @$"
+// <mxCell id=""{Id}.{subnetIndex++}"" value=""{s.Name}"" parent=""{1}"" style=""text"" vertex=""1""><mxGeometry x=""10"" y=""{subnetIndex * 25}"" width=""148"" height=""30"" as=""geometry"" />
+// </mxCell>"));
+//         }
 
     }
 }

@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using DrawIo.Azure.Core.Resources;
+using Microsoft.Msagl.Core.Geometry;
+using Microsoft.Msagl.Core.Geometry.Curves;
+using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.Layout.Incremental;
+using Microsoft.Msagl.Miscellaneous;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Node = Microsoft.Msagl.Core.Layout.Node;
 
 namespace DrawIo.Azure.Core
 {
@@ -73,12 +81,36 @@ namespace DrawIo.Azure.Core
             var directResources = await GetAsync<AzureList<AzureResource>>(
                 $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{resourceGroup}'", "2020-10-01");
 
+            var graph = new GeometryGraph();
+            foreach (var resource in directResources.Value)
+            {
+                var node = new Node(CurveFactory.CreateRectangle(50, 50, new Point(50, 25)))
+                {
+                    DebugId = resource
+                };
+                graph.Nodes.Add(node);
+                resource.Node = node;
+            }
+
+            foreach (var resource in directResources.Value.OfType<IContainResources>())
+            {
+                resource.Group(graph, directResources.Value);
+            }
+
+            var sb = new StringBuilder();
+            foreach (var resource in directResources.Value)
+            {
+                sb.AppendJoin(Environment.NewLine, resource.Link(directResources.Value, graph));
+            }
+
+            LayoutHelpers.CalculateLayout(graph, new FastIncrementalLayoutSettings(), null);
+
             var msGraph = @$"<mxGraphModel>
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
 {string.Join(Environment.NewLine, directResources.Value.SelectMany((v, idx) => v.ToDrawIo(idx % 5, idx / 5)))}
-{string.Join(Environment.NewLine, directResources.Value.SelectMany((v, idx) => v.Link(directResources.Value)))}
+{sb}
 	</root>
 </mxGraphModel>";
 
