@@ -6,7 +6,7 @@ namespace DrawIo.Azure.Core
 {
     internal class IgnoreMeResource : AzureResource
     {
-        public override IEnumerable<string> ToDrawIo(int x, int y)
+        public override IEnumerable<string> ToDrawIo()
         {
             return Array.Empty<string>();
         }

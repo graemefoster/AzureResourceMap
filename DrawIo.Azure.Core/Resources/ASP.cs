@@ -18,10 +18,10 @@ namespace DrawIo.Azure.Core.Resources
             var subNodes = new[] {Node}.Union(allResources.OfType<App>().Where(x =>
                     String.Equals(Id, x.Properties.ServerFarmId, StringComparison.InvariantCultureIgnoreCase))
                 .Select(x => x.Node));
-
+            
             var subgraph = new Cluster(subNodes.ToArray());
-            subgraph.AddClusterParent(graph.RootCluster);
-            subgraph.BoundaryCurve = CurveFactory.CreateRectangle(50, 50, new Point(50, 25)); 
+            // subgraph.AddClusterParent(graph.RootCluster);
+            // subgraph.BoundaryCurve = CurveFactory.CreateRectangle(500, 150, new Point(250, 75));
             // foreach (var node in subgraph.Nodes)
             // {
             //     graph.Nodes.Remove(node);

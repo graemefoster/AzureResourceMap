@@ -12,11 +12,10 @@ namespace DrawIo.Azure.Core.Resources
         public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
         public string[] PublicIpAddresses {get; set; }
 
-        public override IEnumerable<string> Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
         {
-            return 
-                allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).Select(y => Link(y, graph))
-                    .Union(allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).Select(y => Link(y, graph)));
+                allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
+                allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
         }
 
         public override void Enrich(JObject full)

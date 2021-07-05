@@ -9,9 +9,9 @@ namespace DrawIo.Azure.Core.Resources
         public override bool IsSpecific => true;
         public override string Image => "img/lib/azure2/networking/Public_IP_Addresses.svg";
 
-        public override IEnumerable<string> Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
         {
-            return allResources.OfType<Nic>().Where(x => x.ExposedBy(this)).Select(x => Link(x, graph));
+            allResources.OfType<Nic>().Where(x => x.ExposedBy(this)).ForEach(x => Link(x, graph));
         }
     }
 }

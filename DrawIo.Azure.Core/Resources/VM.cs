@@ -22,10 +22,10 @@ namespace DrawIo.Azure.Core.Resources
             Nics = full["properties"]["networkProfile"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
         }
 
-        public override IEnumerable<string> Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
         {
             var disk = allResources.OfType<Disk>().Single(x => String.Equals(x.Id, SystemDiskId, StringComparison.InvariantCultureIgnoreCase));
-            return new[] {Link(disk, graph)};
+            Link(disk, graph);
         }
     }
 }

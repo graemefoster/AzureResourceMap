@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
@@ -13,23 +14,31 @@ namespace DrawIo.Azure.Core.Resources
 
         public string[] Nics { get; private set; }
 
-        public override IEnumerable<string> Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
         {
-            var endpointLinks =
-                allResources
-                    .OfType<App>().Where(x => x.AccessedViaPrivateEndpoint(this))
-                    .Select(x => base.Link(x, graph))
-                    .Union(
-                        allResources
-                            .OfType<KeyVault>().Where(x => x.AccessedViaPrivateEndpoint(this))
-                            .Select(x => base.Link(x, graph))
-                    );
-            return endpointLinks;
+            allResources
+                .OfType<App>().Where(x => x.AccessedViaPrivateEndpoint(this))
+                .ForEach(x => base.Link(x, graph));
+
+            allResources
+                .OfType<KeyVault>().Where(x => x.AccessedViaPrivateEndpoint(this))
+                .ForEach(x => base.Link(x, graph));
         }
 
         public override void Enrich(JObject full)
         {
             Nics = full["properties"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
         }
+    }
+
+    public static class EnumerableEx
+    {
+        public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
+        {
+            foreach (var item in items)
+            {
+                action(item);
+            }
+        } 
     }
 }

@@ -7,7 +7,7 @@ namespace DrawIo.Azure.Core.Resources
     {
         public override bool IsSpecific => true;
 
-        public override IEnumerable<string> ToDrawIo(int x, int y)
+        public override IEnumerable<string> ToDrawIo()
         {
             return Array.Empty<string>();
         }
