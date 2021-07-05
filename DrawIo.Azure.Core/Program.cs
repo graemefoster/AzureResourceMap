@@ -73,6 +73,7 @@ namespace DrawIo.Azure.Core
                 $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{resourceGroup}'", "2020-10-01");
 
             var graph = new GeometryGraph();
+            graph.RootCluster ??= new Cluster();
             foreach (var resource in directResources.Value)
             {
                 var node = new Node(CurveFactory.CreateRectangle(50, 50, new Point(50, 25)))
@@ -83,15 +84,14 @@ namespace DrawIo.Azure.Core
                 resource.Node = node;
             }
 
-            foreach (var resource in directResources.Value.OfType<IContainResources>())
-            {
-                resource.Group(graph, directResources.Value);
-            }
-
             var sb = new StringBuilder();
             foreach (var resource in directResources.Value)
             {
                 resource.Link(directResources.Value, graph);
+            }
+            foreach (var resource in directResources.Value.OfType<IContainResources>())
+            {
+                resource.Group(graph, directResources.Value);
             }
             foreach (var node in graph.Nodes)
             {
