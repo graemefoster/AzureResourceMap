@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources
@@ -11,12 +14,14 @@ namespace DrawIo.Azure.Core.Resources
         public override string ApiVersion => "2019-09-01";
         public string[] PrivateEndpoints { get; set; }
 
-        public override void Enrich(JObject full)
+        public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
             PrivateEndpoints =
-                full["properties"]["privateEndpointConnections"]
-                    .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
+                jObject["properties"]!["privateEndpointConnections"]!
+                    .Select(x => x["properties"]!["privateEndpoint"]!.Value<string>("id")!.ToLowerInvariant())
                     .ToArray();        
+            
+            return Task.CompletedTask;
         }
         
         public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)

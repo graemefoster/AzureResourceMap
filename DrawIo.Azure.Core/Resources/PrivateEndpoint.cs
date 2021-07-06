@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
@@ -25,9 +26,11 @@ namespace DrawIo.Azure.Core.Resources
                 .ForEach(x => base.Link(x, graph));
         }
 
-        public override void Enrich(JObject full)
+        public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
-            Nics = full["properties"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
+            Nics = jObject["properties"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
+            
+            return Task.CompletedTask;
         }
     }
 

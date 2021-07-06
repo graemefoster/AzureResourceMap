@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 using Edge = Microsoft.Msagl.Core.Layout.Edge;
@@ -19,9 +21,13 @@ namespace DrawIo.Azure.Core.Resources
         public string Location { get; set; }
         public virtual string ApiVersion => "2020-11-01";
         public Node Node { get; set; }
-        private List<Edge> _edges = new();
-        public virtual void Enrich(JObject full)
+        private readonly List<Edge> _edges = new();
+
+        public virtual HashSet<(HttpMethod, string)> AdditionalResources => new();
+        
+        public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
         {
+            return Task.CompletedTask;
         }
 
         public virtual IEnumerable<string> ToDrawIo()

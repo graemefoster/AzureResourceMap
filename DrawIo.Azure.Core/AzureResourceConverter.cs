@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Resources;
 using Newtonsoft.Json;
@@ -8,11 +10,15 @@ namespace DrawIo.Azure.Core
 {
     internal class AzureResourceConverter : JsonConverter
     {
-        Func<AzureResource, string, Task<JObject>> _enricher;
+        readonly Func<AzureResource, string, Task<JObject>> _enricher;
+        readonly Func<AzureResource, Dictionary<string, Task<JObject>>> _additionalItems;
 
-        public AzureResourceConverter(Func<AzureResource, string, Task<JObject>> enricher)
+        public AzureResourceConverter(
+            Func<AzureResource, string, Task<JObject>> enricher,
+            Func<AzureResource, Dictionary<string, Task<JObject>>> additionalItems)
         {
             _enricher = enricher;
+            _additionalItems = additionalItems;
         }
 
         public override bool CanConvert(Type objectType)
@@ -20,10 +26,13 @@ namespace DrawIo.Azure.Core
             return typeof(AzureResource).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader,
-            Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(
+            JsonReader reader,
+            Type objectType, 
+            object existingValue, 
+            JsonSerializer serializer)
         {
-            static AzureResource GetAzureResource(string type) => type.ToLowerInvariant() switch
+            static AzureResource? GetAzureResource(string type) => type.ToLowerInvariant() switch
             {
                 "microsoft.network/virtualnetworks" => new VNet(),
                 "microsoft.network/privateendpoints" => new PrivateEndpoint(),
@@ -50,7 +59,7 @@ namespace DrawIo.Azure.Core
 
             JObject jo = JObject.Load(reader);
 
-            var type = (string) jo["type"];
+            var type = (string) jo["type"]!;
             var item = GetAzureResource(type);
             if (item != null)
             {
@@ -59,7 +68,12 @@ namespace DrawIo.Azure.Core
                 if (item.FetchFull)
                 {
                     var fullItem = _enricher(item, item.ApiVersion).GetAwaiter().GetResult();
-                    item.Enrich(fullItem);
+                    var additionalItems = _additionalItems(item);
+                    item.Enrich(
+                        fullItem, 
+                        additionalItems.ToDictionary(
+                            x => x.Key, 
+                            x => x.Value.GetAwaiter().GetResult()));
                 }
             }
             else
@@ -70,13 +84,9 @@ namespace DrawIo.Azure.Core
             return item;
         }
 
-        public override bool CanWrite
-        {
-            get { return false; }
-        }
+        public override bool CanWrite => false;
 
-        public override void WriteJson(JsonWriter writer,
-            object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

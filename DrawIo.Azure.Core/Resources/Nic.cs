@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
@@ -30,23 +32,25 @@ namespace DrawIo.Azure.Core.Resources
             }
         }
 
-        public override void Enrich(JObject full)
+        public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
-            PublicIpAddresses = full["properties"]["ipConfigurations"]
+            PublicIpAddresses = jObject["properties"]!["ipConfigurations"]!
                 .Select(x =>
-                    x["properties"]["publicIPAddress"] != null
-                        ? x["properties"]["publicIPAddress"].Value<string>("id").ToLowerInvariant()
+                    x["properties"]!["publicIPAddress"] != null
+                        ? x["properties"]!["publicIPAddress"]!.Value<string>("id")!.ToLowerInvariant()
                         : null)
                 .Where(x => x != null)
-                .ToArray();
+                .ToArray()!;
 
-            _networkAttachments = full["properties"]["ipConfigurations"]
+            _networkAttachments = jObject["properties"]!["ipConfigurations"]!
                 .Select(x =>
-                    x["properties"]["subnet"] != null
-                        ? x["properties"]["subnet"].Value<string>("id").ToLowerInvariant()
+                    x["properties"]!["subnet"] != null
+                        ? x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant()
                         : null)
                 .Where(x => x != null)
                 .Select(x => x!);
+            
+            return Task.CompletedTask;
         }
 
         private IEnumerable<string> _networkAttachments { get; set; }

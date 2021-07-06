@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
@@ -16,13 +18,15 @@ namespace DrawIo.Azure.Core.Resources
 
         public override string Image => "img/lib/azure2/networking/Virtual_Networks.svg";
 
-        public override void Enrich(JObject full)
+        public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
         {
-            Subnets = full["properties"]["subnets"].Select(x => new Subnet
+            Subnets = full["properties"]!["subnets"]!.Select(x => new Subnet
             {
-                Name = x.Value<string>("name"),
-                AddressPrefix = x["properties"].Value<string>("addressPrefix")
+                Name = x.Value<string>("name")!,
+                AddressPrefix = x["properties"]!.Value<string>("addressPrefix")!
             }).ToArray();
+            
+            return Task.CompletedTask;
         }
 
         public class Subnet

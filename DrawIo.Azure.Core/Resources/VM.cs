@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
@@ -16,10 +18,12 @@ namespace DrawIo.Azure.Core.Resources
         public string[] Nics { get; private set; }
         public override string? ApiVersion => "2021-07-01";
 
-        public override void Enrich(JObject full)
+        public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
-            SystemDiskId = full["properties"]["storageProfile"]["osDisk"]["managedDisk"].Value<string>("id");
-            Nics = full["properties"]["networkProfile"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
+            SystemDiskId = jObject["properties"]!["storageProfile"]!["osDisk"]!["managedDisk"]!.Value<string>("id")!;
+            Nics = jObject["properties"]!["networkProfile"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!).ToArray();
+            
+            return Task.CompletedTask;
         }
 
         public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,7 +12,6 @@ using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
-using Microsoft.Msagl.Layout.Incremental;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 using Newtonsoft.Json;
@@ -26,7 +24,7 @@ namespace DrawIo.Azure.Core
     {
         public static async Task Main(string[] args)
         {
-            var resourceGroup = "apimgmtpoc";// "function-outbound-calls";
+            var resourceGroup = "apimgmtpoc"; // "function-outbound-calls";
             resourceGroup = string.IsNullOrWhiteSpace(resourceGroup) ? "Defence-PoC" : resourceGroup;
 
             var directoryName = @"C:\Users\graemefoster\Documents\LINQPad Queries\AzureResourceManager\";
@@ -37,7 +35,8 @@ namespace DrawIo.Azure.Core
                     $"responseCache.{resourceGroup}.json");
 
             var responseCache = File.Exists(responseCacheFile)
-                ? JsonConvert.DeserializeObject<Dictionary<string, string>>(await File.ReadAllTextAsync(responseCacheFile))!
+                ? JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    await File.ReadAllTextAsync(responseCacheFile))!
                 : new Dictionary<string, string>();
 
 
@@ -51,7 +50,7 @@ namespace DrawIo.Azure.Core
                 "Bearer"
                 , token.Token);
 
-            async Task<T?> GetAsync<T>(string uri, string apiVersion)
+            async Task<T?> GetAsync<T>(string uri, string apiVersion, HttpMethod? method = null)
             {
                 var apiVersionQueryString = (uri.Contains("?") ? "&" : "?") + $"api-version={apiVersion}";
                 var resourceUri = $"{uri}{apiVersionQueryString}";
@@ -59,13 +58,28 @@ namespace DrawIo.Azure.Core
                 {
                     return JsonConvert.DeserializeObject<T>(
                         responseCache[resourceUri],
-                        new AzureResourceConverter((r, v) => GetAsync<JObject>(r.Id, v)));
+                        new AzureResourceConverter(
+                            (r, v) => GetAsync<JObject>(r.Id, v)!,
+                            r =>
+                                r
+                                    .AdditionalResources
+                                    .ToDictionary(
+                                        x => x.Item2,
+                                        x => GetAsync<JObject>($"{r.Id}/{x.Item2}", r.ApiVersion, x.Item1))!));
                 }
 
-                var responseContent = await httpClient.GetStringAsync(resourceUri);
+                var request = new HttpRequestMessage(method ?? HttpMethod.Get, resourceUri);
+                var responseContent = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
                 responseCache[resourceUri] = responseContent;
                 return JsonConvert.DeserializeObject<T>(responseContent,
-                    new AzureResourceConverter((r, v) => GetAsync<JObject>(r.Id, v)));
+                    new AzureResourceConverter(
+                        (r, v) => GetAsync<JObject>(r.Id, v)!,
+                        r =>
+                            r
+                                .AdditionalResources
+                                .ToDictionary(
+                                    x => x.Item2,
+                                    x => GetAsync<JObject>($"{r.Id}/{x.Item2}", r.ApiVersion, x.Item1))!));
             }
 
 
@@ -74,7 +88,7 @@ namespace DrawIo.Azure.Core
 
             var graph = new GeometryGraph();
             graph.RootCluster ??= new Cluster();
-            foreach (var resource in directResources.Value)
+            foreach (var resource in directResources!.Value)
             {
                 var node = new Node(CurveFactory.CreateRectangle(50, 50, new Point(50, 25)))
                 {
@@ -89,23 +103,27 @@ namespace DrawIo.Azure.Core
             {
                 resource.Link(directResources.Value, graph);
             }
+
             foreach (var resource in directResources.Value.OfType<IContainResources>())
             {
                 resource.Group(graph, directResources.Value);
             }
+
             foreach (var node in graph.Nodes)
             {
-                node.BoundaryCurve = 
+                node.BoundaryCurve =
                     CurveFactory.CreateRectangle(150, 50, new Point(0, 0));
             }
 
-            var routingSettings = new EdgeRoutingSettings {
+            var routingSettings = new EdgeRoutingSettings
+            {
                 UseObstacleRectangles = true,
                 BendPenalty = 100,
                 EdgeRoutingMode = EdgeRoutingMode.StraightLine
             };
-            
-            var settings = new SugiyamaLayoutSettings {
+
+            var settings = new SugiyamaLayoutSettings
+            {
                 ClusterMargin = 50,
                 PackingAspectRatio = 3,
                 PackingMethod = PackingMethod.Columns,
@@ -114,9 +132,9 @@ namespace DrawIo.Azure.Core
                 NodeSeparation = 50,
                 LayerSeparation = 150
             };
-            
+
             LayoutHelpers.CalculateLayout(graph, settings, null);
-            
+
             var msGraph = @$"<mxGraphModel>
 	<root>
 		<mxCell id=""0"" />
