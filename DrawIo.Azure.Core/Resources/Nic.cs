@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -26,9 +27,16 @@ namespace DrawIo.Azure.Core.Resources
                     return new {vnet = segments.ElementAt(segments.Length - 3), subnet = segments.Last()};
                 })
                 .ToArray();
+            
             foreach (var subnet in subnets)
             {
-                allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet).AddToVNet(this, subnet.subnet);
+                var vNet = allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet);
+                vNet.AddToVNet(this, subnet.subnet);
+                foreach (var associatedWithNic in
+                    allResources.OfType<IAssociateWithNic>().Where(x => x.Nics.Any(nic => nic.Equals(Id, StringComparison.InvariantCultureIgnoreCase))))
+                {
+                    vNet.AddToVNet((AzureResource)associatedWithNic, subnet.subnet);
+                }
             }
         }
 

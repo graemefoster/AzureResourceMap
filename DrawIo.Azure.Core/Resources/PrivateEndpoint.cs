@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources
 {
-    class PrivateEndpoint : AzureResource
+    class PrivateEndpoint : AzureResource, IAssociateWithNic
     {
         public override bool IsSpecific => true;
         public override bool FetchFull => true;
@@ -28,7 +28,7 @@ namespace DrawIo.Azure.Core.Resources
 
         public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
-            Nics = jObject["properties"]["networkInterfaces"].Select(x => x.Value<string>("id")).ToArray();
+            Nics = jObject["properties"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!).ToArray();
             
             return Task.CompletedTask;
         }

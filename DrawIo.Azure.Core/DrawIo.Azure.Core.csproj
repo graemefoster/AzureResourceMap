@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutomaticGraphLayout" Version="1.1.11" />
+      <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
       <PackageReference Include="Azure.Identity" Version="1.5.0-beta.1" />
       <PackageReference Include="Microsoft.Identity.Client" Version="4.33.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

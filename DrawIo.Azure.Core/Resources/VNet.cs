@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Msagl.Core.Geometry;
+using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +26,7 @@ namespace DrawIo.Azure.Core.Resources
                 Name = x.Value<string>("name")!,
                 AddressPrefix = x["properties"]!.Value<string>("addressPrefix")!
             }).ToArray();
-            
+
             return Task.CompletedTask;
         }
 
@@ -43,31 +44,44 @@ namespace DrawIo.Azure.Core.Resources
 
         public void Group(GeometryGraph graph, IEnumerable<AzureResource> allResources)
         {
-            var vnetCluster = new Cluster( new[] {Node});
             foreach (var subnet in Subnets)
             {
-                var cluster = new Cluster(subnet.ContainedResources.Select(x => x.Node));
-                vnetCluster.AddChild(cluster);
+                var emptyContents = new Node(CurveFactory.CreateRectangle(150, 75, new Point()));
+                var cluster = new Cluster(subnet.ContainedResources.Select(x => x.Node).Union(new[] { emptyContents }))
+                {
+                    BoundaryCurve = CurveFactory.CreateRectangle(150, 75, new Point()),
+                    UserData = subnet.Name
+                };
+                graph.Nodes.Add(emptyContents);
+                graph.Nodes.Add(cluster);
                 _clusters.Add(cluster);
             }
 
+            var vnetCluster = new Cluster(new[] { Node }, _clusters)
+            {
+                BoundaryCurve = CurveFactory.CreateRectangle(150, 75, new Point()), UserData = Name
+            };
             graph.Nodes.Add(vnetCluster);
-            
             _clusters.Add(vnetCluster);
-
         }
-
 
         public override IEnumerable<string> ToDrawIo()
         {
             return base.ToDrawIo().Union(
                 _clusters.Select(x =>
-                    $@"
-<mxCell id=""{Guid.NewGuid()}"" value="""" style=""rounded=0;whiteSpace=wrap;html=1;"" vertex=""1"" parent=""1"">
-    <mxGeometry x=""{x.BoundingBox.Left}"" y=""{x.BoundingBox.Top - (x.BoundingBox.Height / 2)}"" width=""{x.BoundingBox.Width}"" height=""{x.BoundingBox.Height}"" 
+                {
+                    var boundingBoxWidth = x.BoundingBox.Width;
+                    var boundingBoxHeight = x.BoundingBox.Height;
+                    var boundingBoxLeft = x.BoundingBox.Left - (x.ClusterParent?.BoundingBox.Left ?? 0);
+                    var boundingBoxTop = x.BoundingBox.Bottom - (x.ClusterParent?.BoundingBox.Bottom ?? 0);
+                    var nodeUserData = (string)x.UserData;
+
+                    return $@"
+<mxCell id=""{(string)x.UserData}"" value=""{nodeUserData}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(x.ClusterParent == null ? "1" : x.ClusterParent.UserData)}"">
+    <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
-</mxCell>"
-                ));
+</mxCell>";
+                }));
         }
     }
 }

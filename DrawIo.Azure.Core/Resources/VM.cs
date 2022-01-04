@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources
 {
-    class VM : AzureResource
+    class VM : AzureResource, IAssociateWithNic
     {
         public override bool IsSpecific => true;
         public override bool FetchFull => true;
