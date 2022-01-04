@@ -24,11 +24,11 @@ namespace DrawIo.Azure.Core.Resources
             
             return Task.CompletedTask;
         }
-
-        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
-        {
-            var disk = allResources.OfType<Disk>().Single(x => String.Equals(x.Id, SystemDiskId, StringComparison.InvariantCultureIgnoreCase));
-            Link(disk, graph);
-        }
+        //
+        // public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        // {
+        //     var disk = allResources.OfType<Disk>().Single(x => String.Equals(x.Id, SystemDiskId, StringComparison.InvariantCultureIgnoreCase));
+        //     Link(disk, graph);
+        // }
     }
 }

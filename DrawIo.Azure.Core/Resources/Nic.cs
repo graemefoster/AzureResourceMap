@@ -15,30 +15,30 @@ namespace DrawIo.Azure.Core.Resources
         public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
         public string[] PublicIpAddresses { get; set; }
 
-        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
-        {
-            allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
-            allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
-
-            var subnets = _networkAttachments
-                .Select(x =>
-                {
-                    var segments = x.Split('/');
-                    return new {vnet = segments.ElementAt(segments.Length - 3), subnet = segments.Last()};
-                })
-                .ToArray();
-            
-            foreach (var subnet in subnets)
-            {
-                var vNet = allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet);
-                vNet.AddToVNet(this, subnet.subnet);
-                foreach (var associatedWithNic in
-                    allResources.OfType<IAssociateWithNic>().Where(x => x.Nics.Any(nic => nic.Equals(Id, StringComparison.InvariantCultureIgnoreCase))))
-                {
-                    vNet.AddToVNet((AzureResource)associatedWithNic, subnet.subnet);
-                }
-            }
-        }
+        // public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        // {
+        //     allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
+        //     allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(y => Link(y, graph));
+        //
+        //     var subnets = _networkAttachments
+        //         .Select(x =>
+        //         {
+        //             var segments = x.Split('/');
+        //             return new {vnet = segments.ElementAt(segments.Length - 3), subnet = segments.Last()};
+        //         })
+        //         .ToArray();
+        //     
+        //     foreach (var subnet in subnets)
+        //     {
+        //         var vNet = allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet);
+        //         vNet.AddToVNet(this, subnet.subnet);
+        //         foreach (var associatedWithNic in
+        //             allResources.OfType<IAssociateWithNic>().Where(x => x.Nics.Any(nic => nic.Equals(Id, StringComparison.InvariantCultureIgnoreCase))))
+        //         {
+        //             vNet.AddToVNet((AzureResource)associatedWithNic, subnet.subnet);
+        //         }
+        //     }
+        // }
 
         public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {

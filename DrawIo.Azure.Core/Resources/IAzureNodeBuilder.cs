@@ -3,7 +3,7 @@ using Microsoft.Msagl.Core.Layout;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal interface IContainResources
+internal interface IAzureNodeBuilder
 {
-    void Group(GeometryGraph graph, IEnumerable<AzureResource> allResources);
+    IEnumerable<Node> CreateNodes(AzureResource resource);
 }

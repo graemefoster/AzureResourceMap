@@ -15,16 +15,16 @@ namespace DrawIo.Azure.Core.Resources
 
         public string[] Nics { get; private set; }
 
-        public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
-        {
-            allResources
-                .OfType<App>().Where(x => x.AccessedViaPrivateEndpoint(this))
-                .ForEach(x => base.Link(x, graph));
-
-            allResources
-                .OfType<KeyVault>().Where(x => x.AccessedViaPrivateEndpoint(this))
-                .ForEach(x => base.Link(x, graph));
-        }
+        // public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
+        // {
+        //     // allResources
+        //     //     .OfType<App>().Where(x => x.AccessedViaPrivateEndpoint(this))
+        //     //     .ForEach(x => base.Link(x, graph));
+        //
+        //     allResources
+        //         .OfType<KeyVault>().Where(x => x.AccessedViaPrivateEndpoint(this))
+        //         .ForEach(x => base.Link(x, graph));
+        // }
 
         public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
         {
@@ -34,14 +34,4 @@ namespace DrawIo.Azure.Core.Resources
         }
     }
 
-    public static class EnumerableEx
-    {
-        public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
-        {
-            foreach (var item in items)
-            {
-                action(item);
-            }
-        } 
-    }
 }

@@ -8,15 +8,12 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using DrawIo.Azure.Core.Resources;
-using Microsoft.Msagl.Core.Geometry;
-using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Node = Microsoft.Msagl.Core.Layout.Node;
 
 namespace DrawIo.Azure.Core;
 
@@ -87,27 +84,37 @@ public static class Program
         var directResources = await GetAsync<AzureList<AzureResource>>(
             $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{resourceGroup}'", "2020-10-01");
 
+        await DrawDiagram(directResources, responseCacheFile, responseCache, directoryName, resourceGroup);
+    }
+
+    private static async Task DrawDiagram(AzureList<AzureResource>? directResources, string responseCacheFile,
+        Dictionary<string, string> responseCache,
+        string directoryName, string resourceGroup)
+    {
         var graph = new GeometryGraph();
         foreach (var resource in directResources!.Value)
         {
-            var node = new Node(CurveFactory.CreateRectangle(150, 75, new Point()));
-            graph.Nodes.Add(node);
-            resource.Node = node;
+            var nodes = resource.CreateNodeBuilder().CreateNodes(resource);
+            foreach (var node in nodes)
+            {
+                graph.Nodes.Add(node);
+            }
         }
 
         var sb = new StringBuilder();
 
         //Discover hidden links that aren't obvious through the resource manager
-        foreach (var resource in directResources.Value)
-        {
-            resource.Link(directResources.Value, graph);
-        }
+        //For example, a NIC / private endpoint linked to a subnet
+        // foreach (var resource in directResources.Value)
+        // {
+        //     resource.Link(directResources.Value, graph);
+        // }
 
         //Group items into clusters - for example a subnet contains many vms, or an app-service-plan contains many apps
-        foreach (var resource in directResources.Value.OfType<IContainResources>())
-        {
-            resource.Group(graph, directResources.Value);
-        }
+        // foreach (var resource in directResources.Value.OfType<IContainResources>())
+        // {
+        //     resource.CreateNodes(graph, directResources.Value);
+        // }
 
         var routingSettings = new EdgeRoutingSettings
         {
@@ -116,7 +123,7 @@ public static class Program
             EdgeRoutingMode = EdgeRoutingMode.StraightLine
         };
 
-        var settings = new  SugiyamaLayoutSettings()
+        var settings = new SugiyamaLayoutSettings()
         {
             ClusterMargin = 5,
             PackingAspectRatio = 3,
@@ -133,12 +140,13 @@ public static class Program
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
-{string.Join(Environment.NewLine, directResources.Value.SelectMany((v, idx) => v.ToDrawIo()))}
+{string.Join(Environment.NewLine, graph.Nodes.Select(v => ((CustomUserData)v.UserData).Draw()))}
 {sb}
 	</root>
 </mxGraphModel>";
 
         await File.WriteAllTextAsync(responseCacheFile, JsonConvert.SerializeObject(responseCache));
         await File.WriteAllTextAsync(Path.Combine(directoryName, $"{resourceGroup}.drawio"), msGraph);
+        Console.WriteLine(msGraph);
     }
 }
