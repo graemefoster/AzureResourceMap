@@ -9,7 +9,7 @@ namespace DrawIo.Azure.Core.Resources;
 internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
-    private AzureVNetIntegrationResource? _azureVNetIntegrationResource;
+    private VNetIntegration? _azureVNetIntegrationResource;
     public override bool FetchFull => true;
     public string Kind { get; set; }
     public AppProperties Properties { get; set; }
@@ -69,7 +69,7 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
     {
         if (Properties.VirtualNetworkSubnetId != null)
         {
-            _azureVNetIntegrationResource = new AzureVNetIntegrationResource($"{Id}.vnetintegration", Properties.VirtualNetworkSubnetId);
+            _azureVNetIntegrationResource = new VNetIntegration($"{Id}.vnetintegration", Properties.VirtualNetworkSubnetId);
             yield return _azureVNetIntegrationResource;
         }
     }

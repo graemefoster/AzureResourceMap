@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class AzureVNetIntegrationResource : AzureResource
+internal class VNetIntegration : AzureResource
 {
     private readonly string _vnetIntegratedInto;
 
-    public AzureVNetIntegrationResource(string id, string vnetIntegratedInto)
+    public VNetIntegration(string id, string vnetIntegratedInto)
     {
         Id = id;
         _vnetIntegratedInto = vnetIntegratedInto;

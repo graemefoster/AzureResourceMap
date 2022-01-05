@@ -35,7 +35,7 @@ internal static class AzureResourceRectangleDrawer
         }
 
         return
-            @$"<mxCell id=""{id}"" value=""{name}/{type}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
+            @$"<mxCell id=""{id}"" value=""{name}&lt;br/&gt;({type})"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
 </mxCell>";
