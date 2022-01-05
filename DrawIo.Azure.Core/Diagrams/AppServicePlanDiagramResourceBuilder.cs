@@ -8,18 +8,22 @@ internal class AppServicePlanDiagramResourceBuilder : AzureResourceNodeBuilder
 {
     private readonly ASP _resource;
 
-    public AppServicePlanDiagramResourceBuilder(AzureResource resource) : base(resource)
+    public AppServicePlanDiagramResourceBuilder(ASP resource) : base(resource)
     {
-        _resource = (ASP)resource;
+        _resource = resource;
     }
 
     protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         var appServicePlanNode =
-            AzureResourceRectangleDrawer.CreateContainerRectangleNode("ASP", _resource.Name, _resource.InternalId);
+            AzureResourceDrawer.CreateContainerRectangleNode("ASP", _resource.Name, _resource.InternalId);
         
         yield return (_resource, appServicePlanNode);
+
+        var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("", "", _resource.InternalId + $".{_resource.Name}.empty");
+        appServicePlanNode.AddChild(emptyContents);
+        yield return (_resource, emptyContents);
 
         foreach (var containedApp in _resource.ContainedApps)
         {

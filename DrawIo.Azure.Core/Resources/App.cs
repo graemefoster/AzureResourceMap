@@ -2,17 +2,21 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
+public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
+    
     private VNetIntegration? _azureVNetIntegrationResource;
     public override bool FetchFull => true;
+    
     public string Kind { get; set; }
     public AppProperties Properties { get; set; }
+    
     public Identity? Identity { get; set; }
     public override string ApiVersion => "2021-01-15";
     public override string Image => "img/lib/azure2/app_services/App_Services.svg";
@@ -26,6 +30,11 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
     public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
     {
         return Properties.PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
+    }
+
+    public override AzureResourceNodeBuilder CreateNodeBuilder()
+    {
+        return new AppServicePlanAppNodeBuilder(this);
     }
 
     public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)

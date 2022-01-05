@@ -120,13 +120,12 @@ public static class Program
 
         var settings = new SugiyamaLayoutSettings
         {
-            ClusterMargin = 5,
             PackingAspectRatio = 3,
             PackingMethod = PackingMethod.Compact,
             RepetitionCoefficientForOrdering = 0,
             LayerSeparation = 50,
             EdgeRoutingSettings = routingSettings,
-            NodeSeparation = 50
+            NodeSeparation = 25
         };
 
         LayoutHelpers.CalculateLayout(graph, settings, null);

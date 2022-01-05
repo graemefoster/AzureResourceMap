@@ -8,28 +8,28 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
 {
     private readonly VNet _resource;
 
-    public VNetDiagramResourceBuilder(AzureResource resource) : base(resource)
+    public VNetDiagramResourceBuilder(VNet resource) : base(resource)
     {
-        _resource = (VNet)resource;
+        _resource = resource;
     }
 
     protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         var vnetNode =
-            AzureResourceRectangleDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId);
+            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId);
         yield return (_resource, vnetNode);
 
         foreach (var subnet in _resource.Subnets)
         {
             var subnetNode =
-                AzureResourceRectangleDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
+                AzureResourceDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
                     _resource.InternalId + $".{subnet.Name}");
             vnetNode.AddChild(subnetNode);
 
             if (subnet.ContainedResources.Count == 0)
             {
-                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode("Subnet", "Empty",
+                var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("Subnet", "Empty",
                     _resource.InternalId + $".{subnet.Name}.empty");
                 subnetNode.AddChild(emptyContents);
                 yield return (_resource, emptyContents);

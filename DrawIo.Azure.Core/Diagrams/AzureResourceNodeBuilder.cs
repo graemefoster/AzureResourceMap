@@ -15,11 +15,9 @@ public class AzureResourceNodeBuilder
         _resource = resource;
     }
 
-    public IEnumerable<(AzureResource, Node)> CreateNodes(
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+    public IEnumerable<(AzureResource, Node)> CreateNodes(IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         if (_resource.ContainedByAnotherResource) yield break;
-
         foreach (var node in CreateNodesInternal(resourceNodeBuilders)) yield return node;
     }
 
@@ -34,7 +32,7 @@ public class AzureResourceNodeBuilder
             {
                 var from = nodes[_resource].Single();
                 var to = nodes[link.To].Single();
-                yield return AzureResourceRectangleDrawer.CreateSimpleEdge(@from, to);
+                yield return AzureResourceDrawer.CreateSimpleEdge(@from, to);
             }
     }
 
@@ -48,7 +46,9 @@ public class AzureResourceNodeBuilder
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         yield return (_resource,
-            AzureResourceRectangleDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
+            AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
                 _resource.InternalId));
     }
+    
+
 }

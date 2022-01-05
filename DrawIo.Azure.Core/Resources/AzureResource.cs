@@ -11,7 +11,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
-    private string _id;
+    private string _id = default!;
     public List<ResourceLink> Links { get; } = new();
 
     public virtual bool FetchFull => false;
@@ -19,16 +19,19 @@ public class AzureResource
     public string Id
     {
         get => _id;
-        set
+        init
         {
             _id = value;
             InternalId = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(value))[..16]).ToString();
         }
     }
 
-    public string InternalId { get; private set; }
+    /// <summary>
+    /// This is a deterministic guid based on the Resource Id. You cannot set it. It's worked out when you set the ID.
+    /// </summary>
+    public string InternalId { get; private init; } = default!;
 
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
     public virtual string Image { get; protected set; }
     public string Type { get; set; }
     public string Location { get; set; }
@@ -41,7 +44,7 @@ public class AzureResource
     ///     Initial use of this flag is to push the responsibility of drawing an object to the containing resource. Not the top
     ///     level.
     /// </summary>
-    public bool ContainedByAnotherResource { get; protected internal set; } = false;
+    public bool ContainedByAnotherResource { get; protected internal set; }
 
     public virtual AzureResourceNodeBuilder CreateNodeBuilder()
     {
