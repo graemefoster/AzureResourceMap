@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Resources.Diagrams;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 

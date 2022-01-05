@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace DrawIo.Azure.Core.Resources.Diagrams;
 
 class CustomUserData
 {

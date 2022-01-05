@@ -2,7 +2,7 @@
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace DrawIo.Azure.Core.Resources.Diagrams;
 
 static class AzureResourceRectangleDrawer
 {

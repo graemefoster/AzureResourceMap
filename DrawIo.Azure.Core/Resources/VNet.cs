@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Resources.Diagrams;
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
 
