@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class KeyVault : AzureResource
+internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     public override bool FetchFull => true;
     public override string Image => "img/lib/azure2/security/Key_Vaults.svg";

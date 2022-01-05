@@ -12,16 +12,12 @@ internal class PrivateEndpoint : AzureResource, IAssociateWithNic
 
     public string[] Nics { get; private set; }
 
-    // public override void Link(IEnumerable<AzureResource> allResources, GeometryGraph graph)
-    // {
-    //     // allResources
-    //     //     .OfType<App>().Where(x => x.AccessedViaPrivateEndpoint(this))
-    //     //     .ForEach(x => base.Link(x, graph));
-    //
-    //     allResources
-    //         .OfType<KeyVault>().Where(x => x.AccessedViaPrivateEndpoint(this))
-    //         .ForEach(x => base.Link(x, graph));
-    // }
+    public override void BuildRelationships(IEnumerable<AzureResource> allResources)
+    {
+        allResources
+            .OfType<ICanBeExposedByPrivateEndpoints>().Where(x => x.AccessedViaPrivateEndpoint(this))
+            .ForEach(x => base.CreateFlowTo((AzureResource)x));
+    }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {

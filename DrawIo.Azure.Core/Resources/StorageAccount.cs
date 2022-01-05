@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class StorageAccount : AzureResource
+internal class StorageAccount : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     public override string Image => "img/lib/azure2/storage/Storage_Accounts.svg";
 
     private string[] PrivateEndpoints { get; set; } = default!;
+    public override bool FetchFull => true;
+    public override string ApiVersion => "2021-08-01";
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {

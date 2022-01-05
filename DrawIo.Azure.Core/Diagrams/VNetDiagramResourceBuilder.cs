@@ -24,11 +24,14 @@ internal class VNetDiagramResourceBuilder : IDiagramResourceBuilder
             var subnetNode = AzureResourceRectangleDrawer.CreateContainerRectangleNode(subnet.Name);
             vnetNode.AddChild(subnetNode);
 
-            var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode(Guid.NewGuid().ToString());
-            subnetNode.AddChild(emptyContents);
+            if (subnet.ContainedResources.Count == 0)
+            {
+                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode(Guid.NewGuid().ToString());
+                subnetNode.AddChild(emptyContents);
+                yield return emptyContents;
+            }
 
             yield return subnetNode;
-            yield return emptyContents;
         }
     }
 }

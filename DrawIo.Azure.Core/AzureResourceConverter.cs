@@ -39,25 +39,25 @@ internal class AzureResourceConverter : JsonConverter
             return type.ToLowerInvariant() switch
             {
                 "microsoft.network/virtualnetworks" => new VNet(),
-                // "microsoft.network/privateendpoints" => new PrivateEndpoint(),
+                "microsoft.network/privateendpoints" => new PrivateEndpoint(),
                 // "microsoft.network/privatednszones" => new PrivateDnsZone(),
                 // "microsoft.network/privatednszones/virtualnetworklinks" => new PrivateDnsZoneVirtualNetworkLink(),
-                // "microsoft.network/networkinterfaces" => new Nic(),
+                "microsoft.network/networkinterfaces" => new Nic(),
                 // "microsoft.containerservice/managedclusters" => new AKS(),
                 // "microsoft.containerregistry/registries" => new ACR(),
                 // "microsoft.web/serverfarms" => new ASP(),
                 // "microsoft.web/sites" => new App(),
                 // "microsoft.apimanagement/service" => new APIm(),
-                // "microsoft.compute/virtualmachines" => new VM(),
-                // "microsoft.compute/disks" => new Disk(),
+                "microsoft.compute/virtualmachines" => new VM(),
+                "microsoft.compute/disks" => new Disk(),
                 // "microsoft.operationalinsights/workspaces" => new LogAnalyticsWorkspace(),
                 // "microsoft.insights/components" => new AppInsights(),
-                // "microsoft.storage/storageaccounts" => new StorageAccount(),
+                "microsoft.storage/storageaccounts" => new StorageAccount(),
                 // "microsoft.network/networksecuritygroups" => new NSG(),
-                // "microsoft.network/publicipaddresses" => new PIP(),
+                "microsoft.network/publicipaddresses" => new PIP(),
                 // "microsoft.compute/virtualmachines/extensions" => new VMExtension(),
                 // "microsoft.managedidentity/userassignedidentities" => new UserAssignedManagedIdentity(),
-                // "microsoft.keyvault/vaults" => new KeyVault(),
+                "microsoft.keyvault/vaults" => new KeyVault(),
                 _ => new IgnoreMeResource()
             };
         }

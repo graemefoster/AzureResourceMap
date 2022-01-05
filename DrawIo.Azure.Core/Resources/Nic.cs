@@ -16,8 +16,8 @@ internal class Nic : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(Link);
-        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(Link);
+        allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
+        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
 
         var subnets = _networkAttachments
             .Select(x =>
@@ -30,11 +30,11 @@ internal class Nic : AzureResource
         foreach (var subnet in subnets)
         {
             var vNet = allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet);
-            vNet.AddToVNet(this, subnet.subnet);
+            vNet.InjectResourceInto(this, subnet.subnet);
             foreach (var associatedWithNic in
                      allResources.OfType<IAssociateWithNic>().Where(x =>
                          x.Nics.Any(nic => nic.Equals(Id, StringComparison.InvariantCultureIgnoreCase))))
-                vNet.AddToVNet((AzureResource)associatedWithNic, subnet.subnet);
+                vNet.InjectResourceInto((AzureResource)associatedWithNic, subnet.subnet);
         }
     }
 

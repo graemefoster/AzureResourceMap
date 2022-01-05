@@ -7,7 +7,7 @@
 //
 // namespace DrawIo.Azure.Core.Resources
 // {
-//     class App : AzureResource
+//     class App : AzureResource, ICanBeExposedByPrivateEndpoints
 //     {
 //         private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
 //         public override bool IsSpecific => true;

@@ -30,7 +30,7 @@ public class VNet : AzureResource
         return Task.CompletedTask;
     }
 
-    public void AddToVNet(AzureResource resource, string subnet)
+    public void InjectResourceInto(AzureResource resource, string subnet)
     {
         Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
     }

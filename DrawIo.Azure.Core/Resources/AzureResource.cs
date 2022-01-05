@@ -47,15 +47,19 @@ public class AzureResource
     }
 
     /// <summary>
-    ///     Override this to build derived relationships between nodes.
+    /// Override this to build derived relationships between nodes.
+    /// An example would be using metadata to add private endpoints / NICs into subnets.
     /// </summary>
     /// <param name="allResources"></param>
-    /// <param name="graph"></param>
     public virtual void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
     }
 
-    protected void Link(AzureResource to)
+    /// <summary>
+    /// Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
+    /// </summary>
+    /// <param name="to"></param>
+    protected void CreateFlowTo(AzureResource to)
     {
         var link = new ResourceLink(this, to);
         _links.Add(link);
