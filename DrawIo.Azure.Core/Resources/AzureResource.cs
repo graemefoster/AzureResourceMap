@@ -11,7 +11,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
-    private readonly List<ResourceLink> _links = new();
+    public List<ResourceLink> Links { get; } = new();
     private string _id;
 
     public virtual bool FetchFull => false;
@@ -22,11 +22,11 @@ public class AzureResource
         set
         {
             _id = value;
-            InternalId = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(value))[..16]);
+            InternalId = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(value))[..16]).ToString();
         }
     }
 
-    public Guid InternalId { get; private set; }
+    public string InternalId { get; private set; }
 
     public string Name { get; set; }
     public virtual string Image { get; protected set; }
@@ -36,7 +36,13 @@ public class AzureResource
 
     public virtual HashSet<(HttpMethod, string)> AdditionalResources => new();
 
-    public virtual IDiagramResourceBuilder CreateNodeBuilder()
+    /// <summary>
+    /// Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
+    /// Initial use of this flag is to push the responsibility of drawing an object to the containing resource. Not the top level.
+    /// </summary>
+    public bool ContainedByAnotherResource { get; protected internal set; } = false;
+
+    public virtual AzureResourceNodeBuilder CreateNodeBuilder()
     {
         return new AzureResourceNodeBuilder(this);
     }
@@ -62,18 +68,6 @@ public class AzureResource
     protected void CreateFlowTo(AzureResource to)
     {
         var link = new ResourceLink(this, to);
-        _links.Add(link);
+        Links.Add(link);
     }
-}
-
-internal class ResourceLink
-{
-    public ResourceLink(AzureResource from, AzureResource to)
-    {
-        From = from;
-        To = to;
-    }
-
-    public AzureResource From { get; }
-    public AzureResource To { get; }
 }

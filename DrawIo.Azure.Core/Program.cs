@@ -97,9 +97,13 @@ public static class Program
 
         var graph = new GeometryGraph();
         var nodeBuilders = directResources!.Value.ToDictionary(x => x, x => x.CreateNodeBuilder());
-        var nodes = nodeBuilders.Values.SelectMany(x => x.CreateNodes());
-        nodes.ForEach(graph.Nodes.Add);
+        var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
+        var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
+        var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x=> x.ToArray());
+        var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary)).ToArray();
 
+        nodesDictionary.SelectMany(x => x.Value).ForEach(graph.Nodes.Add);
+        edges.ForEach(graph.Edges.Add);
 
         var sb = new StringBuilder();
 
@@ -128,6 +132,7 @@ public static class Program
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
 {string.Join(Environment.NewLine, graph.Nodes.Select(v => ((CustomUserData)v.UserData).Draw()))}
+{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).Draw()))}
 {sb}
 	</root>
 </mxGraphModel>";

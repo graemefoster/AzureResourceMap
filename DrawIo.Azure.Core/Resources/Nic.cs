@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -13,6 +14,11 @@ internal class Nic : AzureResource
     public string[] PublicIpAddresses { get; set; }
 
     private IEnumerable<string> _networkAttachments { get; set; }
+
+    public override AzureResourceNodeBuilder CreateNodeBuilder()
+    {
+        return new IgnoreNodeBuilder(this);
+    }
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {

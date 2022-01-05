@@ -1,37 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 
 namespace DrawIo.Azure.Core.Diagrams;
 
-internal class VNetDiagramResourceBuilder : IDiagramResourceBuilder
+internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
 {
     private readonly VNet _resource;
 
-    public VNetDiagramResourceBuilder(AzureResource resource)
+    public VNetDiagramResourceBuilder(AzureResource resource) : base(resource)
     {
         _resource = (VNet)resource;
     }
 
-    public IEnumerable<Node> CreateNodes()
+    protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
-        var vnetNode = AzureResourceRectangleDrawer.CreateContainerRectangleNode(_resource.Name);
-        yield return vnetNode;
+        var vnetNode = AzureResourceRectangleDrawer.CreateContainerRectangleNode(_resource.Name, _resource.InternalId);
+        yield return (_resource, vnetNode);
 
         foreach (var subnet in _resource.Subnets)
         {
-            var subnetNode = AzureResourceRectangleDrawer.CreateContainerRectangleNode(subnet.Name);
+            var subnetNode =
+                AzureResourceRectangleDrawer.CreateContainerRectangleNode(subnet.Name, _resource.InternalId + $".{subnet.Name}");
             vnetNode.AddChild(subnetNode);
 
             if (subnet.ContainedResources.Count == 0)
             {
-                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode(Guid.NewGuid().ToString());
+                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode("Empty Subnet", _resource.InternalId + $".{subnet.Name}.empty");
                 subnetNode.AddChild(emptyContents);
-                yield return emptyContents;
+                yield return (_resource, emptyContents);
+            }
+            else
+            {
+                foreach (var resource in subnet.ContainedResources)
+                {
+                    var node = resourceNodeBuilders[resource];
+                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders))
+                    {
+                        if (contained.Item2.ClusterParent == null)
+                        {
+                            subnetNode.AddChild(contained.Item2);
+                        }
+
+                        yield return contained;
+                    }
+                }
             }
 
-            yield return subnetNode;
+            yield return (_resource, subnetNode);
         }
     }
 }

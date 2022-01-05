@@ -14,7 +14,7 @@ public class VNet : AzureResource
 
     public override string Image => "img/lib/azure2/networking/Virtual_Networks.svg";
 
-    public override IDiagramResourceBuilder CreateNodeBuilder()
+    public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
         return new VNetDiagramResourceBuilder(this);
     }
@@ -33,6 +33,7 @@ public class VNet : AzureResource
     public void InjectResourceInto(AzureResource resource, string subnet)
     {
         Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
+        resource.ContainedByAnotherResource = true;
     }
 
     public class Subnet

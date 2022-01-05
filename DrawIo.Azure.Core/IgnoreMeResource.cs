@@ -5,8 +5,8 @@ namespace DrawIo.Azure.Core;
 
 internal class IgnoreMeResource : AzureResource
 {
-    public override IDiagramResourceBuilder CreateNodeBuilder()
+    public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
-        return new IgnoreNodeBuilder();
+        return new IgnoreNodeBuilder(this);
     }
 }
