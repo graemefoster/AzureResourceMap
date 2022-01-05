@@ -6,33 +6,37 @@ using DrawIo.Azure.Core.Resources;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core
+namespace DrawIo.Azure.Core;
+
+internal class AzureResourceConverter : JsonConverter
 {
-    internal class AzureResourceConverter : JsonConverter
+    private readonly Func<AzureResource, Dictionary<string, Task<JObject>>> _additionalItems;
+    private readonly Func<AzureResource, string, Task<JObject>> _enricher;
+
+    public AzureResourceConverter(
+        Func<AzureResource, string, Task<JObject>> enricher,
+        Func<AzureResource, Dictionary<string, Task<JObject>>> additionalItems)
     {
-        readonly Func<AzureResource, string, Task<JObject>> _enricher;
-        readonly Func<AzureResource, Dictionary<string, Task<JObject>>> _additionalItems;
+        _enricher = enricher;
+        _additionalItems = additionalItems;
+    }
 
-        public AzureResourceConverter(
-            Func<AzureResource, string, Task<JObject>> enricher,
-            Func<AzureResource, Dictionary<string, Task<JObject>>> additionalItems)
-        {
-            _enricher = enricher;
-            _additionalItems = additionalItems;
-        }
+    public override bool CanWrite => false;
 
-        public override bool CanConvert(Type objectType)
-        {
-            return typeof(AzureResource).IsAssignableFrom(objectType);
-        }
+    public override bool CanConvert(Type objectType)
+    {
+        return typeof(AzureResource).IsAssignableFrom(objectType);
+    }
 
-        public override object ReadJson(
-            JsonReader reader,
-            Type objectType, 
-            object existingValue, 
-            JsonSerializer serializer)
+    public override object ReadJson(
+        JsonReader reader,
+        Type objectType,
+        object existingValue,
+        JsonSerializer serializer)
+    {
+        static AzureResource? GetAzureResource(string type)
         {
-            static AzureResource? GetAzureResource(string type) => type.ToLowerInvariant() switch
+            return type.ToLowerInvariant() switch
             {
                 "microsoft.network/virtualnetworks" => new VNet(),
                 // "microsoft.network/privateendpoints" => new PrivateEndpoint(),
@@ -56,39 +60,37 @@ namespace DrawIo.Azure.Core
                 // "microsoft.keyvault/vaults" => new KeyVault(),
                 _ => new IgnoreMeResource()
             };
-
-            JObject jo = JObject.Load(reader);
-
-            var type = (string) jo["type"]!;
-            var item = GetAzureResource(type);
-            if (item != null)
-            {
-                serializer.Populate(jo.CreateReader(), item);
-
-                if (item.FetchFull)
-                {
-                    var fullItem = _enricher(item, item.ApiVersion).GetAwaiter().GetResult();
-                    var additionalItems = _additionalItems(item);
-                    item.Enrich(
-                        fullItem, 
-                        additionalItems.ToDictionary(
-                            x => x.Key, 
-                            x => x.Value.GetAwaiter().GetResult()));
-                }
-            }
-            else
-            {
-                Console.WriteLine($"WARNING: No resource configured for {type}");
-            }
-
-            return item;
         }
 
-        public override bool CanWrite => false;
+        var jo = JObject.Load(reader);
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        var type = (string)jo["type"]!;
+        var item = GetAzureResource(type);
+        if (item != null)
         {
-            throw new NotImplementedException();
+            serializer.Populate(jo.CreateReader(), item);
+
+            if (item.FetchFull)
+            {
+                var fullItem = _enricher(item, item.ApiVersion).GetAwaiter().GetResult();
+                var additionalItems = _additionalItems(item);
+                item.Enrich(
+                    fullItem,
+                    additionalItems.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.GetAwaiter().GetResult()));
+            }
         }
+        else
+        {
+            Console.WriteLine($"WARNING: No resource configured for {type}");
+        }
+
+        return item;
+    }
+
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    {
+        throw new NotImplementedException();
     }
 }

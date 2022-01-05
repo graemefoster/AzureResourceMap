@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
+using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources;
-using DrawIo.Azure.Core.Resources.Diagrams;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
 using Microsoft.Msagl.Layout.Layered;
@@ -44,8 +45,8 @@ public static class Program
 
         var httpClient = new HttpClient();
         var subscriptionId = "8d2059f3-b805-41fa-ab84-e13d4dfec042";
-        httpClient.BaseAddress = new Uri($"https://management.azure.com/");
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+        httpClient.BaseAddress = new Uri("https://management.azure.com/");
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer"
             , token.Token);
 
@@ -54,7 +55,6 @@ public static class Program
             var apiVersionQueryString = (uri.Contains("?") ? "&" : "?") + $"api-version={apiVersion}";
             var resourceUri = $"{uri}{apiVersionQueryString}";
             if (responseCache.ContainsKey(resourceUri))
-            {
                 return JsonConvert.DeserializeObject<T>(
                     responseCache[resourceUri],
                     new AzureResourceConverter(
@@ -65,7 +65,6 @@ public static class Program
                                 .ToDictionary(
                                     x => x.Item2,
                                     x => GetAsync<JObject>($"{r.Id}/{x.Item2}", r.ApiVersion, x.Item1))!));
-            }
 
             var request = new HttpRequestMessage(method ?? HttpMethod.Get, resourceUri);
             var responseContent = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
@@ -92,30 +91,17 @@ public static class Program
         Dictionary<string, string> responseCache,
         string directoryName, string resourceGroup)
     {
-        var graph = new GeometryGraph();
-        foreach (var resource in directResources!.Value)
-        {
-            var nodes = resource.CreateNodeBuilder().CreateNodes(resource);
-            foreach (var node in nodes)
-            {
-                graph.Nodes.Add(node);
-            }
-        }
-
-        var sb = new StringBuilder();
-
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
-        // foreach (var resource in directResources.Value)
-        // {
-        //     resource.Link(directResources.Value, graph);
-        // }
+        foreach (var resource in directResources!.Value) resource.BuildRelationships(directResources.Value);
 
-        //Group items into clusters - for example a subnet contains many vms, or an app-service-plan contains many apps
-        // foreach (var resource in directResources.Value.OfType<IContainResources>())
-        // {
-        //     resource.CreateNodes(graph, directResources.Value);
-        // }
+        var graph = new GeometryGraph();
+        var nodeBuilders = directResources!.Value.ToDictionary(x => x, x => x.CreateNodeBuilder());
+        var nodes = nodeBuilders.Values.SelectMany(x => x.CreateNodes());
+        nodes.ForEach(graph.Nodes.Add);
+
+
+        var sb = new StringBuilder();
 
         var routingSettings = new EdgeRoutingSettings
         {
@@ -124,7 +110,7 @@ public static class Program
             EdgeRoutingMode = EdgeRoutingMode.StraightLine
         };
 
-        var settings = new SugiyamaLayoutSettings()
+        var settings = new SugiyamaLayoutSettings
         {
             ClusterMargin = 5,
             PackingAspectRatio = 3,

@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
+        <PackageReference Include="AutomaticGraphLayout" Version="1.1.12"/>
     </ItemGroup>
 
 </Project>

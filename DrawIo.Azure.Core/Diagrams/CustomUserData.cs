@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace DrawIo.Azure.Core.Resources.Diagrams;
+namespace DrawIo.Azure.Core.Diagrams;
 
-class CustomUserData
+internal class CustomUserData
 {
     public Func<string> Draw { get; init; }
     public string Name { get; init; }

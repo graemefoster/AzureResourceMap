@@ -1,9 +1,7 @@
-﻿namespace DrawIo.Azure.Core.Resources
+﻿namespace DrawIo.Azure.Core.Resources;
+
+internal class Disk : AzureResource
 {
-    class Disk : AzureResource
-    {
-        public override bool IsSpecific => true;
-        public string ManagedBy { get; set; }
-        public override string Image => "img/lib/azure2/compute/Disks.svg";
-    }
+    public string ManagedBy { get; set; } = default!;
+    public override string Image => "img/lib/azure2/compute/Disks.svg";
 }

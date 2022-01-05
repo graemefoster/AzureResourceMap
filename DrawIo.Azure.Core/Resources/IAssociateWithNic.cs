@@ -1,7 +1,6 @@
-﻿namespace DrawIo.Azure.Core.Resources
+﻿namespace DrawIo.Azure.Core.Resources;
+
+internal interface IAssociateWithNic
 {
-    internal interface IAssociateWithNic
-    {
-        string[] Nics { get; }
-    }
+    string[] Nics { get; }
 }
