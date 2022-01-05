@@ -45,9 +45,16 @@ public class AzureResourceNodeBuilder
     protected virtual IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
-        yield return (_resource,
-            AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
-                _resource.InternalId));
+        if (string.IsNullOrEmpty(_resource.Image))
+        {
+            yield return (_resource,
+                AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
+                    _resource.InternalId));
+        } else
+        {
+            yield return (_resource,
+                AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId));
+        }
     }
     
 

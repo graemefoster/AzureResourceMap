@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DrawIo.Azure.Core.Resources;
+using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Layout;
 
 namespace DrawIo.Azure.Core.Diagrams;
@@ -17,14 +18,14 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         var vnetNode =
-            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, backgroundColour:"#FFE6CC");
+            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, backgroundColour:"#FFE6CC", textAlignment:TextAlignment.Top);
         yield return (_resource, vnetNode);
 
         foreach (var subnet in _resource.Subnets)
         {
             var subnetNode =
                 AzureResourceDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
-                    _resource.InternalId + $".{subnet.Name}", "white");
+                    _resource.InternalId + $".{subnet.Name}", "white", textAlignment:TextAlignment.Bottom);
             vnetNode.AddChild(subnetNode);
 
             if (subnet.ContainedResources.Count == 0)

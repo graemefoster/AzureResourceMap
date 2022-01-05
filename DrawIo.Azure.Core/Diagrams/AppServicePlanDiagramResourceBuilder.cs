@@ -22,11 +22,6 @@ internal class AppServicePlanDiagramResourceBuilder : AzureResourceNodeBuilder
 
         yield return (_resource, appServicePlanNode);
 
-        var emptyContents =
-            AzureResourceDrawer.CreateSimpleRectangleNode("", "", _resource.InternalId + $".{_resource.Name}.empty");
-        appServicePlanNode.AddChild(emptyContents);
-        yield return (_resource, emptyContents);
-
         foreach (var containedApp in _resource.ContainedApps)
         {
             var node = resourceNodeBuilders[containedApp];

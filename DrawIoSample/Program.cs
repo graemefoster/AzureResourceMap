@@ -38,8 +38,7 @@ internal class Program
         var cluster1 = new Cluster(new[] { test3, test4 }, new[] { cluster2 })
             { UserData = "cluster1", BoundaryCurve = CurveFactory.CreateRectangle(200, 100, new Point()) };
 
-        drawingGraph.Nodes.Add(cluster1);
-        drawingGraph.Nodes.Add(cluster2);
+        drawingGraph.RootCluster.AddChild(cluster1);
 
         var routingSettings = new EdgeRoutingSettings
         {
@@ -50,7 +49,7 @@ internal class Program
 
         var settings = new SugiyamaLayoutSettings
         {
-            ClusterMargin = 5,
+            ClusterMargin = 50,
             PackingAspectRatio = 3,
             PackingMethod = PackingMethod.Compact,
             RepetitionCoefficientForOrdering = 0,
@@ -87,23 +86,15 @@ internal class Program
             var boundingBoxLeft = node.BoundingBox.Left;
             var boundingBoxTop = node.BoundingBox.Bottom;
 
-            if (node is Cluster)
-            {
-                boundingBoxWidth += 50;
-                boundingBoxLeft -= 25;
-                boundingBoxHeight += 50;
-                boundingBoxTop -= 25;
-            }
-
             if (node.ClusterParent != null)
             {
                 boundingBoxLeft -= node.ClusterParent.BoundingBox.Left;
                 boundingBoxTop -= node.ClusterParent.BoundingBox.Bottom;
             }
 
-            Console.WriteLine($"{nodeUserData} - {node.BoundingBox}");
+            Console.WriteLine($"Parent::{node.ClusterParent?.UserData}: {nodeUserData} - {node.BoundingBox}");
             sb.AppendLine($@"
-<mxCell id=""{nodeUserData}"" value=""{nodeUserData}"" style=""rounded=0;whiteSpace=wrap;html=1;{(node is Cluster ? "verticalAlign=top" : "")}"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : (string)node.ClusterParent.UserData)}"">
+<mxCell id=""{nodeUserData}"" value=""{nodeUserData}"" style=""rounded=0;whiteSpace=wrap;html=1;{(node is Cluster ? "verticalAlign=top" : "")}"" vertex=""1"" parent=""{(node.ClusterParent == null || node.ClusterParent == drawingGraph.RootCluster ? "1" : (string)node.ClusterParent.UserData)}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
 </mxCell>

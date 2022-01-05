@@ -12,6 +12,7 @@ using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
+using Microsoft.Msagl.Layout.Initial;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 using Newtonsoft.Json;
@@ -99,14 +100,25 @@ public static class Program
         foreach (var resource in allNodes) resource.BuildRelationships(directResources.Value);
 
         var graph = new GeometryGraph();
-        
+
         var nodeBuilders = allNodes.ToDictionary(x => x, x => x.CreateNodeBuilder());
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
         var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary)).ToArray();
 
-        nodesDictionary.SelectMany(x => x.Value).ForEach(graph.Nodes.Add);
+        nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
+        {
+            if (n is Cluster)
+            {
+                if (n.ClusterParent == null)
+                    graph.RootCluster.AddChild(n);
+            }
+            else
+            {
+                graph.Nodes.Add(n);
+            }
+        });
         edges.ForEach(graph.Edges.Add);
 
         var sb = new StringBuilder();
@@ -122,10 +134,10 @@ public static class Program
         {
             PackingAspectRatio = 3,
             PackingMethod = PackingMethod.Compact,
-            RepetitionCoefficientForOrdering = 0,
-            LayerSeparation = 50,
+            LayerSeparation = 25,
             EdgeRoutingSettings = routingSettings,
-            NodeSeparation = 25
+            NodeSeparation = 25,
+            ClusterMargin = 50
         };
 
         LayoutHelpers.CalculateLayout(graph, settings, null);
@@ -134,7 +146,7 @@ public static class Program
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
-{string.Join(Environment.NewLine, graph.Nodes.Select(v => ((CustomUserData)v.UserData).Draw()))}
+{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).Draw()))}
 {string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).Draw()))}
 {sb}
 	</root>
