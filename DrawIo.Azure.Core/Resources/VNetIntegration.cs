@@ -21,6 +21,5 @@ internal class VNetIntegration : AzureResource
         var vNet = allResources.OfType<VNet>().Single(x => x.Name == vnetInfo.vnet);
         vNet.InjectResourceInto(this, vnetInfo.subnet);
         ContainedByAnotherResource = true;
-
     }
 }

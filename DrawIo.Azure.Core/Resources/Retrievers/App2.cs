@@ -7,21 +7,15 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeExposedByPrivateEndpoints
+public class App2 : AzureResource, ICanBeExposedByPrivateEndpoints
 {
-    private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
 
     private VNetIntegration? _azureVNetIntegrationResource;
-    public override bool FetchFull => true;
 
-    public string Kind { get; set; }
     public AppProperties Properties { get; set; }
 
     public Identity? Identity { get; set; }
-    public override string ApiVersion => "2021-01-15";
     public override string Image => "img/lib/azure2/app_services/App_Services.svg";
-
-    public override HashSet<(HttpMethod, string)> AdditionalResources => new() { ConfigApiEndpoint };
 
     public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; }
 
@@ -34,42 +28,7 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
-        return new AppServicePlanAppNodeBuilder(this);
-    }
-
-    public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
-    {
-        Properties = full["properties"].ToObject<AppProperties>();
-
-        Properties.PrivateEndpoints =
-            full["properties"]["privateEndpointConnections"]
-                .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
-                .ToArray();
-
-
-        var config = additionalResources[ConfigApiEndpoint.Item2];
-        var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
-
-        if (appSettings.ContainsKey("APPINSIGHTS_INSTRUMENTATIONKEY"))
-            AppInsightsKey = (string)appSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
-
-        ConnectedStorageAccounts = appSettings
-            .Values
-            .OfType<string>()
-            .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&
-                                 appSetting.Contains("AccountName") &&
-                                 appSetting.Contains("EndpointSuffix"))
-            .Select(x =>
-            {
-                var parts = x!.Split(';')
-                    .Select(x =>
-                        new KeyValuePair<string, string>(x.Split('=')[0].ToLowerInvariant(),
-                            x.Split('=')[1].ToLowerInvariant()))
-                    .ToDictionary(x => x.Key, x => x.Value);
-
-                return (parts["accountname"], "." + parts["endpointsuffix"]);
-            })
-            .ToArray();
+        return new IgnoreNodeBuilder(this);
     }
 
     public override IEnumerable<AzureResource> DiscoverNewNodes()

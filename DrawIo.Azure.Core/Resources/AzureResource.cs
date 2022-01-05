@@ -11,10 +11,10 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
-    private string _id = default!;
+    private readonly string _id = default!;
     public List<ResourceLink> Links { get; } = new();
-
     public virtual bool FetchFull => false;
+
 
     public string Id
     {
@@ -27,7 +27,7 @@ public class AzureResource
     }
 
     /// <summary>
-    /// This is a deterministic guid based on the Resource Id. You cannot set it. It's worked out when you set the ID.
+    ///     This is a deterministic guid based on the Resource Id. You cannot set it. It's worked out when you set the ID.
     /// </summary>
     public string InternalId { get; private init; } = default!;
 
@@ -57,8 +57,8 @@ public class AzureResource
     }
 
     /// <summary>
-    /// Opportunity to explode any 'new' nodes that aren't represented by ARM resources, but important to the diagram.
-    /// Example is App-Service VNet Integration. We want to show flows going through the vnet-integrated subnet.
+    ///     Opportunity to explode any 'new' nodes that aren't represented by ARM resources, but important to the diagram.
+    ///     Example is App-Service VNet Integration. We want to show flows going through the vnet-integrated subnet.
     /// </summary>
     public virtual IEnumerable<AzureResource> DiscoverNewNodes()
     {

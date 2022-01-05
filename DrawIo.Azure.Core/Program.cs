@@ -10,6 +10,7 @@ using Azure.Core;
 using Azure.Identity;
 using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources;
+using DrawIo.Azure.Core.Resources.Retrievers;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
 using Microsoft.Msagl.Layout.Initial;
@@ -50,6 +51,9 @@ public static class Program
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer"
             , token.Token);
+
+        var newTest = new ArmResourceRetriever(httpClient);
+        var resources = await newTest.Retrieve(subscriptionId, resourceGroup);
 
         async Task<T?> GetAsync<T>(string uri, string apiVersion, HttpMethod? method = null)
         {
