@@ -9,7 +9,6 @@ namespace DrawIo.Azure.Core.Resources;
 internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
-    private AzureResource _trafficOut;
     public override bool FetchFull => true;
     public string Kind { get; set; }
     public AppProperties Properties { get; set; }
@@ -36,13 +35,14 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
             full["properties"]["privateEndpointConnections"]
                 .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
                 .ToArray();
+        
 
         var config = additionalResources[ConfigApiEndpoint.Item2];
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
 
         if (appSettings.ContainsKey("APPINSIGHTS_INSTRUMENTATIONKEY"))
         {
-            AppInsightsKey = config["properties"]!.Value<string>("");
+            AppInsightsKey = (string)appSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
         }
 
         ConnectedStorageAccounts = appSettings
@@ -85,25 +85,13 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
                 if (privateEndpointConnection != null)
                 {
                     //connection hostname uses a private endpoint hostname.... Take a plunge and link the private endpoint instead:
-                    (_trafficOut ?? this).CreateFlowTo(privateEndpointConnection);
+                    CreateFlowTo(privateEndpointConnection);
                 }
                 else
                 {
-                    (_trafficOut ?? this).CreateFlowTo(storage);
+                    CreateFlowTo(storage);
                 }
             }
-        }
-
-        if (Properties.VirtualNetworkSubnetId != null)
-        {
-            //VNet Integration create a pseudo resource. Then send any links from here via this.
-            _trafficOut = new AzureResource()
-            {
-                Id = Id + "/.out",
-                Location = this.Location,
-                Name = Name + ".traffic-out"
-            };
-            
         }
     }
 
@@ -111,6 +99,6 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
     {
         public string ServerFarmId { get; set; }
         public string[] PrivateEndpoints { get; set; }
-        public string VirtualNetworkSubnetId { get; set; }
+        
     }
 }
