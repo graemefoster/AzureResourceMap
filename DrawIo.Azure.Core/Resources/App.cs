@@ -9,6 +9,7 @@ namespace DrawIo.Azure.Core.Resources;
 internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
 {
     private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
+    private AzureVNetIntegrationResource? _azureVNetIntegrationResource;
     public override bool FetchFull => true;
     public string Kind { get; set; }
     public AppProperties Properties { get; set; }
@@ -30,12 +31,12 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
     public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
         Properties = full["properties"].ToObject<AppProperties>();
-        
+
         Properties.PrivateEndpoints =
             full["properties"]["privateEndpointConnections"]
                 .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
                 .ToArray();
-        
+
 
         var config = additionalResources[ConfigApiEndpoint.Item2];
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
@@ -64,6 +65,15 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
             .ToArray();
     }
 
+    public override IEnumerable<AzureResource> DiscoverNewNodes()
+    {
+        if (Properties.VirtualNetworkSubnetId != null)
+        {
+            _azureVNetIntegrationResource = new AzureVNetIntegrationResource($"{Id}.vnetintegration", Properties.VirtualNetworkSubnetId);
+            yield return _azureVNetIntegrationResource;
+        }
+    }
+
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         if (AppInsightsKey != null)
@@ -80,16 +90,24 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
             if (storage != null)
             {
-                var privateEndpointConnection = storage.ExposedByPrivateEndpoints.SingleOrDefault(x => 
-                    x.CustomHostNames.Any(x => x.StartsWith(storageAccount.storageName) && x.EndsWith(storageAccount.storageSuffix)));
+                if (_azureVNetIntegrationResource != null)
+                {
+                    CreateFlowTo(_azureVNetIntegrationResource);
+                }
+
+                var flowSource = _azureVNetIntegrationResource as AzureResource ?? this;
+                var privateEndpointConnection = storage.ExposedByPrivateEndpoints.SingleOrDefault(x =>
+                    x.CustomHostNames.Any(x =>
+                        x.StartsWith(storageAccount.storageName) && x.EndsWith(storageAccount.storageSuffix)));
+                
                 if (privateEndpointConnection != null)
                 {
                     //connection hostname uses a private endpoint hostname.... Take a plunge and link the private endpoint instead:
-                    CreateFlowTo(privateEndpointConnection);
+                    flowSource.CreateFlowTo(privateEndpointConnection);
                 }
                 else
                 {
-                    CreateFlowTo(storage);
+                    flowSource.CreateFlowTo(storage);
                 }
             }
         }
@@ -99,6 +117,6 @@ internal class App : AzureResource, ICanBeExposedByPrivateEndpoints
     {
         public string ServerFarmId { get; set; }
         public string[] PrivateEndpoints { get; set; }
-        
+        public string? VirtualNetworkSubnetId { get; set; }
     }
 }

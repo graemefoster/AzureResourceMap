@@ -91,12 +91,16 @@ public static class Program
         Dictionary<string, string> responseCache,
         string directoryName, string resourceGroup)
     {
+        var additionalNodes = directResources!.Value.SelectMany(x => x.DiscoverNewNodes());
+        var allNodes = directResources.Value.Concat(additionalNodes).ToArray();
+
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
-        foreach (var resource in directResources!.Value) resource.BuildRelationships(directResources.Value);
+        foreach (var resource in allNodes) resource.BuildRelationships(directResources.Value);
 
         var graph = new GeometryGraph();
-        var nodeBuilders = directResources!.Value.ToDictionary(x => x, x => x.CreateNodeBuilder());
+        
+        var nodeBuilders = allNodes.ToDictionary(x => x, x => x.CreateNodeBuilder());
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
