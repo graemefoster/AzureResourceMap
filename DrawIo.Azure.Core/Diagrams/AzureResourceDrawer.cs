@@ -7,28 +7,28 @@ namespace DrawIo.Azure.Core.Diagrams;
 
 internal static class AzureResourceDrawer
 {
-    public static Node CreateSimpleRectangleNode(string type, string name, string id)
+    public static Node CreateSimpleRectangleNode(string type, string name, string id, string backgroundColour = "#dae8fc")
     {
         var node = new Node(CurveFactory.CreateRectangle(150, 75, new Point())) { UserData = name };
-        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id), name, id);
+        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id, backgroundColour), name, id);
         return node;
     }
 
     public static Node CreateSimpleImageNode(string image, string name, string id)
     {
-        var node = new Node(CurveFactory.CreateCircle(50, new Point())) { UserData = name };
+        var node = new Node(CurveFactory.CreateCircle(25, new Point())) { UserData = name };
         node.UserData = new CustomUserData(() => DrawSimpleImageNode(node, image, name, id), name, id);
         return node;
     }
 
-    public static Cluster CreateContainerRectangleNode(string type, string name, string id)
+    public static Cluster CreateContainerRectangleNode(string type, string name, string id, string backgroundColour = "#dae8fc")
     {
         var node = new Cluster { BoundaryCurve = CurveFactory.CreateRectangle(150, 75, new Point()) };
-        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id), name, id);
+        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id, backgroundColour), name, id);
         return node;
     }
 
-    private static string DrawSimpleRectangleNode(Node node, string type, string name, string id)
+    private static string DrawSimpleRectangleNode(Node node, string type, string name, string id, string backgroundColour)
     {
         var boundingBoxWidth = node.BoundingBox.Width;
         var boundingBoxHeight = node.BoundingBox.Height;
@@ -42,7 +42,7 @@ internal static class AzureResourceDrawer
         }
 
         return
-            @$"<mxCell id=""{id}"" value=""{name}&lt;br/&gt;({type})"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
+            @$"<mxCell id=""{id}"" value=""{name}&lt;br/&gt;({type})"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor={backgroundColour}"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
 </mxCell>";

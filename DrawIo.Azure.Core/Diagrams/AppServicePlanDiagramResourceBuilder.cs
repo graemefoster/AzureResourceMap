@@ -17,11 +17,13 @@ internal class AppServicePlanDiagramResourceBuilder : AzureResourceNodeBuilder
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         var appServicePlanNode =
-            AzureResourceDrawer.CreateContainerRectangleNode("ASP", _resource.Name, _resource.InternalId);
-        
+            AzureResourceDrawer.CreateContainerRectangleNode("ASP", _resource.Name, _resource.InternalId,
+                backgroundColour: "#D5E8D4");
+
         yield return (_resource, appServicePlanNode);
 
-        var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("", "", _resource.InternalId + $".{_resource.Name}.empty");
+        var emptyContents =
+            AzureResourceDrawer.CreateSimpleRectangleNode("", "", _resource.InternalId + $".{_resource.Name}.empty");
         appServicePlanNode.AddChild(emptyContents);
         yield return (_resource, emptyContents);
 

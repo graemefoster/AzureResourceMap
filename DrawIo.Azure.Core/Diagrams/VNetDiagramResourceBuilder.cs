@@ -17,14 +17,14 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
         var vnetNode =
-            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId);
+            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, backgroundColour:"#FFE6CC");
         yield return (_resource, vnetNode);
 
         foreach (var subnet in _resource.Subnets)
         {
             var subnetNode =
                 AzureResourceDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
-                    _resource.InternalId + $".{subnet.Name}");
+                    _resource.InternalId + $".{subnet.Name}", "white");
             vnetNode.AddChild(subnetNode);
 
             if (subnet.ContainedResources.Count == 0)
