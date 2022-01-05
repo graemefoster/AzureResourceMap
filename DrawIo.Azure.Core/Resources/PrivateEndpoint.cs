@@ -9,6 +9,7 @@ internal class PrivateEndpoint : AzureResource, IAssociateWithNic
 {
     public override bool FetchFull => true;
     public override string Image => "img/lib/azure2/networking/Private_Link.svg";
+    public string[] CustomHostNames { get; private set; }
 
     public string[] Nics { get; private set; }
 
@@ -16,12 +17,13 @@ internal class PrivateEndpoint : AzureResource, IAssociateWithNic
     {
         allResources
             .OfType<ICanBeExposedByPrivateEndpoints>().Where(x => x.AccessedViaPrivateEndpoint(this))
-            .ForEach(x => base.CreateFlowTo((AzureResource)x));
+            .ForEach(x => CreateFlowTo((AzureResource)x));
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
         Nics = jObject["properties"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!).ToArray();
+        CustomHostNames = jObject["properties"]!["customDnsConfigs"]!.Select(x => x.Value<string>("fqdn")!).ToArray();
 
         return Task.CompletedTask;
     }

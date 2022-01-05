@@ -7,21 +7,21 @@ namespace DrawIo.Azure.Core.Diagrams;
 
 internal static class AzureResourceRectangleDrawer
 {
-    public static Node CreateSimpleRectangleNode(string name, string id)
+    public static Node CreateSimpleRectangleNode(string type, string name, string id)
     {
         var node = new Node(CurveFactory.CreateRectangle(150, 75, new Point())) { UserData = name };
-        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, name, id), name, id);
+        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id), name, id);
         return node;
     }
 
-    public static Cluster CreateContainerRectangleNode(string name, string id)
+    public static Cluster CreateContainerRectangleNode(string type, string name, string id)
     {
         var node = new Cluster { BoundaryCurve = CurveFactory.CreateRectangle(150, 75, new Point()) };
-        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, name, id), name, id);
+        node.UserData = new CustomUserData(() => DrawSimpleRectangleNode(node, type, name, id), name, id);
         return node;
     }
 
-    private static string DrawSimpleRectangleNode(Node node, string name, string id)
+    private static string DrawSimpleRectangleNode(Node node, string type, string name, string id)
     {
         var boundingBoxWidth = node.BoundingBox.Width;
         var boundingBoxHeight = node.BoundingBox.Height;
@@ -35,7 +35,7 @@ internal static class AzureResourceRectangleDrawer
         }
 
         return
-            @$"<mxCell id=""{id}"" value=""{name}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
+            @$"<mxCell id=""{id}"" value=""{name}/{type}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc"" vertex=""1"" parent=""{(node.ClusterParent == null ? "1" : ((CustomUserData)node.ClusterParent.UserData).Id)}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
 </mxCell>";

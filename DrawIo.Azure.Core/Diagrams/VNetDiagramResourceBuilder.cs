@@ -16,18 +16,21 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
     protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
-        var vnetNode = AzureResourceRectangleDrawer.CreateContainerRectangleNode(_resource.Name, _resource.InternalId);
+        var vnetNode =
+            AzureResourceRectangleDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId);
         yield return (_resource, vnetNode);
 
         foreach (var subnet in _resource.Subnets)
         {
             var subnetNode =
-                AzureResourceRectangleDrawer.CreateContainerRectangleNode(subnet.Name, _resource.InternalId + $".{subnet.Name}");
+                AzureResourceRectangleDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
+                    _resource.InternalId + $".{subnet.Name}");
             vnetNode.AddChild(subnetNode);
 
             if (subnet.ContainedResources.Count == 0)
             {
-                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode("Empty Subnet", _resource.InternalId + $".{subnet.Name}.empty");
+                var emptyContents = AzureResourceRectangleDrawer.CreateSimpleRectangleNode("Subnet", "Empty",
+                    _resource.InternalId + $".{subnet.Name}.empty");
                 subnetNode.AddChild(emptyContents);
                 yield return (_resource, emptyContents);
             }
@@ -38,10 +41,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                     var node = resourceNodeBuilders[resource];
                     foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders))
                     {
-                        if (contained.Item2.ClusterParent == null)
-                        {
-                            subnetNode.AddChild(contained.Item2);
-                        }
+                        if (contained.Item2.ClusterParent == null) subnetNode.AddChild(contained.Item2);
 
                         yield return contained;
                     }

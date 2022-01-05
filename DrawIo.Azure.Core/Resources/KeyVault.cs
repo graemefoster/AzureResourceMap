@@ -12,6 +12,11 @@ internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
     public override string ApiVersion => "2019-09-01";
     public string[] PrivateEndpoints { get; set; }
 
+    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
+    {
+        return PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
+    }
+
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
         PrivateEndpoints =
@@ -20,10 +25,5 @@ internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
                 .ToArray();
 
         return Task.CompletedTask;
-    }
-
-    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
-    {
-        return PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
     }
 }

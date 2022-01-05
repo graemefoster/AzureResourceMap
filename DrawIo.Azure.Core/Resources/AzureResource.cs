@@ -11,8 +11,8 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
-    public List<ResourceLink> Links { get; } = new();
     private string _id;
+    public List<ResourceLink> Links { get; } = new();
 
     public virtual bool FetchFull => false;
 
@@ -37,8 +37,9 @@ public class AzureResource
     public virtual HashSet<(HttpMethod, string)> AdditionalResources => new();
 
     /// <summary>
-    /// Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
-    /// Initial use of this flag is to push the responsibility of drawing an object to the containing resource. Not the top level.
+    ///     Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
+    ///     Initial use of this flag is to push the responsibility of drawing an object to the containing resource. Not the top
+    ///     level.
     /// </summary>
     public bool ContainedByAnotherResource { get; protected internal set; } = false;
 
@@ -53,8 +54,8 @@ public class AzureResource
     }
 
     /// <summary>
-    /// Override this to build derived relationships between nodes.
-    /// An example would be using metadata to add private endpoints / NICs into subnets.
+    ///     Override this to build derived relationships between nodes.
+    ///     An example would be using metadata to add private endpoints / NICs into subnets.
     /// </summary>
     /// <param name="allResources"></param>
     public virtual void BuildRelationships(IEnumerable<AzureResource> allResources)
@@ -62,10 +63,10 @@ public class AzureResource
     }
 
     /// <summary>
-    /// Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
+    ///     Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
     /// </summary>
     /// <param name="to"></param>
-    protected void CreateFlowTo(AzureResource to)
+    protected internal void CreateFlowTo(AzureResource to)
     {
         var link = new ResourceLink(this, to);
         Links.Add(link);

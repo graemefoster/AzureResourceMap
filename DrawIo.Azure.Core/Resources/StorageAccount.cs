@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -14,6 +13,19 @@ internal class StorageAccount : AzureResource, ICanBeExposedByPrivateEndpoints
     public override bool FetchFull => true;
     public override string ApiVersion => "2021-08-01";
 
+    /// <summary>
+    ///     If the storage account is exposed by a private endpoint, it will be in this list.
+    /// </summary>
+    public List<PrivateEndpoint> ExposedByPrivateEndpoints { get; set; } = new();
+
+    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
+    {
+        var exposedByThisPrivateEndpoint = PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
+        if (exposedByThisPrivateEndpoint) ExposedByPrivateEndpoints.Add(privateEndpoint);
+
+        return exposedByThisPrivateEndpoint;
+    }
+
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
         PrivateEndpoints =
@@ -22,10 +34,5 @@ internal class StorageAccount : AzureResource, ICanBeExposedByPrivateEndpoints
                 .ToArray();
 
         return Task.CompletedTask;
-    }
-
-    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
-    {
-        return PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
     }
 }

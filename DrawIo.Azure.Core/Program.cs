@@ -99,7 +99,7 @@ public static class Program
         var nodeBuilders = directResources!.Value.ToDictionary(x => x, x => x.CreateNodeBuilder());
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
-        var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x=> x.ToArray());
+        var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
         var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary)).ToArray();
 
         nodesDictionary.SelectMany(x => x.Value).ForEach(graph.Nodes.Add);

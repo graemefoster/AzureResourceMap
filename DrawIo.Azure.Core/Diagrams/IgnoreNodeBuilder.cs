@@ -6,12 +6,13 @@ namespace DrawIo.Azure.Core.Diagrams;
 
 internal class IgnoreNodeBuilder : AzureResourceNodeBuilder
 {
-    protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
-    {
-        yield break;
-    }
-
     public IgnoreNodeBuilder(AzureResource resource) : base(resource)
     {
+    }
+
+    protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+    {
+        yield break;
     }
 }
