@@ -10,7 +10,8 @@ internal class AKS : AzureResource, IUseManagedIdentities
 
     public bool DoYouUseThisUserAssignedClientId(string id)
     {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
+        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
+            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
     public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)

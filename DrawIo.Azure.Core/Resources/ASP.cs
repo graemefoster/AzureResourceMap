@@ -7,7 +7,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 internal class ASP : AzureResource
 {
-    public string Kind { get; set; } = default!;
+    public override bool IsPureContainer => true;
     public override string Image => "img/lib/azure2/app_services/App_Service_Plans.svg";
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()

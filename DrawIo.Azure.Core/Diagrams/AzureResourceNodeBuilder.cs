@@ -50,7 +50,7 @@ public class AzureResourceNodeBuilder
 
         if (_resource.ContainedResources.Count > 0)
         {
-            container = AzureResourceDrawer.CreateContainerRectangleNode("", _resource.Name,
+            container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type, _resource.Name,
                 $"{_resource.InternalId}.container", "#FFE6CC", TextAlignment.Top);
             yield return (_resource, container);
             foreach (var contained in _resource.ContainedResources)

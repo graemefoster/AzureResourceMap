@@ -8,10 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
-        <PackageReference Include="Azure.Identity" Version="1.5.0-beta.1" />
-        <PackageReference Include="Microsoft.Identity.Client" Version="4.33.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="AutomaticGraphLayout" Version="1.1.12"/>
+        <PackageReference Include="Azure.Identity" Version="1.5.0-beta.1"/>
+        <PackageReference Include="Microsoft.Identity.Client" Version="4.33.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
     </ItemGroup>
 
 </Project>

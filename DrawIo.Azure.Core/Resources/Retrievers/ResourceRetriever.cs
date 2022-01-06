@@ -30,7 +30,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
 
         var additionalResources = AdditionalResources().ToDictionary(x => x.suffix,
             x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", _apiVersion,
-                HttpMethod.Post).Result);
+                x.method).Result);
         return await BuildResource(azureResource, additionalResources);
     }
 

@@ -10,7 +10,11 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
+    /// <summary>
+    /// Settings this to true stops an icon being drawn for 'this' resource. Instead we just draw a box with the resources that it owns.
+    /// </summary>
     public virtual bool IsPureContainer => false;
+
     private readonly string _id = default!;
     public List<ResourceLink> Links { get; } = new();
     public List<AzureResource> ContainedResources { get; } = new();
@@ -41,6 +45,8 @@ public class AzureResource
     ///     level.
     /// </summary>
     public bool ContainedByAnotherResource { get; protected internal set; }
+
+    public string Type { get; set; } = default!;
 
     public virtual AzureResourceNodeBuilder CreateNodeBuilder()
     {
