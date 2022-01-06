@@ -9,15 +9,14 @@ namespace DrawIo.Azure.Core.Resources;
 
 internal class Nic : AzureResource
 {
-    public override bool FetchFull => true;
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
-    public string[] PublicIpAddresses { get; set; }
+    public string[] PublicIpAddresses { get; set; } = default!;
 
     private IEnumerable<string> _networkAttachments { get; set; }
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
-        return new IgnoreNodeBuilder(this);
+        return new AzureResourceNodeBuilder(this);
     }
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
@@ -68,5 +67,10 @@ internal class Nic : AzureResource
     public bool ExposedBy(PIP pip)
     {
         return PublicIpAddresses.Contains(pip.Id.ToLowerInvariant());
+    }
+
+    public void AssignNsg(NSG nsg)
+    {
+        ContainResource(nsg);
     }
 }

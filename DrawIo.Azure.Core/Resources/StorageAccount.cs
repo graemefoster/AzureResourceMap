@@ -10,8 +10,6 @@ internal class StorageAccount : AzureResource, ICanBeExposedByPrivateEndpoints
     public override string Image => "img/lib/azure2/storage/Storage_Accounts.svg";
 
     private string[] PrivateEndpoints { get; set; } = default!;
-    public override bool FetchFull => true;
-    public override string ApiVersion => "2021-08-01";
 
     /// <summary>
     ///     If the storage account is exposed by a private endpoint, it will be in this list.

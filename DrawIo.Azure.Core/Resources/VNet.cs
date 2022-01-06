@@ -8,9 +8,8 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class VNet : AzureResource
 {
-    public override bool FetchFull => true;
-    public override string ApiVersion => "2021-02-01";
     public Subnet[] Subnets { get; private set; } = default!;
+    public List<PrivateDnsZone> PrivateDnsZones { get; } = new();
 
     public override string Image => "img/lib/azure2/networking/Virtual_Networks.svg";
 
@@ -30,6 +29,10 @@ public class VNet : AzureResource
         return Task.CompletedTask;
     }
 
+    public void AssignPrivateDnsZone(PrivateDnsZone resource)
+    {
+        PrivateDnsZones.Add(resource);
+    }
     public void InjectResourceInto(AzureResource resource, string subnet)
     {
         Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
@@ -41,5 +44,13 @@ public class VNet : AzureResource
         public string Name { get; init; } = default!;
         public string AddressPrefix { get; init; } = default!;
         internal List<AzureResource> ContainedResources { get; } = new();
+
+        public List<NSG> NSGs { get; } = new();
+    }
+
+    public void AssignNsg(NSG nsg, string subnet)
+    {
+        Subnets.Single(x => x.Name == subnet).NSGs.Add(nsg);
+        nsg.ContainedByAnotherResource = true;
     }
 }

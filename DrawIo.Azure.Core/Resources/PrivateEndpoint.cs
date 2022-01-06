@@ -7,7 +7,6 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class PrivateEndpoint : AzureResource, IAssociateWithNic
 {
-    public override bool FetchFull => true;
     public override string Image => "img/lib/azure2/networking/Private_Link.svg";
     public string[] CustomHostNames { get; private set; }
 

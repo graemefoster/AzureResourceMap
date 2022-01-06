@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,8 +12,7 @@ public class AzureResource
 {
     private readonly string _id = default!;
     public List<ResourceLink> Links { get; } = new();
-    public virtual bool FetchFull => false;
-
+    public List<AzureResource> ContainedResources { get; } = new();
 
     public string Id
     {
@@ -33,11 +31,8 @@ public class AzureResource
 
     public string Name { get; set; } = default!;
     public virtual string Image { get; protected set; }
-    public string Type { get; set; }
+    
     public string Location { get; set; }
-    public virtual string ApiVersion => "2020-11-01";
-
-    public virtual HashSet<(HttpMethod, string)> AdditionalResources => new();
 
     /// <summary>
     ///     Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
@@ -82,5 +77,16 @@ public class AzureResource
     {
         var link = new ResourceLink(this, to);
         Links.Add(link);
+    }
+
+    /// <summary>
+    /// Containing a resource will cause anything without a 'specific' drawer to be rendered as a container, with all contained resources inside.
+    /// Also sets the ContainedByAnotherResource flag to tell the drawer that something else will draw it
+    /// </summary>
+    /// <param name="contained"></param>
+    protected void ContainResource(AzureResource contained)
+    {
+        ContainedResources.Add(contained);
+        contained.ContainedByAnotherResource = true;
     }
 }

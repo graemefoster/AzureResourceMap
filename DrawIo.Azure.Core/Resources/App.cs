@@ -3,25 +3,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
+using DrawIo.Azure.Core.Resources.Retrievers;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
 public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 {
-    private static readonly (HttpMethod, string) ConfigApiEndpoint = (HttpMethod.Post, "config/appSettings/list");
-
     private VNetIntegration? _azureVNetIntegrationResource;
-    public override bool FetchFull => true;
-
-    public string Kind { get; set; }
-    public AppProperties Properties { get; set; }
-
+    public string? ServerFarmId { get; set; }
+    public string[] PrivateEndpoints { get; set; }
+    public string? VirtualNetworkSubnetId { get; set; }
     public Identity? Identity { get; set; }
-    public override string ApiVersion => "2021-01-15";
     public override string Image => "img/lib/azure2/app_services/App_Services.svg";
-
-    public override HashSet<(HttpMethod, string)> AdditionalResources => new() { ConfigApiEndpoint };
 
     public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; }
 
@@ -29,7 +23,7 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
     public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
     {
-        return Properties.PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
+        return PrivateEndpoints.Contains(privateEndpoint.Id.ToLowerInvariant());
     }
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
@@ -39,15 +33,16 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
     public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        Properties = full["properties"].ToObject<AppProperties>();
+        VirtualNetworkSubnetId = full["properties"]!["virtualNetworkSubnetId"]?.Value<string>();
+        ServerFarmId = full["properties"]!["serverFarmId"]?.Value<string>();
 
-        Properties.PrivateEndpoints =
-            full["properties"]["privateEndpointConnections"]
+        PrivateEndpoints =
+            full["properties"]!["privateEndpointConnections"]?
                 .Select(x => x["properties"]["privateEndpoint"].Value<string>("id").ToLowerInvariant())
                 .ToArray();
 
 
-        var config = additionalResources[ConfigApiEndpoint.Item2];
+        var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
 
         if (appSettings.ContainsKey("APPINSIGHTS_INSTRUMENTATIONKEY"))
@@ -74,10 +69,10 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
     public override IEnumerable<AzureResource> DiscoverNewNodes()
     {
-        if (Properties.VirtualNetworkSubnetId != null)
+        if (VirtualNetworkSubnetId != null)
         {
             _azureVNetIntegrationResource =
-                new VNetIntegration($"{Id}.vnetintegration", Properties.VirtualNetworkSubnetId);
+                new VNetIntegration($"{Id}.vnetintegration", VirtualNetworkSubnetId);
             yield return _azureVNetIntegrationResource;
         }
     }
@@ -112,12 +107,5 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
                     flowSource.CreateFlowTo(storage);
             }
         }
-    }
-
-    public class AppProperties
-    {
-        public string ServerFarmId { get; set; }
-        public string[] PrivateEndpoints { get; set; }
-        public string? VirtualNetworkSubnetId { get; set; }
     }
 }

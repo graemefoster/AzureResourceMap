@@ -2,6 +2,6 @@
 
 internal class AzureList<T> where T : AzureResource
 {
-    public string NextLink { get; set; }
-    public T[] Value { get; set; }
+    public string? NextLink { get; set; }
+    public T[] Value { get; set; } = default!;
 }

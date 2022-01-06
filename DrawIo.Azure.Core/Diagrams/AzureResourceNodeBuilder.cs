@@ -31,8 +31,8 @@ public class AzureResourceNodeBuilder
             }
             else
             {
-                var from = nodes[_resource].Single();
-                var to = nodes[link.To].Single();
+                var from = nodes[_resource].Single(x => ((CustomUserData)x.UserData).Id == link.From.InternalId);
+                var to = nodes[link.To].Single(x => ((CustomUserData)x.UserData).Id == link.To.InternalId);
                 yield return AzureResourceDrawer.CreateSimpleEdge(from, to);
             }
     }
@@ -46,15 +46,34 @@ public class AzureResourceNodeBuilder
     protected virtual IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
+
+        Cluster? container = null;
+        if (_resource.ContainedResources.Count > 0)
+        {
+            container = AzureResourceDrawer.CreateContainerRectangleNode("", _resource.Name, $"{_resource.InternalId}.container", "#FFE6CC",  TextAlignment.Top);
+            yield return (_resource, container);
+            foreach (var contained in _resource.ContainedResources)
+            {
+                var nodeBuilder = resourceNodeBuilders[contained];
+                foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders))
+                {
+                    if (containedNode.Item2.ClusterParent == null) container.AddChild(containedNode.Item2);
+                    yield return containedNode;
+                }
+            }
+        }
+
         if (string.IsNullOrEmpty(_resource.Image))
         {
-            yield return (_resource,
-                AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
-                    _resource.InternalId));
-        } else
+            var resourceNode = AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name, _resource.InternalId);
+            if (container != null) container.AddChild(resourceNode);
+            yield return (_resource, resourceNode);
+        }
+        else
         {
-            yield return (_resource,
-                AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId));
+            var resourceNode = AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId);
+            if (container != null) container.AddChild(resourceNode);
+            yield return (_resource, resourceNode);
         }
     }
 }

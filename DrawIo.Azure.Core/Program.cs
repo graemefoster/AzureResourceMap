@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,11 +12,8 @@ using DrawIo.Azure.Core.Resources;
 using DrawIo.Azure.Core.Resources.Retrievers;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
-using Microsoft.Msagl.Layout.Initial;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core;
 
@@ -25,22 +21,9 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var resourceGroup = "DiagramBuildUp"; // "function-outbound-calls";
+        var resourceGroup = "ovenmedia"; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
-
-        var responseCacheFile =
-            Path.Combine(
-                directoryName,
-                $"responseCache.{resourceGroup}.json");
-
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(responseCacheFile)));
-
-        var responseCache = File.Exists(responseCacheFile)
-            ? JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                await File.ReadAllTextAsync(responseCacheFile))!
-            : new Dictionary<string, string>();
-
 
         var token = new AzureCliCredential().GetToken(
             new TokenRequestContext(new[] { "https://management.azure.com/" }));
@@ -53,55 +36,18 @@ public static class Program
             , token.Token);
 
         var newTest = new ArmResourceRetriever(httpClient);
-        var resources = await newTest.Retrieve(subscriptionId, resourceGroup);
-
-        async Task<T?> GetAsync<T>(string uri, string apiVersion, HttpMethod? method = null)
-        {
-            var apiVersionQueryString = (uri.Contains("?") ? "&" : "?") + $"api-version={apiVersion}";
-            var resourceUri = $"{uri}{apiVersionQueryString}";
-            if (responseCache.ContainsKey(resourceUri))
-                return JsonConvert.DeserializeObject<T>(
-                    responseCache[resourceUri],
-                    new AzureResourceConverter(
-                        (r, v) => GetAsync<JObject>(r.Id, v)!,
-                        r =>
-                            r
-                                .AdditionalResources
-                                .ToDictionary(
-                                    x => x.Item2,
-                                    x => GetAsync<JObject>($"{r.Id}/{x.Item2}", r.ApiVersion, x.Item1))!));
-
-            var request = new HttpRequestMessage(method ?? HttpMethod.Get, resourceUri);
-            var responseContent = await (await httpClient.SendAsync(request)).Content.ReadAsStringAsync();
-            responseCache[resourceUri] = responseContent;
-            return JsonConvert.DeserializeObject<T>(responseContent,
-                new AzureResourceConverter(
-                    (r, v) => GetAsync<JObject>(r.Id, v)!,
-                    r =>
-                        r
-                            .AdditionalResources
-                            .ToDictionary(
-                                x => x.Item2,
-                                x => GetAsync<JObject>($"{r.Id}/{x.Item2}", r.ApiVersion, x.Item1))!));
-        }
-
-
-        var directResources = await GetAsync<AzureList<AzureResource>>(
-            $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{resourceGroup}'", "2020-10-01");
-
-        await DrawDiagram(directResources, responseCacheFile, responseCache, directoryName, resourceGroup);
+        var resources = (await newTest.Retrieve(subscriptionId, resourceGroup)).ToArray();
+        await DrawDiagram(resources, directoryName, resourceGroup);
     }
 
-    private static async Task DrawDiagram(AzureList<AzureResource>? directResources, string responseCacheFile,
-        Dictionary<string, string> responseCache,
-        string directoryName, string resourceGroup)
+    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string resourceGroup)
     {
-        var additionalNodes = directResources!.Value.SelectMany(x => x.DiscoverNewNodes());
-        var allNodes = directResources.Value.Concat(additionalNodes).ToArray();
+        var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
+        var allNodes = resources.Concat(additionalNodes).ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
-        foreach (var resource in allNodes) resource.BuildRelationships(directResources.Value);
+        foreach (var resource in allNodes) resource.BuildRelationships(resources);
 
         var graph = new GeometryGraph();
 
@@ -156,7 +102,6 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        await File.WriteAllTextAsync(responseCacheFile, JsonConvert.SerializeObject(responseCache));
         await File.WriteAllTextAsync(Path.Combine(directoryName, $"{resourceGroup}.drawio"), msGraph);
         Console.WriteLine(msGraph);
     }

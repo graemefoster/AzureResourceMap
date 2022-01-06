@@ -6,28 +6,31 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources.Retrievers;
 
-public class ResourceRetriever<T>  : IRetrieveResource where T:AzureResource
+public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
 {
-    private readonly BasicAzureResourceInfo _basicAzureResourceInfo;
+    private readonly JObject _basicAzureResourceJObject;
+    private readonly string _apiVersion;
+    private readonly bool _fetchFullResource;
 
-    public ResourceRetriever(BasicAzureResourceInfo basicAzureResourceInfo)
+    public ResourceRetriever(JObject basicAzureResourceJObject, string apiVersion = "2021-02-01", bool fetchFullResource = false)
     {
-        _basicAzureResourceInfo = basicAzureResourceInfo;
+        _basicAzureResourceJObject = basicAzureResourceJObject;
+        _apiVersion = apiVersion;
+        _fetchFullResource = fetchFullResource;
     }
-
-    public virtual string ApiVersion => "2020-11-01";
-
-    public virtual bool FetchFull => false;
 
     public async Task<AzureResource> FetchResource(HttpClient client)
     {
-        var azureResource =
-            await client.GetAzResourceAsync<JObject>(_basicAzureResourceInfo.Id, ApiVersion, HttpMethod.Get);
-        
+        if (!_fetchFullResource)
+            return _basicAzureResourceJObject.ToObject<T>()!;
+
+        var basicResource = _basicAzureResourceJObject.ToObject<BasicAzureResourceInfo>()!;
+        var azureResource = await client.GetAzResourceAsync<JObject>(basicResource.Id, _apiVersion, HttpMethod.Get);
+
         var additionalResources = AdditionalResources().ToDictionary(x => x.suffix,
-            x => client.GetAzResourceAsync<JObject>($"{_basicAzureResourceInfo.Id}/{x.suffix}", ApiVersion, HttpMethod.Post).Result);
-        
-        return BuildResource(azureResource, additionalResources);
+            x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", _apiVersion,
+                HttpMethod.Post).Result);
+        return await BuildResource(azureResource, additionalResources);
     }
 
     protected virtual IEnumerable<(HttpMethod method, string suffix)> AdditionalResources()
@@ -36,8 +39,10 @@ public class ResourceRetriever<T>  : IRetrieveResource where T:AzureResource
     }
 
 
-    protected virtual AzureResource BuildResource(BasicAzureResourceInfo basicAzureResourceInfo, JObject resource, Dictionary<string, JObject> additionalResources)
+    private async Task<AzureResource> BuildResource(JObject resource, Dictionary<string, JObject> additionalResources)
     {
-        return resource.ToObject<T>()!;
+        var resourceRepresentation = resource.ToObject<T>()!;
+        await resourceRepresentation.Enrich(resource, additionalResources);
+        return resourceRepresentation;
     }
 }

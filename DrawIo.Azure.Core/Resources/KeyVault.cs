@@ -7,10 +7,8 @@ namespace DrawIo.Azure.Core.Resources;
 
 internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
 {
-    public override bool FetchFull => true;
     public override string Image => "img/lib/azure2/security/Key_Vaults.svg";
-    public override string ApiVersion => "2019-09-01";
-    public string[] PrivateEndpoints { get; set; }
+    public string[] PrivateEndpoints { get; set; } = default!;
 
     public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
     {
