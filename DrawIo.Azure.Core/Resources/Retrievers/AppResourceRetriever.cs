@@ -8,7 +8,7 @@ public class AppResourceRetriever : ResourceRetriever<App>
 {
     public const string ConfigAppSettingsList = "config/appSettings/list";
 
-    public AppResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-01-15", fetchFullResource:true)
+    public AppResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-01-15", true)
     {
     }
 

@@ -18,7 +18,7 @@ internal class AppServicePlanDiagramResourceBuilder : AzureResourceNodeBuilder
     {
         var appServicePlanNode =
             AzureResourceDrawer.CreateContainerRectangleNode("ASP", _resource.Name, _resource.InternalId,
-                "#D5E8D4");
+                "#D5E8D4", TextAlignment.Top);
 
         yield return (_resource, appServicePlanNode);
 

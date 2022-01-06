@@ -15,11 +15,8 @@ public static class AzureHttpEx
         var request = new HttpRequestMessage(method ?? HttpMethod.Get, resourceUri);
         var httpResponseMessage = await httpClient.SendAsync(request);
         var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
-        
-        if (httpResponseMessage.IsSuccessStatusCode)
-        {
-            return JsonConvert.DeserializeObject<T>(responseContent)!;
-        }
+
+        if (httpResponseMessage.IsSuccessStatusCode) return JsonConvert.DeserializeObject<T>(responseContent)!;
 
         throw new HttpRequestException($"Failed to fetch {uri}: {responseContent}");
     }

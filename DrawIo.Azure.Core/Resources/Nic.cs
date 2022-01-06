@@ -71,6 +71,6 @@ internal class Nic : AzureResource
 
     public void AssignNsg(NSG nsg)
     {
-        ContainResource(nsg);
+        OwnsResource(nsg);
     }
 }

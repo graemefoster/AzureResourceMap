@@ -16,13 +16,14 @@ public class ArmResourceRetriever
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<AzureResource>> Retrieve(string subscriptionId, string resourceGroup)
+    public async Task<IEnumerable<AzureResource>> Retrieve(string subscriptionId, IEnumerable<string> resourceGroups)
     {
-        var directResources = await _httpClient.GetAzResourceAsync<AzureList<JObject>>(
-            $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{resourceGroup}'", "2020-10-01");
+        var allDirectResources = await Task.WhenAll(resourceGroups.Select(rg =>
+            _httpClient.GetAzResourceAsync<AzureList<JObject>>(
+                $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{rg}'", "2020-10-01")));
 
-        var allResources = directResources.Value.Select(GetResourceRetriever)
-            .Select(r => r.FetchResource(_httpClient));
+        var allResources = allDirectResources.SelectMany(directResources =>
+            directResources.Value.Select(GetResourceRetriever).Select(r => r.FetchResource(_httpClient)));
 
         return await Task.WhenAll(allResources);
     }
@@ -36,14 +37,14 @@ public class ArmResourceRetriever
             "microsoft.network/virtualnetworks" => new ResourceRetriever<VNet>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-02-01"),
             "microsoft.network/privateendpoints" => new ResourceRetriever<PrivateEndpoint>(basicAzureResourceInfo,
-                "2020-11-01", fetchFullResource: true),
+                "2020-11-01", true),
             "microsoft.network/privatednszones" => new ResourceRetriever<PrivateDnsZone>(basicAzureResourceInfo,
-                "2020-06-01", fetchFullResource: true),
+                "2020-06-01", true),
             "microsoft.network/privatednszones/virtualnetworklinks" => new
                 ResourceRetriever<PrivateDnsZoneVirtualNetworkLink>(basicAzureResourceInfo, "2020-06-01",
-                    fetchFullResource: true),
+                    true),
             "microsoft.network/networkinterfaces" => new ResourceRetriever<Nic>(basicAzureResourceInfo, "2020-11-01",
-                fetchFullResource: true),
+                true),
             "microsoft.containerservice/managedclusters" => new ResourceRetriever<AKS>(basicAzureResourceInfo,
                 "2020-11-01"),
             "microsoft.containerregistry/registries" =>
@@ -52,14 +53,14 @@ public class ArmResourceRetriever
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
             "microsoft.apimanagement/service" => new ResourceRetriever<APIm>(basicAzureResourceInfo),
             "microsoft.compute/virtualmachines" => new ResourceRetriever<VM>(basicAzureResourceInfo,
-                apiVersion: "2021-07-01", fetchFullResource: true),
+                "2021-07-01", true),
             "microsoft.compute/disks" => new ResourceRetriever<Disk>(basicAzureResourceInfo),
             "microsoft.operationalinsights/workspaces" => new ResourceRetriever<LogAnalyticsWorkspace>(
-                basicAzureResourceInfo, fetchFullResource: true),
+                basicAzureResourceInfo, fetchFullResource: true, apiVersion: "2021-06-01"),
             "microsoft.insights/components" => new ResourceRetriever<AppInsights>(basicAzureResourceInfo, "2020-02-02",
-                fetchFullResource: true),
+                true),
             "microsoft.storage/storageaccounts" => new ResourceRetriever<StorageAccount>(basicAzureResourceInfo,
-                apiVersion: "2021-08-01", fetchFullResource: true),
+                "2021-08-01", true),
             "microsoft.network/networksecuritygroups" => new ResourceRetriever<NSG>(basicAzureResourceInfo,
                 fetchFullResource: true),
             "microsoft.network/publicipaddresses" => new ResourceRetriever<PIP>(basicAzureResourceInfo),
@@ -69,10 +70,18 @@ public class ArmResourceRetriever
             "microsoft.managedidentity/userassignedidentities" => new ResourceRetriever<UserAssignedManagedIdentity>(
                 basicAzureResourceInfo),
             "microsoft.keyvault/vaults" => new ResourceRetriever<KeyVault>(basicAzureResourceInfo,
-                apiVersion: "2019-09-01", fetchFullResource: true),
+                "2019-09-01", true),
             "microsoft.insights/actiongroups" => new NoOpResourceRetriever(),
             "microsoft.alertsmanagement/smartdetectoralertrules" => new NoOpResourceRetriever(),
             "microsoft.compute/sshpublickeys" => new NoOpResourceRetriever(),
+            "microsoft.insights/webtests" => new NoOpResourceRetriever(),
+            "microsoft.sql/servers" => new ResourceRetriever<ManagedSqlServer>(basicAzureResourceInfo),
+            "microsoft.sql/servers/databases" => new ResourceRetriever<ManagedSqlDatabase>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-08-01-preview"),
+            "microsoft.web/kubeenvironments" => new ResourceRetriever<ContainerAppEnvironment>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-03-01"),
+            "microsoft.web/containerapps" => new ResourceRetriever<ContainerApp>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-03-01"),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
     }

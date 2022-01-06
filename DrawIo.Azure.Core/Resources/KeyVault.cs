@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -18,9 +19,9 @@ internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
         PrivateEndpoints =
-            jObject["properties"]!["privateEndpointConnections"]!
+            jObject["properties"]!["privateEndpointConnections"]?
                 .Select(x => x["properties"]!["privateEndpoint"]!.Value<string>("id")!.ToLowerInvariant())
-                .ToArray();
+                .ToArray() ?? Array.Empty<string>();
 
         return Task.CompletedTask;
     }

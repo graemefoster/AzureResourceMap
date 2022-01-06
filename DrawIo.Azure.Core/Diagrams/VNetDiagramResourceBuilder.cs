@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 
@@ -27,7 +26,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         {
             var privateDnsZoneCluster =
                 AzureResourceDrawer.CreateContainerRectangleNode("", "DNS Zones",
-                    _resource.InternalId + $".dnszones", "#E1D5E7", TextAlignment.Bottom);
+                    _resource.InternalId + ".dnszones", "#E1D5E7", TextAlignment.Bottom);
 
             vnetNode.AddChild(privateDnsZoneCluster);
             foreach (var privateDnsZone in _resource.PrivateDnsZones)

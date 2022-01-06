@@ -46,11 +46,11 @@ public class AzureResourceNodeBuilder
     protected virtual IEnumerable<(AzureResource, Node)> CreateNodesInternal(
         IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
     {
-
         Cluster? container = null;
         if (_resource.ContainedResources.Count > 0)
         {
-            container = AzureResourceDrawer.CreateContainerRectangleNode("", _resource.Name, $"{_resource.InternalId}.container", "#FFE6CC",  TextAlignment.Top);
+            container = AzureResourceDrawer.CreateContainerRectangleNode("", _resource.Name,
+                $"{_resource.InternalId}.container", "#FFE6CC", TextAlignment.Top);
             yield return (_resource, container);
             foreach (var contained in _resource.ContainedResources)
             {
@@ -65,13 +65,16 @@ public class AzureResourceNodeBuilder
 
         if (string.IsNullOrEmpty(_resource.Image))
         {
-            var resourceNode = AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name, _resource.InternalId);
+            var resourceNode =
+                AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
+                    _resource.InternalId);
             if (container != null) container.AddChild(resourceNode);
             yield return (_resource, resourceNode);
         }
         else
         {
-            var resourceNode = AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId);
+            var resourceNode =
+                AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId);
             if (container != null) container.AddChild(resourceNode);
             yield return (_resource, resourceNode);
         }

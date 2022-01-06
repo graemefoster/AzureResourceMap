@@ -33,10 +33,17 @@ public class VNet : AzureResource
     {
         PrivateDnsZones.Add(resource);
     }
+
     public void InjectResourceInto(AzureResource resource, string subnet)
     {
         Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
         resource.ContainedByAnotherResource = true;
+    }
+
+    public void AssignNsg(NSG nsg, string subnet)
+    {
+        Subnets.Single(x => x.Name == subnet).NSGs.Add(nsg);
+        nsg.ContainedByAnotherResource = true;
     }
 
     public class Subnet
@@ -46,11 +53,5 @@ public class VNet : AzureResource
         internal List<AzureResource> ContainedResources { get; } = new();
 
         public List<NSG> NSGs { get; } = new();
-    }
-
-    public void AssignNsg(NSG nsg, string subnet)
-    {
-        Subnets.Single(x => x.Name == subnet).NSGs.Add(nsg);
-        nsg.ContainedByAnotherResource = true;
     }
 }

@@ -8,11 +8,12 @@ namespace DrawIo.Azure.Core.Resources.Retrievers;
 
 public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
 {
-    private readonly JObject _basicAzureResourceJObject;
     private readonly string _apiVersion;
+    private readonly JObject _basicAzureResourceJObject;
     private readonly bool _fetchFullResource;
 
-    public ResourceRetriever(JObject basicAzureResourceJObject, string apiVersion = "2021-02-01", bool fetchFullResource = false)
+    public ResourceRetriever(JObject basicAzureResourceJObject, string apiVersion = "2021-02-01",
+        bool fetchFullResource = false)
     {
         _basicAzureResourceJObject = basicAzureResourceJObject;
         _apiVersion = apiVersion;

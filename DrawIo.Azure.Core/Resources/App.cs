@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
-using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources.Retrievers;
@@ -8,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeExposedByPrivateEndpoints
+public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccessedViaHttp, IUseManagedIdentities
 {
     private VNetIntegration? _azureVNetIntegrationResource;
     public string? ServerFarmId { get; set; }
@@ -20,6 +22,14 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
     public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; }
 
     public string? AppInsightsKey { get; set; }
+
+    public string[] KeyVaultReferences { get; set; } = default!;
+
+    public string[] EnabledHostNames { get; set; } = default!;
+
+    public string[] HostNamesAccessedInAppSettings { get; set; } = default!;
+
+    public (string server, string database)[] DatabaseConnections { get; set; } = default!;
 
     public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
     {
@@ -48,6 +58,8 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
         if (appSettings.ContainsKey("APPINSIGHTS_INSTRUMENTATIONKEY"))
             AppInsightsKey = (string)appSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
 
+        EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().ToArray();
+
         ConnectedStorageAccounts = appSettings
             .Values
             .OfType<string>()
@@ -64,6 +76,44 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
 
                 return (parts["accountname"], "." + parts["endpointsuffix"]);
             })
+            .ToArray();
+
+        DatabaseConnections = appSettings
+            .Values
+            .OfType<string>()
+            .Where(appSetting => appSetting.Contains("Data Source=") &&
+                                 appSetting.Contains("Initial Catalog="))
+            .Select(x =>
+            {
+                var csb = new DbConnectionStringBuilder();
+                csb.ConnectionString = x;
+                return ((string)csb["Data Source"], (string)csb["Initial Catalog"]);
+            })
+            .ToArray();
+
+        var kvRegex = new Regex(@"^\@Microsoft\.KeyVault\(VaultName\=(.*?);");
+        KeyVaultReferences = appSettings
+            .Values
+            .OfType<string>()
+            .Select(x => kvRegex.Match(x))
+            .Where(x => x.Success)
+            .Select(x => x.Groups[1].Captures[0].Value)
+            .ToArray();
+
+        HostNamesAccessedInAppSettings = appSettings
+            .Values
+            .OfType<string>()
+            .Select(x =>
+                {
+                    if (Uri.TryCreate(x, UriKind.Absolute, out var uri))
+                    {
+                        return uri.Host;
+                    }
+
+                    return string.Empty;
+                }
+            )
+            .Where(x => !string.IsNullOrEmpty(x))
             .ToArray();
     }
 
@@ -106,6 +156,41 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints
                 else
                     flowSource.CreateFlowTo(storage);
             }
+            
         }
+
+        foreach (var databaseConnection in DatabaseConnections)
+        {
+            //TODO check server name as-well
+            var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
+                string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
+            if (database != null) CreateFlowTo(database);
+        }
+
+        foreach (var keyVaultReference in KeyVaultReferences)
+        {
+            //TODO check server name as-well
+            var keyVault = allResources.OfType<KeyVault>().SingleOrDefault(x =>
+                string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
+            if (keyVault != null) CreateFlowTo(keyVault);
+        }
+
+        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName)).ForEach(x => CreateFlowTo((AzureResource)x));
+
+    }
+
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        return EnabledHostNames.Any(hn => string.Compare(hn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0);
+    }
+
+    public bool DoYouUseThisUserAssignedClientId(string id)
+    {
+        return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
+    }
+
+    public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    {
+        CreateFlowTo(userAssignedManagedIdentity);
     }
 }

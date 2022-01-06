@@ -31,7 +31,7 @@ public class AzureResource
 
     public string Name { get; set; } = default!;
     public virtual string Image { get; protected set; }
-    
+
     public string Location { get; set; }
 
     /// <summary>
@@ -80,11 +80,12 @@ public class AzureResource
     }
 
     /// <summary>
-    /// Containing a resource will cause anything without a 'specific' drawer to be rendered as a container, with all contained resources inside.
-    /// Also sets the ContainedByAnotherResource flag to tell the drawer that something else will draw it
+    ///     Containing a resource will cause anything without a 'specific' drawer to be rendered as a container, with all
+    ///     contained resources inside.
+    ///     Also sets the ContainedByAnotherResource flag to tell the drawer that something else will draw it
     /// </summary>
     /// <param name="contained"></param>
-    protected void ContainResource(AzureResource contained)
+    protected void OwnsResource(AzureResource contained)
     {
         ContainedResources.Add(contained);
         contained.ContainedByAnotherResource = true;

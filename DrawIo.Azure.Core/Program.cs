@@ -21,7 +21,8 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var resourceGroup = "ovenmedia"; // //"DiagramBuildUp"; // "function-outbound-calls";
+        var resourceGroup = new[]
+            { "grfsq2-platform-test-rg", "grfsq2-test-rg" }; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
 
@@ -37,10 +38,10 @@ public static class Program
 
         var newTest = new ArmResourceRetriever(httpClient);
         var resources = (await newTest.Retrieve(subscriptionId, resourceGroup)).ToArray();
-        await DrawDiagram(resources, directoryName, resourceGroup);
+        await DrawDiagram(resources, directoryName, resourceGroup[0]);
     }
 
-    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string resourceGroup)
+    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
         var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
         var allNodes = resources.Concat(additionalNodes).ToArray();
@@ -102,7 +103,9 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        await File.WriteAllTextAsync(Path.Combine(directoryName, $"{resourceGroup}.drawio"), msGraph);
+        var path = Path.Combine(directoryName, $"{outputName}.drawio");
+        await File.WriteAllTextAsync(path, msGraph);
         Console.WriteLine(msGraph);
+        Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
     }
 }

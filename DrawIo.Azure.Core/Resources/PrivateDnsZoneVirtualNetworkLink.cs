@@ -8,8 +8,8 @@ namespace DrawIo.Azure.Core.Resources;
 
 internal class PrivateDnsZoneVirtualNetworkLink : AzureResource
 {
-    private string _virtualNetwork;
     private string _dnsZone;
+    private string _virtualNetwork;
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
