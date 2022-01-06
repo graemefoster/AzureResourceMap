@@ -10,6 +10,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AzureResource
 {
+    public virtual bool IsPureContainer => false;
     private readonly string _id = default!;
     public List<ResourceLink> Links { get; } = new();
     public List<AzureResource> ContainedResources { get; } = new();
@@ -75,6 +76,7 @@ public class AzureResource
     /// <param name="to"></param>
     protected internal void CreateFlowTo(AzureResource to)
     {
+        if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
         var link = new ResourceLink(this, to);
         Links.Add(link);
     }

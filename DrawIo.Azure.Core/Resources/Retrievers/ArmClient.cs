@@ -7,11 +7,11 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources.Retrievers;
 
-public class ArmResourceRetriever
+public class ArmClient
 {
     private readonly HttpClient _httpClient;
 
-    public ArmResourceRetriever(HttpClient httpClient)
+    public ArmClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }

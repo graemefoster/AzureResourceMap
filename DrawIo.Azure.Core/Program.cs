@@ -36,7 +36,7 @@ public static class Program
             "Bearer"
             , token.Token);
 
-        var newTest = new ArmResourceRetriever(httpClient);
+        var newTest = new ArmClient(httpClient);
         var resources = (await newTest.Retrieve(subscriptionId, resourceGroup)).ToArray();
         await DrawDiagram(resources, directoryName, resourceGroup[0]);
     }
@@ -44,7 +44,11 @@ public static class Program
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
         var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
-        var allNodes = resources.Concat(additionalNodes).ToArray();
+
+        //create some common nodes to represent common platform groupings (AAD, Diagnostics)
+        var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };
+        var diagnostics = new CommonDiagnostics { Id = CommonResources.Diagnostics, Name = "Diagnostics" };
+        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics }).ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet

@@ -2,7 +2,7 @@
 
 internal class ManagedSqlServer : AzureResource
 {
-    public override string Image => "img/lib/azure2/databases/SQL_Server.svg";
+    public override bool IsPureContainer => true;
 
     public void DiscoveredDatabase(ManagedSqlDatabase managedSqlDatabase)
     {
