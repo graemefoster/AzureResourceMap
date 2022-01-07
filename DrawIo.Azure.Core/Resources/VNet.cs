@@ -38,7 +38,7 @@ public class VNet : AzureResource
 
     private void InjectResourceInto(AzureResource resource, string subnet)
     {
-        Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
+        Subnets.Single(x => string.Compare(x.Name, subnet, StringComparison.InvariantCultureIgnoreCase) == 0).ContainedResources.Add(resource);
         resource.ContainedByAnotherResource = true;
     }
 
@@ -71,5 +71,14 @@ public class VNet : AzureResource
         internal List<AzureResource> ContainedResources { get; } = new();
 
         public List<NSG> NSGs { get; } = new();
+    }
+
+    /// <summary>
+    /// VMs can be associated to multiple nics, in different subnets. So instead of homing it in a subnet, I home it inside the vnet.
+    /// </summary>
+    /// <param name="vm"></param>
+    public void GiveHomeToVirtualMachine(VM vm)
+    {
+        OwnsResource(vm);
     }
 }

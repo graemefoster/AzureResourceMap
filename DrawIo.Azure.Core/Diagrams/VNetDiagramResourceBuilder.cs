@@ -39,6 +39,16 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                 }
             }
         }
+        
+        foreach (var contained in _resource.ContainedResources)
+        {
+            var nodeBuilder = resourceNodeBuilders[contained];
+            foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders))
+            {
+                if (containedNode.Item2.ClusterParent == null) vnetNode.AddChild(containedNode.Item2);
+                yield return containedNode;
+            }
+        }
 
         foreach (var subnet in _resource.Subnets)
         {

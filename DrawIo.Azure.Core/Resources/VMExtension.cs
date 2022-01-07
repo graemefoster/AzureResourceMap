@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class VMExtension : AzureResource
+public class VMExtension : AzureResource
 {
     private string _vm;
 

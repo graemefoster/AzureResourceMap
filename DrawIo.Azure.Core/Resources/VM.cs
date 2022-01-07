@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
+public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
 {
     public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/compute/Virtual_Machine.svg";
@@ -27,6 +27,15 @@ internal class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
         var disk = allResources.OfType<Disk>()
             .Single(x => string.Equals(x.Id, SystemDiskId, StringComparison.InvariantCultureIgnoreCase));
         CreateFlowTo(disk);
+        OwnsResource(disk);
+
+        var allNics = Nics.Select(nic =>
+            allResources.OfType<Nic>().Single(x => x.Id.Equals(nic, StringComparison.InvariantCultureIgnoreCase)));
+
+        var injectedSubnets = allNics.SelectMany(nic => nic.SubnetIdsIAmInjectedInto);
+        //inject the VM into the VNet... It can be in multiple subnets so it feels weird to try put it into each
+        var vnets = injectedSubnets.Select(sn => allResources.OfType<VNet>().Single(x => x.Id.Equals(string.Join('/', sn.Split('/')[..^2]), StringComparison.InvariantCultureIgnoreCase))).Distinct();
+        vnets.ForEach(vnet => vnet.GiveHomeToVirtualMachine(this));
     }
 
     public void AddExtension(VMExtension vmExtension)
