@@ -7,10 +7,13 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
+internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
     public string[] PublicIpAddresses { get; set; } = default!;
+    public string[] PrivateIpAddresses { get; set; } = default!;
+
+    public string[] HostNames { get; set; } = default!;
 
     private string[] NetworkAttachments { get; set; } = default!;
 
@@ -35,15 +38,23 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
             .Where(x => x != null)
             .ToArray()!;
 
-        NetworkAttachments = jObject["properties"]!["ipConfigurations"]!
-            .Select(x =>
-                x["properties"]!["subnet"] != null
-                    ? x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant()
-                    : null)
+        PrivateIpAddresses = jObject["properties"]!["ipConfigurations"]!
+            .Select(x => x["properties"]!.Value<string>("privateIPAddress"))
             .Where(x => x != null)
+            .ToArray()!;
+
+        NetworkAttachments = jObject["properties"]!["ipConfigurations"]!
+            .Select(x => x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant())
             .Select(x => x!)
             .ToArray();
-        
+
+        HostNames = jObject["properties"]!["ipConfigurations"]!
+            .SelectMany(x =>
+                x["properties"]!["privateLinkConnectionProperties"]?["fqdns"]?.Values<string>() ??
+                Array.Empty<string>())
+            .Select(x => x!.ToLowerInvariant())
+            .ToArray();
+
         return Task.CompletedTask;
     }
 
@@ -53,4 +64,9 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
     }
 
     public string[] SubnetIdsIAmInjectedInto => NetworkAttachments;
+
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        return HostNames.Contains(hostname);
+    }
 }

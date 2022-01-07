@@ -22,7 +22,7 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var resourceGroup = new[]
-            { "arian-container-app" }; // //"DiagramBuildUp"; // "function-outbound-calls";
+            { "" }; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
 
@@ -52,7 +52,7 @@ public static class Program
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
-        foreach (var resource in allNodes) resource.BuildRelationships(resources);
+        foreach (var resource in allNodes) resource.BuildRelationships(allNodes);
 
         var graph = new GeometryGraph();
 

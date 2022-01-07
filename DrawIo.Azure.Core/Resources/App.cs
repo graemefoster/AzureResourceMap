@@ -16,8 +16,15 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
     public string? ServerFarmId { get; set; }
     public string[] PrivateEndpoints { get; set; }
     public string? VirtualNetworkSubnetId { get; set; }
+    public string Kind { get; set; }
     public Identity? Identity { get; set; }
-    public override string Image => "img/lib/azure2/app_services/App_Services.svg";
+
+    public override string Image => Kind switch
+    {
+        "functionapp,workflowapp" => "img/lib/azure2/integration/Logic_Apps.svg",
+        "functionapp" => "img/lib/azure2/iot/Function_Apps.svg",
+        _ => "img/lib/azure2/app_services/App_Services.svg"
+    };
 
     public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; }
 
@@ -69,18 +76,19 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
             .Values
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&
-                                 appSetting.Contains("AccountName") &&
-                                 appSetting.Contains("EndpointSuffix"))
+                                 appSetting.Contains("AccountName"))
             .Select(x =>
             {
                 var parts = x!.Split(';')
+                    .Where(x => !string.IsNullOrEmpty(x))
                     .Select(x =>
                         new KeyValuePair<string, string>(x.Split('=')[0].ToLowerInvariant(),
                             x.Split('=')[1].ToLowerInvariant()))
                     .ToDictionary(x => x.Key, x => x.Value);
 
-                return (parts["accountname"], "." + parts["endpointsuffix"]);
+                return (parts["accountname"], "." + (parts.ContainsKey("endpointsuffix") ? parts["endpointsuffix"] : "core.windows.net"));
             })
+            .Distinct()
             .ToArray();
 
         DatabaseConnections = appSettings
@@ -146,7 +154,7 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
                 .SingleOrDefault(x => x.InstrumentationKey == AppInsightsKey);
             if (appInsights != null) CreateFlowTo(appInsights);
         }
-
+        
         foreach (var storageAccount in ConnectedStorageAccounts)
         {
             var storage = allResources.OfType<StorageAccount>()
@@ -157,15 +165,16 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
                 if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource);
 
                 var flowSource = _azureVNetIntegrationResource as AzureResource ?? this;
-                var privateEndpointConnection = storage.ExposedByPrivateEndpoints.SingleOrDefault(x =>
-                    x.CustomHostNames.Any(x =>
-                        x.StartsWith(storageAccount.storageName) && x.EndsWith(storageAccount.storageSuffix)));
 
-                if (privateEndpointConnection != null)
-                    //connection hostname uses a private endpoint hostname.... Take a plunge and link the private endpoint instead:
-                    flowSource.CreateFlowTo(privateEndpointConnection, "Uses");
-                else
+                var nics = allResources.OfType<Nic>().Where(nic => nic.HostNames.Any(hn =>
+                    hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)));
+
+                nics.ForEach(nic => flowSource.CreateFlowTo(nic, "Uses"));
+
+                if (!nics.Any())
+                {
                     flowSource.CreateFlowTo(storage, "Uses");
+                }
             }
         }
 
