@@ -9,6 +9,6 @@ public class UserAssignedManagedIdentity : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<IUseManagedIdentities>().Where(x => x.DoYouUseThisUserAssignedClientId(Id)).ForEach(mi => mi.CreateFlowToMe(this));
+        allResources.OfType<IUseManagedIdentities>().Where(x => x.DoYouUseThisUserAssignedClientId(Id)).ForEach(mi => mi.CreateFlowBackToMe(this));
     }
 }

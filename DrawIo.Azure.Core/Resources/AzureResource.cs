@@ -82,8 +82,17 @@ public class AzureResource
     /// <param name="to"></param>
     protected internal void CreateFlowTo(AzureResource to)
     {
+        CreateFlowTo(to, string.Empty);
+    }
+    /// <summary>
+    ///     Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
+    /// </summary>
+    /// <param name="to"></param>
+    /// <param name="details"></param>
+    protected internal void CreateFlowTo(AzureResource to, string details)
+    {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
-        var link = new ResourceLink(this, to);
+        var link = new ResourceLink(this, to, details);
         Links.Add(link);
     }
 

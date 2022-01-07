@@ -29,12 +29,18 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
         var azureResource = await client.GetAzResourceAsync<JObject>(basicResource.Id, _apiVersion, HttpMethod.Get);
 
         var additionalResources = AdditionalResources().ToDictionary(x => x.suffix,
-            x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", _apiVersion,
+            x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", x.version ?? _apiVersion,
                 x.method).Result);
         return await BuildResource(azureResource, additionalResources);
     }
 
-    protected virtual IEnumerable<(HttpMethod method, string suffix)> AdditionalResources()
+    /// <summary>
+    /// Provide any additional resources you need to enrich your object here.
+    /// An example would be the config of a web-app, or the diagnostics settings against an ASP.
+    /// A null version will use the same api version as the original resource.
+    /// </summary>
+    /// <returns></returns>
+    protected virtual IEnumerable<(HttpMethod method, string suffix, string? version)> AdditionalResources()
     {
         yield break;
     }

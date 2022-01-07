@@ -93,24 +93,41 @@ internal static class AzureResourceDrawer
         return node.UserData == null;
     }
 
-    public static Edge CreateSimpleEdge(Node source, Node target)
+    public static Edge CreateSimpleEdge(Node source, Node target, string? details)
     {
         var edge = new Edge(source, target)
         {
             UserData = new CustomUserData(
-                () => DrawSimpleEdge(((CustomUserData)source.UserData).Id, ((CustomUserData)target.UserData).Id),
-                "Unused", Guid.NewGuid().ToString())
+                () => DrawSimpleEdge(
+                    ((CustomUserData)source.UserData).Id, 
+                    ((CustomUserData)target.UserData).Id,
+                    details),
+                "Unused", 
+                Guid.NewGuid().ToString())
         };
         return edge;
     }
 
-    private static string DrawSimpleEdge(string fromId, string toId)
+    private static string DrawSimpleEdge(string fromId, string toId, string? details)
     {
-        return @$"<mxCell id=""{Guid.NewGuid().ToString().Replace("-", "")}"" 
+        var edgeId = Guid.NewGuid().ToString().Replace("-", "");
+        var edge = @$"<mxCell id=""{edgeId}"" 
         style=""edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;"" edge=""1"" parent=""1"" 
         source=""{fromId}"" target=""{toId}"">
             <mxGeometry relative=""1"" as=""geometry"" />
             </mxCell>
             ";
+        if (string.IsNullOrEmpty(details))
+        {
+            return edge;
+        }
+        
+        edge += @$"<mxCell id=""{edgeId}--1"" value=""{details}"" style=""edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];"" vertex=""1"" connectable=""0"" parent=""{edgeId}"">
+            <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
+            <mxPoint as=""offset"" />
+            </mxGeometry>
+            </mxCell>";
+
+        return edge;
     }
 }

@@ -38,7 +38,7 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
-        return new AppServicePlanAppNodeBuilder(this);
+        return new AzureResourceNodeBuilder(this);
     }
 
     public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
@@ -152,9 +152,9 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
 
                 if (privateEndpointConnection != null)
                     //connection hostname uses a private endpoint hostname.... Take a plunge and link the private endpoint instead:
-                    flowSource.CreateFlowTo(privateEndpointConnection);
+                    flowSource.CreateFlowTo(privateEndpointConnection, "Uses");
                 else
-                    flowSource.CreateFlowTo(storage);
+                    flowSource.CreateFlowTo(storage, "Uses");
             }
             
         }
@@ -164,7 +164,7 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
             //TODO check server name as-well
             var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
                 string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (database != null) CreateFlowTo(database);
+            if (database != null) CreateFlowTo(database, "SQL");
         }
 
         foreach (var keyVaultReference in KeyVaultReferences)
@@ -172,10 +172,10 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
             //TODO check server name as-well
             var keyVault = allResources.OfType<KeyVault>().SingleOrDefault(x =>
                 string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (keyVault != null) CreateFlowTo(keyVault);
+            if (keyVault != null) CreateFlowTo(keyVault, "Secrets");
         }
 
-        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName)).ForEach(x => CreateFlowTo((AzureResource)x));
+        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName)).ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
 
     }
 
@@ -189,8 +189,8 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
         return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity);
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
     }
 }

@@ -3,5 +3,5 @@
 public interface IUseManagedIdentities
 {
     bool DoYouUseThisUserAssignedClientId(string clientId);
-    void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity);
+    void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity);
 }

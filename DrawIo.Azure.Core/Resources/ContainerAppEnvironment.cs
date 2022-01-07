@@ -27,6 +27,6 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
 
     public void CreateFlowBackToMe(LogAnalyticsWorkspace workspace)
     {
-        CreateFlowTo(workspace);
+        CreateFlowTo(workspace, "logs");
     }
 }

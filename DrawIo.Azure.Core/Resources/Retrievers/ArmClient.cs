@@ -49,7 +49,7 @@ public class ArmClient
                 "2020-11-01"),
             "microsoft.containerregistry/registries" =>
                 new ResourceRetriever<ACR>(basicAzureResourceInfo, "2020-11-01"),
-            "microsoft.web/serverfarms" => new ResourceRetriever<ASP>(basicAzureResourceInfo, "2021-03-01"),
+            "microsoft.web/serverfarms" => new AppServicePlanResourceRetriever(basicAzureResourceInfo),
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
             "microsoft.apimanagement/service" => new ApimServiceResourceRetriever(basicAzureResourceInfo),
             "microsoft.compute/virtualmachines" => new ResourceRetriever<VM>(basicAzureResourceInfo,

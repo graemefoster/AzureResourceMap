@@ -31,9 +31,9 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
         return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity);
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
     }
 
     public bool CanIAccessYouOnThisHostName(string hostname)
@@ -44,6 +44,6 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaHttp>().Where(x => Backends.Any(x.CanIAccessYouOnThisHostName)).Distinct();
-        distinctAccessedHosts.ForEach(x => CreateFlowTo((AzureResource)x));
+        distinctAccessedHosts.ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
     }
 }

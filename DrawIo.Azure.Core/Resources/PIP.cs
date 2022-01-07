@@ -9,6 +9,6 @@ internal class PIP : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<Nic>().Where(x => x.ExposedBy(this)).ForEach(CreateFlowTo);
+        allResources.OfType<Nic>().Where(x => x.ExposedBy(this)).ForEach(nic => CreateFlowTo(nic, "From Public Internet"));
     }
 }

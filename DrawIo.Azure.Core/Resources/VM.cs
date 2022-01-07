@@ -39,7 +39,7 @@ internal class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
         return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
         CreateFlowTo(userAssignedManagedIdentity);
     }

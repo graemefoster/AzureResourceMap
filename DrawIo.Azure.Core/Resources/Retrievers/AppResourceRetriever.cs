@@ -12,8 +12,8 @@ public class AppResourceRetriever : ResourceRetriever<App>
     {
     }
 
-    protected override IEnumerable<(HttpMethod method, string suffix)> AdditionalResources()
+    protected override IEnumerable<(HttpMethod method, string suffix, string? version)> AdditionalResources()
     {
-        yield return (HttpMethod.Post, ConfigAppSettingsList);
+        yield return (HttpMethod.Post, ConfigAppSettingsList, null);
     }
 }

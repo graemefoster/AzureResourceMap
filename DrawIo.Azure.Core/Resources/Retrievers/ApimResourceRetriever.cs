@@ -12,8 +12,8 @@ public class ApimServiceResourceRetriever : ResourceRetriever<APIm>
     {
     }
 
-    protected override IEnumerable<(HttpMethod method, string suffix)> AdditionalResources()
+    protected override IEnumerable<(HttpMethod method, string suffix, string? version)> AdditionalResources()
     {
-        yield return (HttpMethod.Get, BackendList);
+        yield return (HttpMethod.Get, BackendList, null);
     }
 }

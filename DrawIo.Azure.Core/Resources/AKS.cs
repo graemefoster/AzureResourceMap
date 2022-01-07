@@ -14,8 +14,8 @@ internal class AKS : AzureResource, IUseManagedIdentities
             string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity);
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
     }
 }
