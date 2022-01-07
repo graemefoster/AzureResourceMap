@@ -74,11 +74,19 @@ public class VNet : AzureResource
     }
 
     /// <summary>
-    /// VMs can be associated to multiple nics, in different subnets. So instead of homing it in a subnet, I home it inside the vnet.
+    /// VMs can be associated to multiple nics, in different subnets. So you can choose to put it in either.
     /// </summary>
     /// <param name="vm"></param>
-    public void GiveHomeToVirtualMachine(VM vm)
+    /// <param name="optionalSubnetId"></param>
+    public void GiveHomeToVirtualMachine(VM vm, string? optionalSubnetId = null)
     {
-        OwnsResource(vm);
+        if (string.IsNullOrEmpty(optionalSubnetId))
+        {
+            OwnsResource(vm);
+        }
+        else
+        {
+            InjectResourceInto(vm, optionalSubnetId);
+        }
     }
 }
