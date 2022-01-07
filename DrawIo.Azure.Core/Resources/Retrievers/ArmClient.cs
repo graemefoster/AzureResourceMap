@@ -97,8 +97,12 @@ public class ArmClient
             "microsoft.eventhub/namespaces" => new ResourceRetriever<EventHub>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-11-01"),
             "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
-                fetchFullResource:true, apiVersion:"2021-05-01"),
+                fetchFullResource: true, apiVersion: "2021-05-01"),
             "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
+            "microsoft.logic/workflows" => new ResourceRetriever<LogicApp>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2019-05-01"),
+            "microsoft.web/connections" => new ResourceRetriever<LogicAppConnector>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2016-06-01"),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
     }
