@@ -7,12 +7,12 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class Nic : AzureResource
+internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
 {
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
     public string[] PublicIpAddresses { get; set; } = default!;
 
-    private IEnumerable<string> _networkAttachments { get; set; }
+    private string[] NetworkAttachments { get; set; } = default!;
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
@@ -23,24 +23,6 @@ internal class Nic : AzureResource
     {
         allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
         allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
-
-        var subnets = _networkAttachments
-            .Select(x =>
-            {
-                var segments = x.Split('/');
-                return new { vnet = segments.ElementAt(segments.Length - 3), subnet = segments.Last() };
-            })
-            .ToArray();
-
-        foreach (var subnet in subnets)
-        {
-            var vNet = allResources.OfType<VNet>().Single(x => x.Name == subnet.vnet);
-            vNet.InjectResourceInto(this, subnet.subnet);
-            foreach (var associatedWithNic in
-                     allResources.OfType<IAssociateWithNic>().Where(x =>
-                         x.Nics.Any(nic => nic.Equals(Id, StringComparison.InvariantCultureIgnoreCase))))
-                vNet.InjectResourceInto((AzureResource)associatedWithNic, subnet.subnet);
-        }
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
@@ -53,24 +35,22 @@ internal class Nic : AzureResource
             .Where(x => x != null)
             .ToArray()!;
 
-        _networkAttachments = jObject["properties"]!["ipConfigurations"]!
+        NetworkAttachments = jObject["properties"]!["ipConfigurations"]!
             .Select(x =>
                 x["properties"]!["subnet"] != null
                     ? x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant()
                     : null)
             .Where(x => x != null)
-            .Select(x => x!);
-
+            .Select(x => x!)
+            .ToArray();
+        
         return Task.CompletedTask;
-    }
-
-    public bool ExposedBy(PIP pip)
-    {
-        return PublicIpAddresses.Contains(pip.Id.ToLowerInvariant());
     }
 
     public void AssignNsg(NSG nsg)
     {
         OwnsResource(nsg);
     }
+
+    public string[] SubnetIdsIAmInjectedInto => NetworkAttachments;
 }

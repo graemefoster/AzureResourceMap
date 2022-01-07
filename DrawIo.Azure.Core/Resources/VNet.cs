@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
@@ -34,7 +36,7 @@ public class VNet : AzureResource
         PrivateDnsZones.Add(resource);
     }
 
-    public void InjectResourceInto(AzureResource resource, string subnet)
+    private void InjectResourceInto(AzureResource resource, string subnet)
     {
         Subnets.Single(x => x.Name == subnet).ContainedResources.Add(resource);
         resource.ContainedByAnotherResource = true;
@@ -44,6 +46,22 @@ public class VNet : AzureResource
     {
         Subnets.Single(x => x.Name == subnet).NSGs.Add(nsg);
         nsg.ContainedByAnotherResource = true;
+    }
+
+    public override void BuildRelationships(IEnumerable<AzureResource> allResources)
+    {
+        allResources
+            .OfType<ICanInjectIntoASubnet>()
+            .Select(x => (resource: (AzureResource)x, subnets: SubnetsInsideThisVNet(x.SubnetIdsIAmInjectedInto)))
+            .ForEach(r =>
+                r.subnets.ForEach(s => InjectResourceInto(r.resource, s)));
+    }
+
+    private IEnumerable<string> SubnetsInsideThisVNet(string[] subnetIdsIAmInjectedInto)
+    {
+        return subnetIdsIAmInjectedInto.Where(x =>
+            string.Compare(Id, string.Join('/', x.Split('/')[..^2]), StringComparison.InvariantCultureIgnoreCase) == 0)
+            .Select(x => x.Split('/')[^1]);
     }
 
     public class Subnet

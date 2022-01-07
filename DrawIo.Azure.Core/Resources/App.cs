@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccessedViaHttp, IUseManagedIdentities
+public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccessedViaHttp, IUseManagedIdentities
 {
     private VNetIntegration? _azureVNetIntegrationResource;
     public string? ServerFarmId { get; set; }
@@ -55,8 +55,13 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
 
-        if (appSettings.ContainsKey("APPINSIGHTS_INSTRUMENTATIONKEY"))
-            AppInsightsKey = (string)appSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
+        var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
+            x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
+            x.Contains("key", StringComparison.InvariantCultureIgnoreCase));
+        if (potentialAppInsightsKey != null)
+        {
+            AppInsightsKey = (string)appSettings[potentialAppInsightsKey];
+        }
 
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().ToArray();
 
@@ -115,6 +120,12 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
             )
             .Where(x => !string.IsNullOrEmpty(x))
             .ToArray();
+
+        if (appSettings.ContainsKey("AzureSearchName"))
+        {
+            HostNamesAccessedInAppSettings = HostNamesAccessedInAppSettings
+                .Concat(new[] { $"{(string)appSettings["AzureSearchName"]}.search.windows.net" }).ToArray();
+        }
     }
 
     public override IEnumerable<AzureResource> DiscoverNewNodes()
@@ -156,7 +167,6 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
                 else
                     flowSource.CreateFlowTo(storage, "Uses");
             }
-            
         }
 
         foreach (var databaseConnection in DatabaseConnections)
@@ -175,18 +185,21 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints,  ICanBeAccess
             if (keyVault != null) CreateFlowTo(keyVault, "Secrets");
         }
 
-        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName)).ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
-
+        allResources.OfType<ICanBeAccessedViaHttp>()
+            .Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName))
+            .ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
     }
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
-        return EnabledHostNames.Any(hn => string.Compare(hn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0);
+        return EnabledHostNames.Any(
+            hn => string.Compare(hn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0);
     }
 
     public bool DoYouUseThisUserAssignedClientId(string id)
     {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
+        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
+            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
     public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)

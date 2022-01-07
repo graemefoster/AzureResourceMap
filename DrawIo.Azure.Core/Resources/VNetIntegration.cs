@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class VNetIntegration : AzureResource
+internal class VNetIntegration : AzureResource, ICanInjectIntoASubnet
 {
     private readonly string _vnetIntegratedInto;
 
@@ -13,13 +13,5 @@ internal class VNetIntegration : AzureResource
         _vnetIntegratedInto = vnetIntegratedInto;
     }
 
-    public override void BuildRelationships(IEnumerable<AzureResource> allResources)
-    {
-        var segments = _vnetIntegratedInto.Split('/');
-        var vnetInfo = new { vnet = segments.ElementAt(segments.Length - 3), subnet = segments.Last() };
-
-        var vNet = allResources.OfType<VNet>().Single(x => x.Name == vnetInfo.vnet);
-        vNet.InjectResourceInto(this, vnetInfo.subnet);
-        ContainedByAnotherResource = true;
-    }
+    public string[] SubnetIdsIAmInjectedInto => new[] { _vnetIntegratedInto };
 }

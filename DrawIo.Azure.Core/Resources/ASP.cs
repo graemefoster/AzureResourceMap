@@ -21,7 +21,12 @@ public class ASP : AzureResource
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        _diagnosticsWorkspaceId = additionalResources[AppServicePlanResourceRetriever.DiagnosticSettings]["value"]?[0]?["properties"]?.Value<string>("workspaceId");
+        var workspaces = additionalResources[AppServicePlanResourceRetriever.DiagnosticSettings]["value"];
+        if (workspaces.Any())
+        {
+            _diagnosticsWorkspaceId = workspaces[0]?["properties"]?.Value<string>("workspaceId");
+        }
+
         return base.Enrich(full, additionalResources);
     }
 

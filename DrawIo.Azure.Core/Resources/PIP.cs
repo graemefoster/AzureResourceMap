@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -9,6 +10,9 @@ internal class PIP : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<Nic>().Where(x => x.ExposedBy(this)).ForEach(nic => CreateFlowTo(nic, "From Public Internet"));
+        allResources.OfType<ICanExposePublicIPAddresses>()
+            .Where(x => x.PublicIpAddresses.Any(x =>
+                string.Compare(Id, x, StringComparison.InvariantCultureIgnoreCase) == 0))
+            .ForEach(x => CreateFlowTo((AzureResource)x, "From Public Internet"));
     }
 }

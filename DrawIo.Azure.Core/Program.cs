@@ -22,7 +22,7 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var resourceGroup = new[]
-            { "grfsq2-platform-test-rg", "grfsq2-test-rg" }; // //"DiagramBuildUp"; // "function-outbound-calls";
+            { "arian-cog" }; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
 
@@ -30,7 +30,7 @@ public static class Program
             new TokenRequestContext(new[] { "https://management.azure.com/" }));
 
         var httpClient = new HttpClient();
-        var subscriptionId = "8d2059f3-b805-41fa-ab84-e13d4dfec042";
+        var subscriptionId = "e4fc0399-4ecf-4e03-b54e-27ab303b2947";
         httpClient.BaseAddress = new Uri("https://management.azure.com/");
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer"
@@ -107,7 +107,7 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        var path = Path.Combine(directoryName, $"{outputName}.drawio");
+        var path = Path.Combine(directoryName, $"diagram.drawio");
         await File.WriteAllTextAsync(path, msGraph);
         Console.WriteLine(msGraph);
         Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
