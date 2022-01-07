@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
+internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/security/Key_Vaults.svg";
     public string[] PrivateEndpoints { get; set; } = default!;
@@ -24,5 +24,10 @@ internal class KeyVault : AzureResource, ICanBeExposedByPrivateEndpoints
                 .ToArray() ?? Array.Empty<string>();
 
         return Task.CompletedTask;
+    }
+
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        throw new NotImplementedException();
     }
 }

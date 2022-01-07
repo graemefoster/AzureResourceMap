@@ -162,7 +162,6 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
 
             if (storage != null)
             {
-                if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource);
 
                 var flowSource = _azureVNetIntegrationResource as AzureResource ?? this;
 
@@ -175,6 +174,11 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
                 {
                     flowSource.CreateFlowTo(storage, "Uses");
                 }
+                else
+                {
+                    //Had some NICs so let's use the vnet integration resource.
+                    if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource);
+                }
             }
         }
 
@@ -183,11 +187,14 @@ public class App : AzureResource, ICanBeExposedByPrivateEndpoints, ICanBeAccesse
             //TODO check server name as-well
             var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
                 string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
+            
             if (database != null) CreateFlowTo(database, "SQL");
         }
 
         foreach (var keyVaultReference in KeyVaultReferences)
         {
+            //TODO KeyVault via private endpoint. Needs a generic way to look for a host that is accessed via private endpoints.
+            
             //TODO check server name as-well
             var keyVault = allResources.OfType<KeyVault>().SingleOrDefault(x =>
                 string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
