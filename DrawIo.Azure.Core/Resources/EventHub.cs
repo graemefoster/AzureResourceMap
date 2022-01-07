@@ -19,7 +19,7 @@ public class EventHub : AzureResource, ICanBeExposedByPrivateEndpoints
         return base.Enrich(full, additionalResources);
     }
 
-    public string[] PrivateEndpointConnections { get; private set; }
+    public string[] PrivateEndpointConnections { get; private set; } = default!;
 
     public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
     {
