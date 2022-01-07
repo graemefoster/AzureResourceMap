@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,14 +9,16 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class AzureResource
+public class AzureResource 
 {
+    private readonly string _id = default!;
+
     /// <summary>
-    /// Settings this to true stops an icon being drawn for 'this' resource. Instead we just draw a box with the resources that it owns.
+    ///     Settings this to true stops an icon being drawn for 'this' resource. Instead we just draw a box with the resources
+    ///     that it owns.
     /// </summary>
     public virtual bool IsPureContainer => false;
 
-    private readonly string _id = default!;
     public List<ResourceLink> Links { get; } = new();
     public List<AzureResource> ContainedResources { get; } = new();
 
@@ -35,7 +38,7 @@ public class AzureResource
     public string InternalId { get; private init; } = default!;
 
     public string Name { get; set; } = default!;
-    public virtual string Image { get; protected set; }
+    public virtual string Image { get; }
 
     public string Location { get; set; }
 
@@ -48,6 +51,14 @@ public class AzureResource
 
     public string Type { get; set; } = default!;
 
+    public string[]? PrivateEndpointConnections { get; private set; }
+
+    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
+    {
+        return PrivateEndpointConnections?.Any(x =>
+            x.Equals(privateEndpoint.Id, StringComparison.InvariantCultureIgnoreCase)) ?? false;
+    }
+
     public virtual AzureResourceNodeBuilder CreateNodeBuilder()
     {
         return new AzureResourceNodeBuilder(this);
@@ -55,6 +66,12 @@ public class AzureResource
 
     public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
+        //Common ways the platform is expressed
+        PrivateEndpointConnections =
+            full["properties"]!["privateEndpointConnections"]
+                ?.Select(x => x["properties"]!["privateEndpoint"]!.Value<string>("id")!).ToArray() ??
+            Array.Empty<string>();
+
         return Task.CompletedTask;
     }
 
@@ -84,6 +101,7 @@ public class AzureResource
     {
         CreateFlowTo(to, string.Empty);
     }
+
     /// <summary>
     ///     Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
     /// </summary>

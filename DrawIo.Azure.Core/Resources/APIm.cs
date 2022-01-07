@@ -12,23 +12,19 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
     public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/app_services/API_Management_Services.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
-    {
-        HostNames = full["properties"]!["hostnameConfigurations"]!.Select(x => x.Value<string>("hostName")!).ToArray();
-        Backends = additionalResources[ApimServiceResourceRetriever.BackendList]["value"]?.Select(x => x["properties"]!.Value<string>("url")!)
-            .Select(x => new Uri(x).Host)
-            .ToArray() ?? Array.Empty<string>();
-        
-        return base.Enrich(full, additionalResources);
-    }
-
     public string[] Backends { get; set; }
 
     public string[] HostNames { get; set; } = default!;
 
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        return HostNames.Any(hn => string.Compare(hostname, hn, StringComparison.InvariantCultureIgnoreCase) == 0);
+    }
+
     public bool DoYouUseThisUserAssignedClientId(string id)
     {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
+        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
+            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
     public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
@@ -36,14 +32,21 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
         CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
     }
 
-    public bool CanIAccessYouOnThisHostName(string hostname)
+    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        return HostNames.Any(hn => string.Compare(hostname, hn, StringComparison.InvariantCultureIgnoreCase) == 0);
+        HostNames = full["properties"]!["hostnameConfigurations"]!.Select(x => x.Value<string>("hostName")!).ToArray();
+        Backends = additionalResources[ApimServiceResourceRetriever.BackendList]["value"]
+            ?.Select(x => x["properties"]!.Value<string>("url")!)
+            .Select(x => new Uri(x).Host)
+            .ToArray() ?? Array.Empty<string>();
+
+        return base.Enrich(full, additionalResources);
     }
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaHttp>().Where(x => Backends.Any(x.CanIAccessYouOnThisHostName)).Distinct();
+        var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaHttp>()
+            .Where(x => Backends.Any(x.CanIAccessYouOnThisHostName)).Distinct();
         distinctAccessedHosts.ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
     }
 }

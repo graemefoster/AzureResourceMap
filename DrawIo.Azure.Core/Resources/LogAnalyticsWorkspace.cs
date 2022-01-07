@@ -18,6 +18,7 @@ internal class LogAnalyticsWorkspace : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<ICanWriteToLogAnalyticsWorkspaces>().Where(x => x.DoYouWriteTo(CustomerId)).ForEach(x => x.CreateFlowBackToMe(this));
+        allResources.OfType<ICanWriteToLogAnalyticsWorkspaces>().Where(x => x.DoYouWriteTo(CustomerId))
+            .ForEach(x => x.CreateFlowBackToMe(this));
     }
 }

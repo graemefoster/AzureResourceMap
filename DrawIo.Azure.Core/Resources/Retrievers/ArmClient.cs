@@ -96,6 +96,9 @@ public class ArmClient
                 fetchFullResource: true, apiVersion: "2021-05-01"),
             "microsoft.eventhub/namespaces" => new ResourceRetriever<EventHub>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-11-01"),
+            "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
+                fetchFullResource:true, apiVersion:"2021-05-01"),
+            "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
     }

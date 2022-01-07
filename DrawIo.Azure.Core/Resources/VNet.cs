@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
@@ -38,7 +37,8 @@ public class VNet : AzureResource
 
     private void InjectResourceInto(AzureResource resource, string subnet)
     {
-        Subnets.Single(x => string.Compare(x.Name, subnet, StringComparison.InvariantCultureIgnoreCase) == 0).ContainedResources.Add(resource);
+        Subnets.Single(x => string.Compare(x.Name, subnet, StringComparison.InvariantCultureIgnoreCase) == 0)
+            .ContainedResources.Add(resource);
         resource.ContainedByAnotherResource = true;
     }
 
@@ -60,8 +60,22 @@ public class VNet : AzureResource
     private IEnumerable<string> SubnetsInsideThisVNet(string[] subnetIdsIAmInjectedInto)
     {
         return subnetIdsIAmInjectedInto.Where(x =>
-            string.Compare(Id, string.Join('/', x.Split('/')[..^2]), StringComparison.InvariantCultureIgnoreCase) == 0)
+                string.Compare(Id, string.Join('/', x.Split('/')[..^2]), StringComparison.InvariantCultureIgnoreCase) ==
+                0)
             .Select(x => x.Split('/')[^1]);
+    }
+
+    /// <summary>
+    ///     VMs can be associated to multiple nics, in different subnets. So you can choose to put it in either.
+    /// </summary>
+    /// <param name="vm"></param>
+    /// <param name="optionalSubnetId"></param>
+    public void GiveHomeToVirtualMachine(VM vm, string? optionalSubnetId = null)
+    {
+        if (string.IsNullOrEmpty(optionalSubnetId))
+            OwnsResource(vm);
+        else
+            InjectResourceInto(vm, optionalSubnetId);
     }
 
     public class Subnet
@@ -71,22 +85,5 @@ public class VNet : AzureResource
         internal List<AzureResource> ContainedResources { get; } = new();
 
         public List<NSG> NSGs { get; } = new();
-    }
-
-    /// <summary>
-    /// VMs can be associated to multiple nics, in different subnets. So you can choose to put it in either.
-    /// </summary>
-    /// <param name="vm"></param>
-    /// <param name="optionalSubnetId"></param>
-    public void GiveHomeToVirtualMachine(VM vm, string? optionalSubnetId = null)
-    {
-        if (string.IsNullOrEmpty(optionalSubnetId))
-        {
-            OwnsResource(vm);
-        }
-        else
-        {
-            InjectResourceInto(vm, optionalSubnetId);
-        }
     }
 }

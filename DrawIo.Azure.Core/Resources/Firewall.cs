@@ -4,16 +4,16 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class Bastion : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
+public class Firewall : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
 {
     private IpConfigurations _ipConfigurations = default!;
-    public override string Image => "img/lib/azure2/networking/Connections.svg";
-    public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
-    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
+    public override string Image => "img/lib/azure2/networking/Firewalls.svg";
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
         _ipConfigurations = new IpConfigurations(full);
         return base.Enrich(full, additionalResources);
     }
+    public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
+    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
 }

@@ -22,7 +22,7 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var resourceGroup = new[]
-            { "arian-sql", "private-link-services" }; // //"DiagramBuildUp"; // "function-outbound-calls";
+            { "az-fw" }; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
 
@@ -107,7 +107,7 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        var path = Path.Combine(directoryName, $"diagram.drawio");
+        var path = Path.Combine(directoryName, "diagram.drawio");
         await File.WriteAllTextAsync(path, msGraph);
         Console.WriteLine(msGraph);
         Console.WriteLine($"Written output to {Path.GetFullPath(path)}");

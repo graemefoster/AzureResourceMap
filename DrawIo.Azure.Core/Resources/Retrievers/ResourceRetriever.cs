@@ -35,9 +35,9 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     }
 
     /// <summary>
-    /// Provide any additional resources you need to enrich your object here.
-    /// An example would be the config of a web-app, or the diagnostics settings against an ASP.
-    /// A null version will use the same api version as the original resource.
+    ///     Provide any additional resources you need to enrich your object here.
+    ///     An example would be the config of a web-app, or the diagnostics settings against an ASP.
+    ///     A null version will use the same api version as the original resource.
     /// </summary>
     /// <returns></returns>
     protected virtual IEnumerable<(HttpMethod method, string suffix, string? version)> AdditionalResources()

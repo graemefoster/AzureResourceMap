@@ -12,7 +12,7 @@ public class ASP : AzureResource
 {
     private string? _diagnosticsWorkspaceId;
     public override string Image => "img/lib/azure2/app_services/App_Service_Plans.svg";
-    
+
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
@@ -22,10 +22,7 @@ public class ASP : AzureResource
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
         var workspaces = additionalResources[AppServicePlanResourceRetriever.DiagnosticSettings]["value"];
-        if (workspaces.Any())
-        {
-            _diagnosticsWorkspaceId = workspaces[0]?["properties"]?.Value<string>("workspaceId");
-        }
+        if (workspaces.Any()) _diagnosticsWorkspaceId = workspaces[0]?["properties"]?.Value<string>("workspaceId");
 
         return base.Enrich(full, additionalResources);
     }
@@ -40,10 +37,7 @@ public class ASP : AzureResource
         {
             var workspace = allResources.OfType<LogAnalyticsWorkspace>().SingleOrDefault(x =>
                 string.Compare(_diagnosticsWorkspaceId, x.Id, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (workspace != null)
-            {
-                CreateFlowTo(workspace, "diagnostics");
-            }
+            if (workspace != null) CreateFlowTo(workspace, "diagnostics");
         }
     }
 }

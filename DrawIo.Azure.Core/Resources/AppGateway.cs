@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -8,23 +6,21 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AppGateway : AzureResource, ICanBeAccessedViaHttp, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
 {
+    private IpConfigurations _ipConfigurations = default!;
     public override string Image => "img/lib/azure2/networking/Application_Gateways.svg";
-
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
-    {
-        PublicIpAddresses = full["properties"]!["frontendIPConfigurations"]?.Select(x => x["properties"]!["publicIPAddress"]?.Value<string>("id")).Where(x => x != null).Select(x => x!).ToArray() ?? Array.Empty<string>();
-        Subnets = full["properties"]!["gatewayIPConfigurations"]?.Select(x => x["properties"]!["subnet"]?.Value<string>("id")).Where(x => x != null).Select(x => x!).ToArray() ?? Array.Empty<string>();
-        return base.Enrich(full, additionalResources);
-    }
-
-    public string[] PublicIpAddresses { get; set; } = default!;
-    public string[] Subnets { get; set; } = default!;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
-        //TODO - work out how to get the hostnames.
-        return false;
+        return _ipConfigurations.CanIAccessYouOnThisHostName(hostname);
     }
 
-    public string[] SubnetIdsIAmInjectedInto => Subnets;
+    public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
+
+    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
+
+    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    {
+        _ipConfigurations = new IpConfigurations(full);
+        return base.Enrich(full, additionalResources);
+    }
 }

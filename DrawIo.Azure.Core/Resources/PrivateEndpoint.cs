@@ -12,10 +12,12 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
 
     public string[] Nics { get; private set; }
 
+    public string[] SubnetIdsIAmInjectedInto { get; private set; }
+
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         allResources
-            .OfType<ICanBeExposedByPrivateEndpoints>().Where(x => x.AccessedViaPrivateEndpoint(this))
+            .Where(x => x.AccessedViaPrivateEndpoint(this))
             .ForEach(x => CreateFlowTo((AzureResource)x));
     }
 
@@ -23,10 +25,8 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
     {
         Nics = jObject["properties"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!).ToArray();
         CustomHostNames = jObject["properties"]!["customDnsConfigs"]!.Select(x => x.Value<string>("fqdn")!).ToArray();
-        SubnetIdsIAmInjectedInto = new [] { jObject["properties"]!["subnet"]!.Value<string>("id")! };
+        SubnetIdsIAmInjectedInto = new[] { jObject["properties"]!["subnet"]!.Value<string>("id")! };
 
         return Task.CompletedTask;
     }
-
-    public string[] SubnetIdsIAmInjectedInto { get; private set; }
 }

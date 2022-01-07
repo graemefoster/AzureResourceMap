@@ -99,10 +99,10 @@ internal static class AzureResourceDrawer
         {
             UserData = new CustomUserData(
                 () => DrawSimpleEdge(
-                    ((CustomUserData)source.UserData).Id, 
+                    ((CustomUserData)source.UserData).Id,
                     ((CustomUserData)target.UserData).Id,
                     details),
-                "Unused", 
+                "Unused",
                 Guid.NewGuid().ToString())
         };
         return edge;
@@ -117,12 +117,10 @@ internal static class AzureResourceDrawer
             <mxGeometry relative=""1"" as=""geometry"" />
             </mxCell>
             ";
-        if (string.IsNullOrEmpty(details))
-        {
-            return edge;
-        }
-        
-        edge += @$"<mxCell id=""{edgeId}--1"" value=""{details}"" style=""edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];"" vertex=""1"" connectable=""0"" parent=""{edgeId}"">
+        if (string.IsNullOrEmpty(details)) return edge;
+
+        edge +=
+            @$"<mxCell id=""{edgeId}--1"" value=""{details}"" style=""edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];"" vertex=""1"" connectable=""0"" parent=""{edgeId}"">
             <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
             <mxPoint as=""offset"" />
             </mxGeometry>

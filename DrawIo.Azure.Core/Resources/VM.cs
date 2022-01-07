@@ -13,6 +13,17 @@ public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
     public string SystemDiskId { get; private set; } = default!;
     public string[] Nics { get; private set; } = default!;
 
+    public bool DoYouUseThisUserAssignedClientId(string id)
+    {
+        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
+            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
+    }
+
+    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    {
+        CreateFlowTo(userAssignedManagedIdentity);
+    }
+
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
         SystemDiskId = jObject["properties"]!["storageProfile"]!["osDisk"]!["managedDisk"]!.Value<string>("id")!;
@@ -36,7 +47,8 @@ public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
         if (injectedSubnets.Length == 1)
         {
             var vnetId = string.Join('/', injectedSubnets[0].Split('/')[..^2]);
-            var vnet = allResources.OfType<VNet>().Single(x => x.Id.Equals(vnetId, StringComparison.InvariantCultureIgnoreCase));
+            var vnet = allResources.OfType<VNet>()
+                .Single(x => x.Id.Equals(vnetId, StringComparison.InvariantCultureIgnoreCase));
             vnet.GiveHomeToVirtualMachine(this, injectedSubnets[0].Split('/')[^1]);
         }
         else
@@ -52,15 +64,5 @@ public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
     public void AddExtension(VMExtension vmExtension)
     {
         OwnsResource(vmExtension);
-    }
-
-    public bool DoYouUseThisUserAssignedClientId(string id)
-    {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k => string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
-    }
-
-    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
-    {
-        CreateFlowTo(userAssignedManagedIdentity);
     }
 }

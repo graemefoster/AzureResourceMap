@@ -10,12 +10,19 @@ namespace DrawIo.Azure.Core.Resources;
 internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
-    public string[] PublicIpAddresses { get; set; } = default!;
-    public string[] PrivateIpAddresses { get; set; } = default!;
 
-    public string[] HostNames { get; set; } = default!;
+    private IpConfigurations _ipConfigurations = default!;
 
-    private string[] NetworkAttachments { get; set; } = default!;
+    public string[] HostNames => _ipConfigurations.HostNames;
+
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        return _ipConfigurations.CanIAccessYouOnThisHostName(hostname);
+    }
+
+    public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
+
+    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
@@ -30,43 +37,12 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
-        PublicIpAddresses = jObject["properties"]!["ipConfigurations"]!
-            .Select(x =>
-                x["properties"]!["publicIPAddress"] != null
-                    ? x["properties"]!["publicIPAddress"]!.Value<string>("id")!.ToLowerInvariant()
-                    : null)
-            .Where(x => x != null)
-            .ToArray()!;
-
-        PrivateIpAddresses = jObject["properties"]!["ipConfigurations"]!
-            .Select(x => x["properties"]!.Value<string>("privateIPAddress"))
-            .Where(x => x != null)
-            .ToArray()!;
-
-        NetworkAttachments = jObject["properties"]!["ipConfigurations"]!
-            .Select(x => x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant())
-            .Select(x => x!)
-            .ToArray();
-
-        HostNames = jObject["properties"]!["ipConfigurations"]!
-            .SelectMany(x =>
-                x["properties"]!["privateLinkConnectionProperties"]?["fqdns"]?.Values<string>() ??
-                Array.Empty<string>())
-            .Select(x => x!.ToLowerInvariant())
-            .ToArray();
-
+        _ipConfigurations = new IpConfigurations(jObject);
         return Task.CompletedTask;
     }
 
     public void AssignNsg(NSG nsg)
     {
         OwnsResource(nsg);
-    }
-
-    public string[] SubnetIdsIAmInjectedInto => NetworkAttachments;
-
-    public bool CanIAccessYouOnThisHostName(string hostname)
-    {
-        return HostNames.Contains(hostname);
     }
 }

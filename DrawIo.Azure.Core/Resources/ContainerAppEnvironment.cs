@@ -8,17 +8,6 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
 {
     public override string Image => "img/lib/mscae/Kubernetes_Services.svg";
     public string? LogAnalyticsCustomerId { get; private set; }
-    
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
-    {
-        LogAnalyticsCustomerId = full["properties"]!["appLogsConfiguration"]?["logAnalyticsConfiguration"]?.Value<string>("customerId");
-        return base.Enrich(full, additionalResources);
-    }
-
-    public void DiscoveredContainerApp(ContainerApp containerApp)
-    {
-        OwnsResource(containerApp);
-    }
 
     public bool DoYouWriteTo(string customerId)
     {
@@ -28,5 +17,17 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
     public void CreateFlowBackToMe(LogAnalyticsWorkspace workspace)
     {
         CreateFlowTo(workspace, "logs");
+    }
+
+    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    {
+        LogAnalyticsCustomerId = full["properties"]!["appLogsConfiguration"]?["logAnalyticsConfiguration"]
+            ?.Value<string>("customerId");
+        return base.Enrich(full, additionalResources);
+    }
+
+    public void DiscoveredContainerApp(ContainerApp containerApp)
+    {
+        OwnsResource(containerApp);
     }
 }

@@ -2,7 +2,7 @@
 
 public class ResourceLink
 {
-    public ResourceLink(AzureResource @from, AzureResource to, string? details)
+    public ResourceLink(AzureResource from, AzureResource to, string? details)
     {
         From = from;
         To = to;

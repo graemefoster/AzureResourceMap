@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace DrawIo.Azure.Core.Resources;
+﻿namespace DrawIo.Azure.Core.Resources;
 
 internal class VNetIntegration : AzureResource, ICanInjectIntoASubnet
 {

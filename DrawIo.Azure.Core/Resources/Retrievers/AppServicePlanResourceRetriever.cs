@@ -8,7 +8,8 @@ public class AppServicePlanResourceRetriever : ResourceRetriever<ASP>
 {
     public const string DiagnosticSettings = "providers/microsoft.insights/diagnosticSettings";
 
-    public AppServicePlanResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-03-01", true)
+    public AppServicePlanResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
+        "2021-03-01", true)
     {
     }
 

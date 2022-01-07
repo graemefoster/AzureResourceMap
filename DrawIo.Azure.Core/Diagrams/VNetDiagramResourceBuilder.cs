@@ -39,7 +39,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                 }
             }
         }
-        
+
         foreach (var contained in _resource.ContainedResources)
         {
             var nodeBuilder = resourceNodeBuilders[contained];
