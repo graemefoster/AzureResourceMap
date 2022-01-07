@@ -31,7 +31,7 @@ public class ArmClient
     private IRetrieveResource GetResourceRetriever(JObject basicAzureResourceInfo)
     {
         var type = basicAzureResourceInfo.Value<string>("type")!;
-        Console.WriteLine(type);
+        Console.WriteLine(type.ToLowerInvariant() + ": " + basicAzureResourceInfo.Value<string>("name")!);
         return type.ToLowerInvariant() switch
         {
             "microsoft.network/virtualnetworks" => new ResourceRetriever<VNet>(basicAzureResourceInfo,
@@ -64,9 +64,7 @@ public class ArmClient
             "microsoft.network/networksecuritygroups" => new ResourceRetriever<NSG>(basicAzureResourceInfo,
                 fetchFullResource: true),
             "microsoft.network/publicipaddresses" => new ResourceRetriever<PIP>(basicAzureResourceInfo),
-            "microsoft.compute/virtualmachines/extensions" =>
-                new ResourceRetriever<VMExtension>(basicAzureResourceInfo, fetchFullResource: true,
-                    apiVersion: "2021-11-01"),
+            "microsoft.compute/virtualmachines/extensions" => new NoOpResourceRetriever(),
             "microsoft.managedidentity/userassignedidentities" => new ResourceRetriever<UserAssignedManagedIdentity>(
                 basicAzureResourceInfo),
             "microsoft.keyvault/vaults" => new ResourceRetriever<KeyVault>(basicAzureResourceInfo,
@@ -103,6 +101,9 @@ public class ArmClient
                 fetchFullResource: true, apiVersion: "2019-05-01"),
             "microsoft.web/connections" => new ResourceRetriever<LogicAppConnector>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2016-06-01"),
+            "microsoft.devices/iothubs" => new ResourceRetriever<IotHub>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-07-02"),
+            "microsoft.security/iotsecuritysolutions" => new NoOpResourceRetriever(),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
     }

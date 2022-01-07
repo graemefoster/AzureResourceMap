@@ -66,17 +66,21 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         ServerFarmId = full["properties"]!["serverFarmId"]?.Value<string>();
 
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
+        
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
+        var connectionStrings = additionalResources[AppResourceRetriever.ConnectionStringSettingsList]
+            ["properties"]!.ToObject<Dictionary<string, JObject>>()?.Values
+            .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!);
 
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
             x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
             x.Contains("key", StringComparison.InvariantCultureIgnoreCase));
         if (potentialAppInsightsKey != null) AppInsightsKey = (string)appSettings[potentialAppInsightsKey];
 
-        EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().ToArray();
+        EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
 
-        ConnectedStorageAccounts = appSettings
-            .Values
+        var potentialConnectionStrings = appSettings.Values.Union(connectionStrings);
+        ConnectedStorageAccounts = potentialConnectionStrings
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&
                                  appSetting.Contains("AccountName"))
@@ -95,8 +99,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
             .Distinct()
             .ToArray();
 
-        DatabaseConnections = appSettings
-            .Values
+        DatabaseConnections = potentialConnectionStrings
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("Data Source=") &&
                                  appSetting.Contains("Initial Catalog="))
@@ -109,8 +112,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
             .ToArray();
 
         var kvRegex = new Regex(@"^\@Microsoft\.KeyVault\(VaultName\=(.*?);");
-        KeyVaultReferences = appSettings
-            .Values
+        KeyVaultReferences = potentialConnectionStrings
             .OfType<string>()
             .Select(x => kvRegex.Match(x))
             .Where(x => x.Success)
