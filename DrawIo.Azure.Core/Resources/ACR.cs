@@ -16,6 +16,6 @@ internal class ACR : AzureResource, IUseManagedIdentities
 
     public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
 }

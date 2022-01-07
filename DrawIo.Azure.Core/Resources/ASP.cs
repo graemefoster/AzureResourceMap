@@ -37,7 +37,7 @@ public class ASP : AzureResource
         {
             var workspace = allResources.OfType<LogAnalyticsWorkspace>().SingleOrDefault(x =>
                 string.Compare(_diagnosticsWorkspaceId, x.Id, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (workspace != null) CreateFlowTo(workspace, "diagnostics");
+            if (workspace != null) CreateFlowTo(workspace, "diagnostics", FlowEmphasis.LessImportant);
         }
     }
 }

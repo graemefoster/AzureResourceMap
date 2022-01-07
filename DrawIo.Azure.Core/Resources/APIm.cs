@@ -29,7 +29,7 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
 
     public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)

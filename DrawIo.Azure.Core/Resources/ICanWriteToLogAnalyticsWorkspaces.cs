@@ -1,4 +1,6 @@
-﻿namespace DrawIo.Azure.Core.Resources;
+﻿using DrawIo.Azure.Core.Diagrams;
+
+namespace DrawIo.Azure.Core.Resources;
 
 internal interface ICanWriteToLogAnalyticsWorkspaces
 {

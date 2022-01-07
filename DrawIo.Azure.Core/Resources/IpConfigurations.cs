@@ -8,31 +8,31 @@ public class IpConfigurations
 {
     public IpConfigurations(JObject jObject)
     {
-        PublicIpAddresses = jObject["properties"]!["ipConfigurations"]!
+        PublicIpAddresses = jObject["properties"]!["ipConfigurations"]?
             .Select(x =>
                 x["properties"]!["publicIPAddress"] != null
                     ? x["properties"]!["publicIPAddress"]!.Value<string>("id")!.ToLowerInvariant()
                     : null)
             .Where(x => x != null)
             .Select(x => x!.ToLowerInvariant())
-            .ToArray()!;
+            .ToArray() ?? Array.Empty<string>();
 
-        PrivateIpAddresses = jObject["properties"]!["ipConfigurations"]!
+        PrivateIpAddresses = jObject["properties"]!["ipConfigurations"]?
             .Select(x => x["properties"]!.Value<string>("privateIPAddress"))
             .Where(x => x != null)
             .Select(x => x!)
-            .ToArray();
+            .ToArray() ?? Array.Empty<string>();
 
-        SubnetAttachments = jObject["properties"]!["ipConfigurations"]!
+        SubnetAttachments = jObject["properties"]!["ipConfigurations"]?
             .Select(x => x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant())
-            .ToArray();
+            .ToArray() ?? Array.Empty<string>();
 
-        HostNames = jObject["properties"]!["ipConfigurations"]!
+        HostNames = jObject["properties"]!["ipConfigurations"]?
             .SelectMany(x =>
                 x["properties"]!["privateLinkConnectionProperties"]?["fqdns"]?.Values<string>() ??
                 Array.Empty<string>())
             .Select(x => x!.ToLowerInvariant())
-            .ToArray();
+            .ToArray() ?? Array.Empty<string>();
     }
 
     public string[] PrivateIpAddresses { get; set; }

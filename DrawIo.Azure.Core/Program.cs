@@ -21,8 +21,7 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var resourceGroup = new[]
-            { "iot" }; // //"DiagramBuildUp"; // "function-outbound-calls";
+        var resourceGroup = new[]  { "grfsq2-platform-test-rg", "grfsq2-test-rg" };
 
         var directoryName = @".\AzureResourceManager\";
 
@@ -30,11 +29,9 @@ public static class Program
             new TokenRequestContext(new[] { "https://management.azure.com/" }));
 
         var httpClient = new HttpClient();
-        var subscriptionId = "e4fc0399-4ecf-4e03-b54e-27ab303b2947";
+        var subscriptionId = "8d2059f3-b805-41fa-ab84-e13d4dfec042";
         httpClient.BaseAddress = new Uri("https://management.azure.com/");
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Bearer"
-            , token.Token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
         var newTest = new ArmClient(httpClient);
         var resources = (await newTest.Retrieve(subscriptionId, resourceGroup)).ToArray();

@@ -31,8 +31,8 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
-        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(CreateFlowTo);
+        allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm));
+        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm));
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)

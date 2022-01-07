@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
@@ -93,26 +95,39 @@ internal static class AzureResourceDrawer
         return node.UserData == null;
     }
 
-    public static Edge CreateSimpleEdge(Node source, Node target, string? details)
+    public static Edge CreateSimpleEdge(Node source, Node target, string? details, FlowEmphasis flowEmphasis)
     {
+        var pattern = flowEmphasis switch
+        {
+            FlowEmphasis.LessImportant => Pattern.Dashed,
+            _ => Pattern.Solid
+        };
+        
         var edge = new Edge(source, target)
         {
             UserData = new CustomUserData(
                 () => DrawSimpleEdge(
                     ((CustomUserData)source.UserData).Id,
                     ((CustomUserData)target.UserData).Id,
-                    details),
+                    details,
+                    pattern),
                 "Unused",
                 Guid.NewGuid().ToString())
         };
         return edge;
     }
 
-    private static string DrawSimpleEdge(string fromId, string toId, string? details)
+    private static string DrawSimpleEdge(string fromId, string toId, string? details, Pattern pattern)
     {
         var edgeId = Guid.NewGuid().ToString().Replace("-", "");
+        var patternStyle = pattern switch
+        {
+            Pattern.Dashed => ";dashed=1;dashPattern=1 1;",
+            _ => ""
+        };
+
         var edge = @$"<mxCell id=""{edgeId}"" 
-        style=""edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;"" edge=""1"" parent=""1"" 
+        style=""edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle}"" edge=""1"" parent=""1"" 
         source=""{fromId}"" target=""{toId}"">
             <mxGeometry relative=""1"" as=""geometry"" />
             </mxCell>

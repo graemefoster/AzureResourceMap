@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -12,11 +11,14 @@ internal class KeyVault : AzureResource, ICanBeAccessedViaHttp
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
-        throw new NotImplementedException();
+        return VaultUri.Equals(hostname, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
+        VaultUri = jObject["properties"]!.Value<string>("vaultUri")!.GetHostNameFromUrlString();
         return base.Enrich(jObject, additionalResources);
     }
+
+    private string VaultUri { get; set; } = default!;
 }

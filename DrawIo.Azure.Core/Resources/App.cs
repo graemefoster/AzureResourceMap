@@ -51,7 +51,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
 
     public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
-        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity");
+        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
@@ -153,7 +153,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         {
             var appInsights = allResources.OfType<AppInsights>()
                 .SingleOrDefault(x => x.InstrumentationKey == AppInsightsKey);
-            if (appInsights != null) CreateFlowTo(appInsights, "apm");
+            if (appInsights != null) CreateFlowTo(appInsights, "apm", FlowEmphasis.LessImportant);
         }
 
         foreach (var storageAccount in ConnectedStorageAccounts)
@@ -177,7 +177,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
                 else
                 {
                     //Had some NICs so let's use the vnet integration resource.
-                    if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource);
+                    if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource, FlowEmphasis.LessImportant);
                 }
             }
         }

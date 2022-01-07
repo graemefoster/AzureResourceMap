@@ -97,9 +97,10 @@ public class AzureResource
     ///     Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
     /// </summary>
     /// <param name="to"></param>
-    protected internal void CreateFlowTo(AzureResource to)
+    /// <param name="flowEmphasis"></param>
+    protected internal void CreateFlowTo(AzureResource to, FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
-        CreateFlowTo(to, string.Empty);
+        CreateFlowTo(to, string.Empty, flowEmphasis);
     }
 
     /// <summary>
@@ -107,10 +108,11 @@ public class AzureResource
     /// </summary>
     /// <param name="to"></param>
     /// <param name="details"></param>
-    protected internal void CreateFlowTo(AzureResource to, string details)
+    /// <param name="flowEmphasis"></param>
+    protected internal void CreateFlowTo(AzureResource to, string details, FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
-        var link = new ResourceLink(this, to, details);
+        var link = new ResourceLink(this, to, details, flowEmphasis);
         Links.Add(link);
     }
 
@@ -125,4 +127,10 @@ public class AzureResource
         ContainedResources.Add(contained);
         contained.ContainedByAnotherResource = true;
     }
+}
+
+public enum FlowEmphasis
+{
+    Important,
+    LessImportant
 }
