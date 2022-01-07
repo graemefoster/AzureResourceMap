@@ -122,7 +122,7 @@ internal static class AzureResourceDrawer
         var edgeId = Guid.NewGuid().ToString().Replace("-", "");
         var patternStyle = pattern switch
         {
-            Pattern.Dashed => ";dashed=1;dashPattern=1 1;",
+            Pattern.Dashed => ";dashed=1;dashPattern=1 1;strokeColor=#82b366;",
             _ => ""
         };
 
