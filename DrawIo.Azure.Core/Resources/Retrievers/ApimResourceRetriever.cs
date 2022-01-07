@@ -4,6 +4,9 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources.Retrievers;
 
+/// <summary>
+/// Difficult to dive into all operations. So for the moment it only looks at Backends to build relationships.
+/// </summary>
 public class ApimServiceResourceRetriever : ResourceRetriever<APIm>
 {
     public const string BackendList = "backends";

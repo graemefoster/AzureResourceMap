@@ -22,7 +22,7 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var resourceGroup = new[]
-            { "arian-cog" }; // //"DiagramBuildUp"; // "function-outbound-calls";
+            { "arian-container-app" }; // //"DiagramBuildUp"; // "function-outbound-calls";
 
         var directoryName = @".\AzureResourceManager\";
 

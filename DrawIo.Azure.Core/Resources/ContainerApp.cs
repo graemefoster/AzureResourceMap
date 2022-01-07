@@ -14,6 +14,8 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaHttp
 
     public string IngressFqdn { get; private set; } = default!;
 
+    public string[] DaprHostNames { get; private set; } = default!;
+
     public override AzureResourceNodeBuilder CreateNodeBuilder()
     {
         return new AzureResourceNodeBuilder(this);
@@ -23,6 +25,16 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaHttp
     {
         KubeEnvironmentId = full["properties"]!.Value<string>("kubeEnvironmentId")!;
         IngressFqdn = full["properties"]!["configuration"]!["ingress"]!.Value<string>("fqdn")!;
+        DaprHostNames = full["properties"]!["template"]?["dapr"]?["components"]?
+            .SelectMany(component =>
+                component["metadata"]?
+                    .Values<string>("value")
+                    .Where(x => x != null)
+                    .Select(x => x!.GetHostNameFromUrlStringOrNull())
+                    .Where(x => x != null)
+                    .Select(x => x!)
+                    .ToArray() ?? Array.Empty<string>()).ToArray() ?? Array.Empty<string>();
+
         return base.Enrich(full, additionalResources);
     }
 
@@ -31,6 +43,8 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaHttp
         var kubeEnvironment = allResources.OfType<ContainerAppEnvironment>().SingleOrDefault(x =>
             string.Compare(x.Id, KubeEnvironmentId, StringComparison.InvariantCultureIgnoreCase) == 0);
 
+        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => DaprHostNames.Any(x.CanIAccessYouOnThisHostName)).ForEach(x => CreateFlowTo((AzureResource)x, "uses"));
+        
         kubeEnvironment?.DiscoveredContainerApp(this);
     }
 

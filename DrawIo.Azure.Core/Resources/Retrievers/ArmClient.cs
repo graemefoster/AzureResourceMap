@@ -90,6 +90,8 @@ public class ArmClient
                 fetchFullResource: true, apiVersion: "2021-10-01"),
             "microsoft.search/searchservices" => new ResourceRetriever<CognitiveSearch>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-04-01-preview"),
+            "microsoft.documentdb/databaseaccounts" => new ResourceRetriever<CosmosDb>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-04-01-preview"),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
     }

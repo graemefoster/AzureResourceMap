@@ -8,4 +8,15 @@ public static class StringEx
     {
         return new Uri(urlString, UriKind.RelativeOrAbsolute).Host;
     }
+    
+    public static string? GetHostNameFromUrlStringOrNull(this string urlString)
+    {
+        if (Uri.TryCreate(urlString, UriKind.Absolute, out var url))
+        {
+            return url.Host;
+        }
+
+        return null;
+    }
+    
 }
