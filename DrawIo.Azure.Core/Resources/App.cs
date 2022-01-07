@@ -151,7 +151,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         {
             var appInsights = allResources.OfType<AppInsights>()
                 .SingleOrDefault(x => x.InstrumentationKey == AppInsightsKey);
-            if (appInsights != null) CreateFlowTo(appInsights);
+            if (appInsights != null) CreateFlowTo(appInsights, "apm");
         }
 
         foreach (var storageAccount in ConnectedStorageAccounts)
