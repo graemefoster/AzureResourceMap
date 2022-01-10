@@ -7,7 +7,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class VMExtension : AzureResource
 {
-    private string _vm;
+    private string _vm = default!;
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {

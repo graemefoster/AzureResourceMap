@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
