@@ -38,9 +38,9 @@ public class AzureResource
     public string InternalId { get; private init; } = default!;
 
     public string Name { get; set; } = default!;
-    public virtual string Image { get; }
+    public virtual string? Image { get; }
 
-    public string Location { get; set; }
+    public string Location { get; set; } = default!;
 
     /// <summary>
     ///     Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.

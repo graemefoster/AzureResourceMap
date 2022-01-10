@@ -10,8 +10,8 @@ public class LogicApp : AzureResource, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/integration/Logic_Apps.svg";
 
-    public string AccessEndpoint { get; set; }
-    public string[] Connections { get; set; }
+    public string AccessEndpoint { get; set; } = default!;
+    public string[] Connections { get; set; } = default!;
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {

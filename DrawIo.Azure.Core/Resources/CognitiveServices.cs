@@ -8,9 +8,10 @@ namespace DrawIo.Azure.Core.Resources;
 public class CognitiveServices : AzureResource, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/ai_machine_learning/Cognitive_Services.svg";
-    public string Kind { get; set; }
 
-    public string[] HostNames { get; set; }
+    public string Kind { get; set; } = default!;
+
+    public string[] HostNames { get; set; } = default!;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {

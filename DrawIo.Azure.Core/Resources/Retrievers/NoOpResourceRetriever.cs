@@ -6,9 +6,9 @@ namespace DrawIo.Azure.Core.Resources.Retrievers;
 
 public class NoOpResourceRetriever : IRetrieveResource
 {
-    public async Task<AzureResource> FetchResource(HttpClient client)
+    public Task<AzureResource> FetchResource(HttpClient client)
     {
-        return new IgnoreMeResource();
+        return Task.FromResult<AzureResource>(new IgnoreMeResource());
     }
 
     protected virtual IEnumerable<(HttpMethod method, string suffix)> AdditionalResources()

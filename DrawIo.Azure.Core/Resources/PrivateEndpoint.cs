@@ -8,11 +8,11 @@ namespace DrawIo.Azure.Core.Resources;
 public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoASubnet
 {
     public override string Image => "img/lib/azure2/networking/Private_Link.svg";
-    public string[] CustomHostNames { get; private set; }
+    public string[] CustomHostNames { get; private set; } = default!;
 
-    public string[] Nics { get; private set; }
+    public string[] Nics { get; private set; } = default!;
 
-    public string[] SubnetIdsIAmInjectedInto { get; private set; }
+    public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {

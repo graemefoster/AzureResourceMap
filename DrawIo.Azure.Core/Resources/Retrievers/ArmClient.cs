@@ -110,7 +110,7 @@ public class ArmClient
 
     internal class AzureList<T>
     {
-        public string NextLink { get; set; }
-        public T[] Value { get; set; }
+        public string? NextLink { get; set; }
+        public T[] Value { get; set; } = default!;
     }
 }

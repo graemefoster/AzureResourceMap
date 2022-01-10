@@ -15,7 +15,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
     private VNetIntegration? _azureVNetIntegrationResource;
     public string? ServerFarmId { get; set; }
     public string? VirtualNetworkSubnetId { get; set; }
-    public string Kind { get; set; }
+    public string Kind { get; set; } = default!;
     public Identity? Identity { get; set; }
 
     public override string Image => Kind switch
@@ -25,7 +25,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         _ => "img/lib/azure2/app_services/App_Services.svg"
     };
 
-    public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; }
+    public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; } = default!;
 
     public string? AppInsightsKey { get; set; }
 
@@ -68,9 +68,10 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
         
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
+        
         var connectionStrings = additionalResources[AppResourceRetriever.ConnectionStringSettingsList]
             ["properties"]!.ToObject<Dictionary<string, JObject>>()?.Values
-            .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!);
+            .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!) ?? Array.Empty<string>() ;
 
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
             x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
@@ -80,6 +81,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
 
         var potentialConnectionStrings = appSettings.Values.Union(connectionStrings);
+        
         ConnectedStorageAccounts = potentialConnectionStrings
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&

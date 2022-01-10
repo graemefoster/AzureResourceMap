@@ -9,7 +9,7 @@ public class CognitiveSearch : AzureResource, ICanBeAccessedViaHttp
 {
     public override string Image => "img/lib/azure2/general/Search.svg";
 
-    public string HostName { get; set; }
+    public string HostName { get; set; } = default!;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
