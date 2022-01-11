@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class LogicApp : AzureResource, ICanBeAccessedViaHttp
+public class LogicApp : AzureResource, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/integration/Logic_Apps.svg";
 

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaHttp
+internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
 

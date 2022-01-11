@@ -22,7 +22,7 @@ public class Bot : AzureResource
     {
         if (BotEndpoint != null)
             if (Uri.TryCreate(BotEndpoint, UriKind.Absolute, out var uri))
-                allResources.OfType<ICanBeAccessedViaHttp>().Where(x => x.CanIAccessYouOnThisHostName(uri.Host))
+                allResources.OfType<ICanBeAccessedViaAHostName>().Where(x => x.CanIAccessYouOnThisHostName(uri.Host))
                     .ForEach(x => CreateFlowTo((AzureResource)x, "Communicates"));
     }
 }

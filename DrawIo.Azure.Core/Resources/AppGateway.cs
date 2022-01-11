@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class AppGateway : AzureResource, ICanBeAccessedViaHttp, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
+public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
 {
     private IpConfigurations _ipConfigurations = default!;
     public override string Image => "img/lib/azure2/networking/Application_Gateways.svg";

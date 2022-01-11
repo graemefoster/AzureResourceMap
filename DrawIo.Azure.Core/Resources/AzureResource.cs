@@ -112,6 +112,12 @@ public class AzureResource
     protected internal void CreateFlowTo(AzureResource to, string details, FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
+
+        if (Links.Any(x => x.To == to))
+        {
+            return;
+        }
+        
         var link = new ResourceLink(this, to, details, flowEmphasis);
         Links.Add(link);
     }

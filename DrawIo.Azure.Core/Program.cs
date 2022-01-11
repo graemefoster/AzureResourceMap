@@ -21,7 +21,7 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var resourceGroup = new[]  { "grfsq2-platform-test-rg", "grfsq2-test-rg" };
+        var resourceGroup = new[]  { "grftst-aue-bsp-rsg-dns", "grftst-aue-dev-rsg-shared", "grftst-aue-dev-rsg-hasura-graph" };
 
         var directoryName = @".\AzureResourceManager\";
 

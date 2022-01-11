@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class ACR : AzureResource, IUseManagedIdentities
+internal class ACR : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHostName
 {
     public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/containers/Container_Registries.svg";
@@ -14,8 +14,13 @@ internal class ACR : AzureResource, IUseManagedIdentities
             string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateManagedIdentityFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
         CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
+    }
+
+    public bool CanIAccessYouOnThisHostName(string hostname)
+    {
+        return hostname.Equals($"{Name}.azurecr.io", StringComparison.InvariantCultureIgnoreCase);
     }
 }

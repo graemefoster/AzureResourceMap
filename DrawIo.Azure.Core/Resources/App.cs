@@ -10,9 +10,10 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
+public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentities
 {
     private VNetIntegration? _azureVNetIntegrationResource;
+    private string? _dockerRepo;
     public string? ServerFarmId { get; set; }
     public string? VirtualNetworkSubnetId { get; set; }
     public string Kind { get; set; } = default!;
@@ -49,7 +50,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
             string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateManagedIdentityFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
         CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
@@ -66,12 +67,20 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         ServerFarmId = full["properties"]!["serverFarmId"]?.Value<string>();
 
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
-        
         var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
-        
+
+        var siteProperties = full["properties"]!["siteProperties"]?["properties"]?
+            .Select(
+                x => new KeyValuePair<string, string?>(
+                    x.Value<string>("name")!,
+                    x.Value<String>("value")))
+            .ToDictionary(x => x.Key, x => x.Value);
+
+        LookForContainerLink(siteProperties);
+
         var connectionStrings = additionalResources[AppResourceRetriever.ConnectionStringSettingsList]
             ["properties"]!.ToObject<Dictionary<string, JObject>>()?.Values
-            .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!) ?? Array.Empty<string>() ;
+            .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!) ?? Array.Empty<string>();
 
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
             x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
@@ -81,7 +90,7 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
 
         var potentialConnectionStrings = appSettings.Values.Union(connectionStrings);
-        
+
         ConnectedStorageAccounts = potentialConnectionStrings
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&
@@ -139,6 +148,19 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
                 .Concat(new[] { $"{(string)appSettings["AzureSearchName"]}.search.windows.net" }).ToArray();
     }
 
+    /// <summary>
+    /// Look in site properties for anything starting with DOCKER| 
+    /// </summary>
+    /// <param name="full"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    private void LookForContainerLink(Dictionary<string, string?> siteProperties)
+    {
+        var regex = new Regex(@"^DOCKER[|](.*?)\/");
+        _dockerRepo = siteProperties.Values.Where(x => x != null).Select(x => regex.Match(x))
+            .FirstOrDefault(x => x.Success)?.Groups[1].Captures[0]
+            .Value;
+    }
+
     public override IEnumerable<AzureResource> DiscoverNewNodes()
     {
         if (VirtualNetworkSubnetId != null)
@@ -162,25 +184,9 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
         {
             var storage = allResources.OfType<StorageAccount>()
                 .SingleOrDefault(x => x.Name.ToLowerInvariant() == storageAccount.storageName);
-
             if (storage != null)
             {
-                var flowSource = _azureVNetIntegrationResource as AzureResource ?? this;
-
-                var nics = allResources.OfType<Nic>().Where(nic => nic.HostNames.Any(hn =>
-                    hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)));
-
-                nics.ForEach(nic => flowSource.CreateFlowTo(nic, "Uses"));
-
-                if (!nics.Any())
-                {
-                    flowSource.CreateFlowTo(storage, "Uses");
-                }
-                else
-                {
-                    //Had some NICs so let's use the vnet integration resource.
-                    if (_azureVNetIntegrationResource != null) CreateFlowTo(_azureVNetIntegrationResource, FlowEmphasis.LessImportant);
-                }
+                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)), storage, "uses");
             }
         }
 
@@ -190,7 +196,10 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
             var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
                 string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
 
-            if (database != null) CreateFlowTo(database, "SQL");
+            if (database != null)
+            {
+                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => hn.StartsWith(database.Name)), database, "sql");
+            }
         }
 
         foreach (var keyVaultReference in KeyVaultReferences)
@@ -200,11 +209,53 @@ public class App : AzureResource, ICanBeAccessedViaHttp, IUseManagedIdentities
             //TODO check server name as-well
             var keyVault = allResources.OfType<KeyVault>().SingleOrDefault(x =>
                 string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (keyVault != null) CreateFlowTo(keyVault, "Secrets");
+            if (keyVault != null)
+            {
+                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)), keyVault, "secrets");
+            }
         }
 
-        allResources.OfType<ICanBeAccessedViaHttp>()
+        if (_dockerRepo != null)
+        {
+            var acr = allResources.OfType<ACR>().SingleOrDefault(x => x.CanIAccessYouOnThisHostName(_dockerRepo));
+            if (acr != null)
+            {
+                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => acr.CanIAccessYouOnThisHostName(hn)), acr, "pulls");
+            }
+        }
+
+        allResources.OfType<ICanBeAccessedViaAHostName>()
             .Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName))
-            .ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
+            .ForEach(x =>
+            {
+                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(x.CanIAccessYouOnThisHostName), (AzureResource)x, "calls");
+            });
+    }
+
+    private void CreateFlowViaVNetIntegrationOrDirect(
+        IEnumerable<AzureResource> allResources,
+        Func<string[], bool> nicHostNameCheck,
+        AzureResource connectTo,
+        string flowName)
+    {
+        var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
+
+        if (nics.Any() && _azureVNetIntegrationResource != null)
+        {
+            CreateFlowTo(_azureVNetIntegrationResource, FlowEmphasis.LessImportant);
+
+            //Check if we already have a flow from vnet integration to the resource
+            if (_azureVNetIntegrationResource.Links.Any(x => x.To == connectTo))
+            {
+                return;
+            }
+
+            nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
+        }
+        else
+        {
+            //direct flow to the resource (no vnet integration)
+            CreateFlowTo(connectTo, flowName);
+        }
     }
 }

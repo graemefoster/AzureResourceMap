@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class PrivateDnsZoneVirtualNetworkLink : AzureResource
+internal class DnsZoneVirtualNetworkLink : AzureResource
 {
     private string _dnsZone = default!;
     private string _virtualNetwork = default!;

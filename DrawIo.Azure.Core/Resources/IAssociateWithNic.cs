@@ -5,7 +5,7 @@ internal interface IAssociateWithNic
     string[] Nics { get; }
 }
 
-internal interface ICanBeAccessedViaHttp
+internal interface ICanBeAccessedViaAHostName
 {
     bool CanIAccessYouOnThisHostName(string hostname);
 }

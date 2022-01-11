@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class CosmosDb : AzureResource, ICanBeAccessedViaHttp
+internal class CosmosDb : AzureResource, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/databases/Azure_Cosmos_DB.svg";
 

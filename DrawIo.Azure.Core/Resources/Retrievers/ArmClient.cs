@@ -41,14 +41,14 @@ public class ArmClient
             "microsoft.network/privatednszones" => new ResourceRetriever<PrivateDnsZone>(basicAzureResourceInfo,
                 "2020-06-01", true),
             "microsoft.network/privatednszones/virtualnetworklinks" => new
-                ResourceRetriever<PrivateDnsZoneVirtualNetworkLink>(basicAzureResourceInfo, "2020-06-01",
+                ResourceRetriever<DnsZoneVirtualNetworkLink>(basicAzureResourceInfo, "2020-06-01",
                     true),
             "microsoft.network/networkinterfaces" => new ResourceRetriever<Nic>(basicAzureResourceInfo, "2020-11-01",
                 true),
             "microsoft.containerservice/managedclusters" => new ResourceRetriever<AKS>(basicAzureResourceInfo,
                 "2020-11-01"),
             "microsoft.containerregistry/registries" =>
-                new ResourceRetriever<ACR>(basicAzureResourceInfo, "2020-11-01"),
+                new ResourceRetriever<ACR>(basicAzureResourceInfo, "2021-09-01"),
             "microsoft.web/serverfarms" => new AppServicePlanResourceRetriever(basicAzureResourceInfo),
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
             "microsoft.apimanagement/service" => new ApimServiceResourceRetriever(basicAzureResourceInfo),
@@ -104,8 +104,13 @@ public class ArmClient
             "microsoft.devices/iothubs" => new ResourceRetriever<IotHub>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-07-02"),
             "microsoft.security/iotsecuritysolutions" => new NoOpResourceRetriever(),
+            "microsoft.network/routetables" => new ResourceRetriever<UDR>(basicAzureResourceInfo),
+            "microsoft.dbforpostgresql/servers" => new ResourceRetriever<ManagedSqlDatabase>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2017-12-01"),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
+
+        //TODO proper logger and write warning when it's an AzureResource type (e.g. we didn't have a good match for the resource)
     }
 
     internal class AzureList<T>

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
+public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHostName
 {
     public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/app_services/API_Management_Services.svg";
@@ -27,7 +27,7 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
             string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
     }
 
-    public void CreateFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
+    public void CreateManagedIdentityFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
     {
         CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
@@ -45,7 +45,7 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaHttp
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaHttp>()
+        var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaAHostName>()
             .Where(x => Backends.Any(x.CanIAccessYouOnThisHostName)).Distinct();
         distinctAccessedHosts.ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
     }

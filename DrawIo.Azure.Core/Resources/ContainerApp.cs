@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class ContainerApp : AzureResource, ICanBeAccessedViaHttp
+internal class ContainerApp : AzureResource, ICanBeAccessedViaAHostName
 {
     public string KubeEnvironmentId { get; set; } = default!;
     public override string Image => "img/lib/azure2/compute/Container_Instances.svg";
@@ -48,7 +48,7 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaHttp
         var kubeEnvironment = allResources.OfType<ContainerAppEnvironment>().SingleOrDefault(x =>
             string.Compare(x.Id, KubeEnvironmentId, StringComparison.InvariantCultureIgnoreCase) == 0);
 
-        allResources.OfType<ICanBeAccessedViaHttp>().Where(x => DaprHostNames.Any(x.CanIAccessYouOnThisHostName))
+        allResources.OfType<ICanBeAccessedViaAHostName>().Where(x => DaprHostNames.Any(x.CanIAccessYouOnThisHostName))
             .ForEach(x => CreateFlowTo((AzureResource)x, "uses"));
 
         kubeEnvironment?.DiscoveredContainerApp(this);

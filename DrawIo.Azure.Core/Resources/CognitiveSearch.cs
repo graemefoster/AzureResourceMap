@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class CognitiveSearch : AzureResource, ICanBeAccessedViaHttp
+public class CognitiveSearch : AzureResource, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/general/Search.svg";
 

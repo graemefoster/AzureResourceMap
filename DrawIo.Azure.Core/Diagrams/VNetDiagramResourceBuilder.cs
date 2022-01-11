@@ -53,8 +53,8 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         foreach (var subnet in _resource.Subnets)
         {
             var subnetNode =
-                AzureResourceDrawer.CreateContainerRectangleNode("Subnet", subnet.Name,
-                    _resource.InternalId + $".{subnet.Name}", "white", TextAlignment.Bottom);
+                AzureResourceDrawer.CreateContainerRectangleNode(subnet.AddressPrefix, subnet.Name,
+                    _resource.InternalId + $".{subnet.Name}", "white", TextAlignment.Top);
 
             vnetNode.AddChild(subnetNode);
 

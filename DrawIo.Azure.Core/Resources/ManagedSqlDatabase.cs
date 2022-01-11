@@ -15,7 +15,7 @@ internal class ManagedSqlDatabase : AzureResource
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
         ServerId = string.Join('/', Id.Split('/')[..^2]);
-        return Task.CompletedTask;
+        return base.Enrich(full, additionalResources);
     }
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)

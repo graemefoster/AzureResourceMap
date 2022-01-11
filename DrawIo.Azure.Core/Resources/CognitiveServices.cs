@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class CognitiveServices : AzureResource, ICanBeAccessedViaHttp
+public class CognitiveServices : AzureResource, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/ai_machine_learning/Cognitive_Services.svg";
 
