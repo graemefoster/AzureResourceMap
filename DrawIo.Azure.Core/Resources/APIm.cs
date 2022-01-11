@@ -45,8 +45,6 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHost
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var distinctAccessedHosts = allResources.OfType<ICanBeAccessedViaAHostName>()
-            .Where(x => Backends.Any(x.CanIAccessYouOnThisHostName)).Distinct();
-        distinctAccessedHosts.ForEach(x => CreateFlowTo((AzureResource)x, "Calls"));
+        Backends.ForEach(x => this.CreateFlowToHostName(allResources, x, "calls"));
     }
 }

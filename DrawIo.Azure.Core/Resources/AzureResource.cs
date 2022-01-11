@@ -66,7 +66,7 @@ public class AzureResource
 
     public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        //Common ways the platform is expressed
+        //Private endpoints are expressed in a common way across the platform. To generalise I've added the check to AzureResource.
         PrivateEndpointConnections =
             full["properties"]!["privateEndpointConnections"]
                 ?.Select(x => x["properties"]!["privateEndpoint"]!.Value<string>("id")!).ToArray() ??

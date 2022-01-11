@@ -74,7 +74,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
                 x => new KeyValuePair<string, string?>(
                     x.Value<string>("name")!,
                     x.Value<String>("value")))
-            .ToDictionary(x => x.Key, x => x.Value);
+            .ToDictionary(x => x.Key, x => x.Value)!;
 
         LookForContainerLink(siteProperties);
 
@@ -151,12 +151,12 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
     /// <summary>
     /// Look in site properties for anything starting with DOCKER| 
     /// </summary>
-    /// <param name="full"></param>
+    /// <param name="siteProperties"></param>
     /// <exception cref="NotImplementedException"></exception>
     private void LookForContainerLink(Dictionary<string, string?> siteProperties)
     {
         var regex = new Regex(@"^DOCKER[|](.*?)\/");
-        _dockerRepo = siteProperties.Values.Where(x => x != null).Select(x => regex.Match(x))
+        _dockerRepo = siteProperties.Values.Where(x => x != null).Select(x => regex.Match(x!))
             .FirstOrDefault(x => x.Success)?.Groups[1].Captures[0]
             .Value;
     }
@@ -186,7 +186,9 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
                 .SingleOrDefault(x => x.Name.ToLowerInvariant() == storageAccount.storageName);
             if (storage != null)
             {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)), storage, "uses");
+                CreateFlowViaVNetIntegrationOrDirect(allResources, storage, "uses",
+                    hns => hns.Any(hn =>
+                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)));
             }
         }
 
@@ -198,7 +200,8 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
 
             if (database != null)
             {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => hn.StartsWith(database.Name)), database, "sql");
+                CreateFlowViaVNetIntegrationOrDirect(allResources, database, "sql",
+                    hns => hns.Any(hn => hn.StartsWith(database.Name)));
             }
         }
 
@@ -211,7 +214,8 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
                 string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
             if (keyVault != null)
             {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)), keyVault, "secrets");
+                CreateFlowViaVNetIntegrationOrDirect(allResources, keyVault, "secrets",
+                    hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)));
             }
         }
 
@@ -220,7 +224,8 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
             var acr = allResources.OfType<ACR>().SingleOrDefault(x => x.CanIAccessYouOnThisHostName(_dockerRepo));
             if (acr != null)
             {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(hn => acr.CanIAccessYouOnThisHostName(hn)), acr, "pulls");
+                CreateFlowViaVNetIntegrationOrDirect(allResources, acr, "pulls",
+                    hns => hns.Any(hn => acr.CanIAccessYouOnThisHostName(hn)));
             }
         }
 
@@ -228,29 +233,32 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
             .Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName))
             .ForEach(x =>
             {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, hns => hns.Any(x.CanIAccessYouOnThisHostName), (AzureResource)x, "calls");
+                CreateFlowViaVNetIntegrationOrDirect(allResources, (AzureResource)x, "calls",
+                    hns => hns.Any(x.CanIAccessYouOnThisHostName));
             });
     }
 
     private void CreateFlowViaVNetIntegrationOrDirect(
         IEnumerable<AzureResource> allResources,
-        Func<string[], bool> nicHostNameCheck,
         AzureResource connectTo,
-        string flowName)
+        string flowName,
+        Func<string[], bool>? nicHostNameCheck)
     {
         var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
 
-        if (nics.Any() && _azureVNetIntegrationResource != null)
+        if (_azureVNetIntegrationResource != null)
         {
-            CreateFlowTo(_azureVNetIntegrationResource, FlowEmphasis.LessImportant);
+            CreateFlowTo(_azureVNetIntegrationResource);
 
-            //Check if we already have a flow from vnet integration to the resource
-            if (_azureVNetIntegrationResource.Links.Any(x => x.To == connectTo))
+            if (nics.Any())
             {
-                return;
+                nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
             }
-
-            nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
+            else
+            {
+                //Assume all traffic going via vnet integration for simplicity.
+                _azureVNetIntegrationResource.CreateFlowTo(connectTo, flowName);
+            }
         }
         else
         {

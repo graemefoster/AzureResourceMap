@@ -48,8 +48,7 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaAHostName
         var kubeEnvironment = allResources.OfType<ContainerAppEnvironment>().SingleOrDefault(x =>
             string.Compare(x.Id, KubeEnvironmentId, StringComparison.InvariantCultureIgnoreCase) == 0);
 
-        allResources.OfType<ICanBeAccessedViaAHostName>().Where(x => DaprHostNames.Any(x.CanIAccessYouOnThisHostName))
-            .ForEach(x => CreateFlowTo((AzureResource)x, "uses"));
+            DaprHostNames.ForEach(x => this.CreateFlowToHostName(allResources, x, "uses"));
 
         kubeEnvironment?.DiscoveredContainerApp(this);
     }

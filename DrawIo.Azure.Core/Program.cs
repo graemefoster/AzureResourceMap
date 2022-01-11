@@ -44,8 +44,9 @@ public static class Program
 
         //create some common nodes to represent common platform groupings (AAD, Diagnostics)
         var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };
+        var core = new CoreServices { Id = CommonResources.CoreServices, Name = "Core Services" };
         var diagnostics = new CommonDiagnostics { Id = CommonResources.Diagnostics, Name = "Diagnostics" };
-        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics }).ToArray();
+        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics, core }).ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet

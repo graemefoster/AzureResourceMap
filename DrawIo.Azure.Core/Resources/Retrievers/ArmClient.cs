@@ -107,6 +107,8 @@ public class ArmClient
             "microsoft.network/routetables" => new ResourceRetriever<UDR>(basicAzureResourceInfo),
             "microsoft.dbforpostgresql/servers" => new ResourceRetriever<ManagedSqlDatabase>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2017-12-01"),
+            "microsoft.insights/autoscalesettings" => new NoOpResourceRetriever(),
+            "microsoft.network/dnszones" => new NoOpResourceRetriever(),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
 
