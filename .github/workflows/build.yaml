@@ -14,15 +14,25 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: '5.x'
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.7
       - run: dotnet restore
       - run: ls -la ./DrawIo.Azure.Core/
       - run: dotnet build ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
       - run: dotnet publish ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore -o ./published
       - uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/main'
         with:
           name: app
           path: './published/**'
