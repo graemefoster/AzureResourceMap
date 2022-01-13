@@ -21,6 +21,7 @@ jobs:
       - run: dotnet restore
       - run: ls -la ./DrawIo.Azure.Core/
       - run: dotnet build ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
+      - run: dotnet publish ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
 #      - uses: actions/upload-artifact@v2
 #        with:
 #          name: app
