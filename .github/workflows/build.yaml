@@ -19,7 +19,8 @@ jobs:
         with:
           dotnet-version: '6.0.x'
       - run: dotnet restore
-      - run: dotnet build ./AzureResourceMap/DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
+      - run: ls -la
+      - run: dotnet build ./AzureResourceMap/AzureResourceMap/DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
 #      - uses: actions/upload-artifact@v2
 #        with:
 #          name: app
