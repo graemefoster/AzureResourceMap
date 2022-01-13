@@ -14,7 +14,7 @@ dotnet AzureDiagrams.dll --subscription-id <subscription-id> --resource-group <r
 ![AzureSimple](./assets/grfsq2-platform-test-rg.drawio.png)
 
 ### More complex with VNets and private endpoints
-![AzureSimple](./assets/grfsq2-platform-test-rg.drawio.png)
+![AzureSimple](./assets/more-complex.drawio.png)
 
 ## How does it work?
 AzureDiagrams queries the Azure Resource Management APIs to introspect resource-groups. It then uses a set of strategies to enrich the raw data, building a model that can be projected into other formats.
