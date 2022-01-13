@@ -6,9 +6,9 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class IpConfigurations
 {
-    public IpConfigurations(JObject jObject)
+    public IpConfigurations(JObject jObject, string propertyName = "ipConfigurations")
     {
-        PublicIpAddresses = jObject["properties"]!["ipConfigurations"]?
+        PublicIpAddresses = jObject["properties"]![propertyName]?
             .Select(x =>
                 x["properties"]!["publicIPAddress"] != null
                     ? x["properties"]!["publicIPAddress"]!.Value<string>("id")!.ToLowerInvariant()
@@ -17,17 +17,19 @@ public class IpConfigurations
             .Select(x => x!.ToLowerInvariant())
             .ToArray() ?? Array.Empty<string>();
 
-        PrivateIpAddresses = jObject["properties"]!["ipConfigurations"]?
+        PrivateIpAddresses = jObject["properties"]![propertyName]?
             .Select(x => x["properties"]!.Value<string>("privateIPAddress"))
             .Where(x => x != null)
             .Select(x => x!)
             .ToArray() ?? Array.Empty<string>();
 
-        SubnetAttachments = jObject["properties"]!["ipConfigurations"]?
-            .Select(x => x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant())
+        SubnetAttachments = jObject["properties"]![propertyName]?
+            .Select(x => x["properties"]!["subnet"]?.Value<string>("id")!.ToLowerInvariant())
+            .Where(x => x != null)
+            .Select(x => x!)
             .ToArray() ?? Array.Empty<string>();
 
-        HostNames = jObject["properties"]!["ipConfigurations"]?
+        HostNames = jObject["properties"]![propertyName]?
             .SelectMany(x =>
                 x["properties"]!["privateLinkConnectionProperties"]?["fqdns"]?.Values<string>() ??
                 Array.Empty<string>())

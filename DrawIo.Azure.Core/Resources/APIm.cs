@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Resources.Retrievers;
+using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;

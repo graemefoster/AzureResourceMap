@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
+using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers;
+namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
 
 /// <summary>
 ///     Difficult to dive into all operations. So for the moment it only looks at Backends to build relationships.
@@ -12,12 +13,13 @@ public class ApimServiceResourceRetriever : ResourceRetriever<APIm>
     public const string BackendList = "backends";
 
     public ApimServiceResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
-        "2021-08-01", true)
+        "2021-08-01", true, extensions: new[] { new DiagnosticsExtensions() })
     {
     }
 
-    protected override IEnumerable<(HttpMethod method, string suffix, string? version)> AdditionalResources()
+    protected override IEnumerable<(string key, HttpMethod method, string suffix, string? version)>
+        AdditionalResources()
     {
-        yield return (HttpMethod.Get, BackendList, null);
+        yield return (BackendList, HttpMethod.Get, BackendList, null);
     }
 }

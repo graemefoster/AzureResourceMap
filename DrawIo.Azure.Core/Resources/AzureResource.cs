@@ -5,11 +5,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
+using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class AzureResource 
+public class AzureResource
 {
     private readonly string _id = default!;
 
@@ -21,6 +22,7 @@ public class AzureResource
 
     public List<ResourceLink> Links { get; } = new();
     public List<AzureResource> ContainedResources { get; } = new();
+    public IEnumerable<IResourceExtension> Extensions { get; internal set; } = Array.Empty<IResourceExtension>();
 
     public string Id
     {
@@ -51,14 +53,6 @@ public class AzureResource
 
     public string Type { get; set; } = default!;
 
-    public string[]? PrivateEndpointConnections { get; private set; }
-
-    public bool AccessedViaPrivateEndpoint(PrivateEndpoint privateEndpoint)
-    {
-        return PrivateEndpointConnections?.Any(x =>
-            x.Equals(privateEndpoint.Id, StringComparison.InvariantCultureIgnoreCase)) ?? false;
-    }
-
     public virtual AzureResourceNodeBuilder CreateNodeBuilder()
     {
         return new AzureResourceNodeBuilder(this);
@@ -66,12 +60,6 @@ public class AzureResource
 
     public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        //Private endpoints are expressed in a common way across the platform. To generalise I've added the check to AzureResource.
-        PrivateEndpointConnections =
-            full["properties"]!["privateEndpointConnections"]
-                ?.Select(x => x["properties"]!["privateEndpoint"]!.Value<string>("id")!).ToArray() ??
-            Array.Empty<string>();
-
         return Task.CompletedTask;
     }
 
@@ -91,6 +79,7 @@ public class AzureResource
     /// <param name="allResources"></param>
     public virtual void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
+        Extensions.ForEach(x => x.BuildRelationships(this, allResources));;
     }
 
     /// <summary>
@@ -109,7 +98,8 @@ public class AzureResource
     /// <param name="to"></param>
     /// <param name="details"></param>
     /// <param name="flowEmphasis"></param>
-    protected internal void CreateFlowTo(AzureResource to, string details, FlowEmphasis flowEmphasis = FlowEmphasis.Important)
+    protected internal void CreateFlowTo(AzureResource to, string details,
+        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
 
@@ -117,7 +107,7 @@ public class AzureResource
         {
             return;
         }
-        
+
         var link = new ResourceLink(this, to, details, flowEmphasis);
         Links.Add(link);
     }

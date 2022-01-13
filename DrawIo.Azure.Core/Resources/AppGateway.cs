@@ -8,7 +8,7 @@ namespace DrawIo.Azure.Core.Resources;
 
 public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASubnet, ICanExposePublicIPAddresses
 {
-    public override string Image => "img/lib/azure2/networking/Application_Gateways.svg";
+    public override string Image =>  "img/lib/azure2/networking/Application_Gateways.svg";
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
@@ -23,18 +23,27 @@ public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectI
 
     public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
+    public bool IsWaf { get; set; }
+
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
+        IsWaf = full["properties"]!["sku"]!.Value<string>("tier")!.Contains("waf",
+            StringComparison.CurrentCultureIgnoreCase);
+
         SubnetIdsIAmInjectedInto = full["properties"]!["gatewayIPConfigurations"]?
             .Select(x => x["properties"]!["subnet"]!.Value<string>("id")!.ToLowerInvariant())
             .ToArray() ?? Array.Empty<string>();
 
         Hostnames = full["properties"]!["httpListeners"]?
-            .SelectMany(x => x["properties"]!["hostNames"]?.Values<string>().Select(hn => hn!.ToLowerInvariant()) ?? Array.Empty<string>())
+            .SelectMany(x =>
+                x["properties"]!["hostNames"]?.Values<string>().Select(hn => hn!.ToLowerInvariant()) ??
+                Array.Empty<string>())
             .ToArray() ?? Array.Empty<string>();
 
-        HostnamesITryToContact  = full["properties"]!["backendAddressPools"]?
-            .SelectMany(x => x["properties"]!["backendAddresses"]?.Select(ba => ba["fqdn"]?.Value<string>()?.ToLowerInvariant()).Where(ba => ba != null).Select(ba => ba!) ?? Array.Empty<string>())
+        HostnamesITryToContact = full["properties"]!["backendAddressPools"]?
+            .SelectMany(x =>
+                x["properties"]!["backendAddresses"]?.Select(ba => ba["fqdn"]?.Value<string>()?.ToLowerInvariant())
+                    .Where(ba => ba != null).Select(ba => ba!) ?? Array.Empty<string>())
             .ToArray() ?? Array.Empty<string>();
 
         PublicIpAddresses = full["properties"]!["frontendIPConfigurations"]?
@@ -45,6 +54,7 @@ public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectI
 
         return base.Enrich(full, additionalResources);
     }
+
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {

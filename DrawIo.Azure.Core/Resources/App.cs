@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources.Retrievers;
+using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -242,7 +243,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
         IEnumerable<AzureResource> allResources,
         AzureResource connectTo,
         string flowName,
-        Func<string[], bool>? nicHostNameCheck)
+        Func<string[], bool> nicHostNameCheck)
     {
         var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
 

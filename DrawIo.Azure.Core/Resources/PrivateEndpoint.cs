@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -17,8 +18,10 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         allResources
-            .Where(x => x.AccessedViaPrivateEndpoint(this))
-            .ForEach(x => CreateFlowTo((AzureResource)x));
+            .Select(x => new { Resource = x, PrivateEndpointInformation = x.Extensions.OfType<PrivateEndpointExtensions>().SingleOrDefault()})
+            .Where(x => x.PrivateEndpointInformation != null)
+            .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this))
+            .ForEach(x => CreateFlowTo(x.Resource));
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)

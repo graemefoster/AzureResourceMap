@@ -21,21 +21,33 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        var resourceGroup = new[]  { "grftst-aue-bsp-rsg-dns", "grftst-aue-dev-rsg-shared", "grftst-aue-dev-rsg-hasura-graph" };
+        try
+        {
+            var subscriptionId = args[0];
+            var resourceGroups = args.Skip(1).ToArray();
 
-        var directoryName = @".\AzureResourceManager\";
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Subscription: {subscriptionId}");
+            Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
+            Console.ResetColor();
 
-        var token = new AzureCliCredential().GetToken(
-            new TokenRequestContext(new[] { "https://management.azure.com/" }));
+            var directoryName = @".\AzureResourceManager\";
 
-        var httpClient = new HttpClient();
-        var subscriptionId = "8d2059f3-b805-41fa-ab84-e13d4dfec042";
-        httpClient.BaseAddress = new Uri("https://management.azure.com/");
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+            var token = new AzureCliCredential().GetToken(
+                new TokenRequestContext(new[] { "https://management.azure.com/" }));
 
-        var newTest = new ArmClient(httpClient);
-        var resources = (await newTest.Retrieve(subscriptionId, resourceGroup)).ToArray();
-        await DrawDiagram(resources, directoryName, resourceGroup[0]);
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("https://management.azure.com/");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+
+            var newTest = new ArmClient(httpClient);
+            var resources = (await newTest.Retrieve(subscriptionId, resourceGroups)).ToArray();
+            await DrawDiagram(resources, directoryName, resourceGroups[0]);
+        }
+        finally
+        {
+            Console.ResetColor();
+        }
     }
 
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
@@ -46,7 +58,8 @@ public static class Program
         var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };
         var core = new CoreServices { Id = CommonResources.CoreServices, Name = "Core Services" };
         var diagnostics = new CommonDiagnostics { Id = CommonResources.Diagnostics, Name = "Diagnostics" };
-        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics, core }).ToArray();
+        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics, core })
+            .ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
@@ -107,7 +120,9 @@ public static class Program
 
         var path = Path.Combine(directoryName, "diagram.drawio");
         await File.WriteAllTextAsync(path, msGraph);
-        Console.WriteLine(msGraph);
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
+        Console.ResetColor();
     }
 }
