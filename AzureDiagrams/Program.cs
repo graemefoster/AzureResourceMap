@@ -1,4 +1,8 @@
 ﻿using System;
+using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -19,19 +23,44 @@ namespace DrawIo.Azure.Core;
 
 public static class Program
 {
-    public static async Task Main(string[] args)
+    public static async Task<int> Main(string[] args)
+    {
+        var subscriptionIdOption = new Option<string>( "--subscription-id") { IsRequired = true };
+        var resourceGroupsOption = new Option<string[]>("--resource-group") { IsRequired = true, AllowMultipleArgumentsPerToken = true};
+        var outputOption = new Option<string>("--output") { IsRequired = true};
+        var rootCommand = new RootCommand("AzureDiagrams")
+        {
+            subscriptionIdOption,
+            resourceGroupsOption,
+            outputOption
+        };
+        rootCommand.Handler = CommandHandler.Create((string subscriptionId, string[] resourceGroup, string output) =>
+        {
+            DrawDiagram(Guid.Parse(subscriptionId), resourceGroup, output).Wait();
+        });
+
+        var parser =
+            new CommandLineBuilder(rootCommand)
+                .UseDefaults()
+                .UseHelp()
+                .UseExceptionHandler((e, ctx) =>
+                {
+                    Console.WriteLine(e.InnerException?.Message ?? e.Message);
+                    Console.WriteLine(e.ToString());
+                    ctx.ExitCode = -1;
+                }).Build();
+
+        return await parser.InvokeAsync(args);
+    }
+
+    private static async Task DrawDiagram(Guid subscriptionId, string[] resourceGroups, string outputFolder)
     {
         try
         {
-            var subscriptionId = args[0];
-            var resourceGroups = args.Skip(1).ToArray();
-
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
-
-            var directoryName = @".\AzureResourceManager\";
 
             var token = new AzureCliCredential().GetToken(
                 new TokenRequestContext(new[] { "https://management.azure.com/" }));
@@ -40,15 +69,16 @@ public static class Program
             httpClient.BaseAddress = new Uri("https://management.azure.com/");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
-            var newTest = new ArmClient(httpClient);
-            var resources = (await newTest.Retrieve(subscriptionId, resourceGroups)).ToArray();
-            await DrawDiagram(resources, directoryName, resourceGroups[0]);
+            var armClient = new ArmClient(httpClient);
+            var resources = (await armClient.Retrieve(subscriptionId, resourceGroups)).ToArray();
+            await DrawDiagram(resources, outputFolder, resourceGroups[0]);
         }
         finally
         {
             Console.ResetColor();
         }
     }
+
 
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
@@ -103,7 +133,8 @@ public static class Program
             LayerSeparation = 25,
             EdgeRoutingSettings = routingSettings,
             NodeSeparation = 25,
-            ClusterMargin = 50
+            ClusterMargin = 50,
+            
         };
 
         LayoutHelpers.CalculateLayout(graph, settings, null);
@@ -118,7 +149,7 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        var path = Path.Combine(directoryName, "diagram.drawio");
+        var path = Path.Combine(directoryName, $"{outputName}.drawio");
         await File.WriteAllTextAsync(path, msGraph);
 
         Console.ForegroundColor = ConsoleColor.Cyan;

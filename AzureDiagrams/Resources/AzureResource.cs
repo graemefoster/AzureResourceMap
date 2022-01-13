@@ -124,9 +124,3 @@ public class AzureResource
         contained.ContainedByAnotherResource = true;
     }
 }
-
-public enum FlowEmphasis
-{
-    Important,
-    LessImportant
-}

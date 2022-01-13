@@ -31,7 +31,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     {
         var basicResource = _basicAzureResourceJObject.ToObject<BasicAzureResourceInfo>()!;
 
-        var additionalResources = AdditionalResources().ToDictionary(x => x.key,
+        var additionalResources = AdditionalResourcesInternal().ToDictionary(x => x.key,
             x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", x.version ?? _apiVersion,
                 x.method).Result);
 
@@ -52,12 +52,22 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     ///     A null version will use the same api version as the original resource.
     /// </summary>
     /// <returns></returns>
-    protected virtual IEnumerable<(string key, HttpMethod method, string suffix, string? version)> AdditionalResources()
+    private IEnumerable<(string key, HttpMethod method, string suffix, string? version)> AdditionalResourcesInternal()
     {
         foreach (var extension in _extensions)
         {
             if (extension.ApiCall != null) yield return extension.ApiCall.Value;
         }
+
+        foreach (var customResource in AdditionalResources())
+        {
+            yield return customResource;
+        }
+    }
+
+    protected virtual IEnumerable<(string key, HttpMethod method, string suffix, string? version)> AdditionalResources()
+    {
+        yield break;
     }
 
 

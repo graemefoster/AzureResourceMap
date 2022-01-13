@@ -9,9 +9,3 @@ public class Identity
     public string Type { get; set; } = default!;
     public Dictionary<string, UserAssignedIdentity>? UserAssignedIdentities { get; set; }
 }
-
-public class UserAssignedIdentity
-{
-    public string PrincipalId { get; set; } = default!;
-    public string ClientId { get; set; } = default!;
-}

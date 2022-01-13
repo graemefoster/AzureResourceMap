@@ -23,5 +23,6 @@ internal class ManagedSqlDatabase : AzureResource
         var server = allResources.OfType<ManagedSqlServer>().SingleOrDefault(x =>
             string.Compare(ServerId, x.Id, StringComparison.InvariantCultureIgnoreCase) == 0);
         if (server != null) server.DiscoveredDatabase(this);
+        base.BuildRelationships(allResources);
     }
 }

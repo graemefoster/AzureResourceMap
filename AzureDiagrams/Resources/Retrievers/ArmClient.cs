@@ -18,7 +18,7 @@ public class ArmClient
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<AzureResource>> Retrieve(string subscriptionId, IEnumerable<string> resourceGroups)
+    public async Task<IEnumerable<AzureResource>> Retrieve(Guid subscriptionId, IEnumerable<string> resourceGroups)
     {
         var allDirectResources = await Task.WhenAll(resourceGroups.Select(rg =>
             _httpClient.GetAzResourceAsync<AzureList<JObject>>(
@@ -89,7 +89,7 @@ public class ArmClient
                 fetchFullResource: true, apiVersion: "2021-08-01-preview",
                 extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.web/kubeenvironments" => new ResourceRetriever<ContainerAppEnvironment>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-03-01", extensions: new[] { new DiagnosticsExtensions() }),
+                fetchFullResource: true, apiVersion: "2021-03-01"),
             "microsoft.web/containerapps" => new ResourceRetriever<ContainerApp>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01"),
             "microsoft.network/applicationgateways" => new ResourceRetriever<AppGateway>(basicAzureResourceInfo,
