@@ -21,9 +21,21 @@ jobs:
       - run: dotnet restore
       - run: ls -la ./DrawIo.Azure.Core/
       - run: dotnet build ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
-      - run: dotnet publish ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          name: app
-#          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/published-app/**'
+      - run: dotnet publish ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore -o ./published
+      - uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: './published/**'
 
+#  release-app:
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/main'
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-dotnet@v1
+#        with:
+#          dotnet-version: '6.0.x'
+#      - run: dotnet restore
+#      - run: ls -la ./DrawIo.Azure.Core/
+#      - run: dotnet build ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
+#      - run: dotnet publish ./DrawIo.Azure.Core/DrawIo.Azure.Core.csproj --configuration Release --no-restore
