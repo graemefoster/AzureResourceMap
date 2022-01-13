@@ -1,0 +1,27 @@
+﻿name: BuildAndPackage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test-app:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - run: dotnet restore
+      - run: dotnet build ./DrawIO.Azure.Core/DrawIO.Azure.Core.csproj --configuration Release --no-restore
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: app
+#          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/published-app/**'
+
