@@ -34,7 +34,8 @@ public class ArmClient
     {
         var type = basicAzureResourceInfo.Value<string>("type")!;
         Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine($"\tFound resource {type.ToLowerInvariant()}: {basicAzureResourceInfo.Value<string>("name")!}");
+        Console.WriteLine(
+            $"\tFound resource {type.ToLowerInvariant()}: {basicAzureResourceInfo.Value<string>("name")!}");
         Console.ResetColor();
         return type.ToLowerInvariant() switch
         {
@@ -127,6 +128,10 @@ public class ArmClient
             "microsoft.network/dnszones" => new NoOpResourceRetriever(),
             "microsoft.network/loadbalancers" => new ResourceRetriever<LoadBalancer>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01", extensions: new[] { new DiagnosticsExtensions() }),
+            "microsoft.web/hostingenvironments" => new ResourceRetriever<ASE>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-02-01", extensions: new[] { new DiagnosticsExtensions() }),
+            "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-06-01-preview", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };
 
