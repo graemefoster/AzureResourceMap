@@ -7,8 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHostName, ICanExposePublicIPAddresses,
-    ICanInjectIntoASubnet
+public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHostName, ICanInjectIntoASubnet
 {
     public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/app_services/API_Management_Services.svg";
@@ -46,7 +45,7 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHost
             .ToArray() ?? Array.Empty<string>();
 
         PublicIpAddresses = full["properties"]!["publicIPAddresses"]?
-                                .Select((x, idx) => $"{Name}.pip.{idx}").ToArray() ??
+                                .Select(x => x.Value<string>()!).ToArray() ??
                             Array.Empty<string>();
 
         var subnet = full["properties"]!["virtualNetworkConfiguration"]?.Value<string>("subnetResourceId");
@@ -58,13 +57,5 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHost
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         Backends.ForEach(x => this.CreateFlowToHostName(allResources, x, "calls"));
-    }
-
-    public override IEnumerable<AzureResource> DiscoverNewNodes()
-    {
-        foreach (var publicIpAddress in PublicIpAddresses)
-        {
-            yield return new PIP { Id = publicIpAddress, Name = publicIpAddress };
-        }
     }
 }
