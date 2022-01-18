@@ -119,12 +119,20 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
             .Select(x => x.Groups[1].Captures[0].Value)
             .ToArray();
 
+        var hostNameLikeRegex = new Regex(@"\/\/(([A-Za-z0-9-]{2,100}\.?)+)\b");
         HostNamesAccessedInAppSettings = appSettings
             .Values
             .OfType<string>()
             .Select(x =>
                 {
                     if (Uri.TryCreate(x, UriKind.Absolute, out var uri)) return uri.Host;
+
+                    //try look for a URL like pattern in the string
+                    var match = hostNameLikeRegex.Match(x);
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value;
+                    }
 
                     return string.Empty;
                 }
@@ -237,18 +245,31 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
     {
         var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
 
-        if (_azureVNetIntegrationResource != null)
+        if (TrafficEgressesInsideVNet(allResources))
         {
-            CreateFlowTo(_azureVNetIntegrationResource);
-
-            if (nics.Any())
+            if (_azureVNetIntegrationResource != null)
             {
-                nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
+                CreateFlowTo(_azureVNetIntegrationResource);
+                if (nics.Any())
+                {
+                    nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
+                }
+                else
+                {
+                    //Assume all traffic going via vnet integration for simplicity.
+                    _azureVNetIntegrationResource.CreateFlowTo(connectTo, flowName);
+                }
             }
             else
             {
-                //Assume all traffic going via vnet integration for simplicity.
-                _azureVNetIntegrationResource.CreateFlowTo(connectTo, flowName);
+                if (nics.Any())
+                {
+                    nics.ForEach(nic => CreateFlowTo(nic, flowName));
+                }
+                else
+                {
+                    CreateFlowTo(connectTo, flowName);
+                }
             }
         }
         else
@@ -256,5 +277,11 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
             //direct flow to the resource (no vnet integration)
             CreateFlowTo(connectTo, flowName);
         }
+    }
+
+    private bool TrafficEgressesInsideVNet(IEnumerable<AzureResource> allResources)
+    {
+        return _azureVNetIntegrationResource != null ||
+               allResources.OfType<ASP>().Any(x => x.ContainedResources.Contains(this) && !string.IsNullOrEmpty(x.ASE));
     }
 }

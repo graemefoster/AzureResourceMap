@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,7 +8,7 @@ namespace DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 
 public class ManagedIdentityExtension : IResourceExtension
 {
-    public Identity? Identity { get; set; }
+    private Identity? Identity { get; set; }
 
     public (string key, HttpMethod method, string suffix, string? version)? ApiCall { get; }
 
