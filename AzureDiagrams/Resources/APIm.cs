@@ -50,7 +50,7 @@ public class APIm : AzureResource, IUseManagedIdentities, ICanBeAccessedViaAHost
                             Array.Empty<string>();
 
         var subnet = full["properties"]!["virtualNetworkConfiguration"]?.Value<string>("subnetResourceId");
-        SubnetIdsIAmInjectedInto = subnet == null ? new[] { subnet! } : Array.Empty<string>();
+        SubnetIdsIAmInjectedInto = subnet != null ? new[] { subnet! } : Array.Empty<string>();
 
         return base.Enrich(full, additionalResources);
     }
