@@ -10,7 +10,7 @@ public class ASE : AzureResource, ICanInjectIntoASubnet
 {
     public override string Image => "img/lib/azure2/app_services/App_Service_Environments.svg";
 
-    public string[] SubnetIdsIAmInjectedInto { get; private set; }
+    public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
