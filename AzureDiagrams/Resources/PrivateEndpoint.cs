@@ -22,6 +22,7 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
             .Where(x => x.PrivateEndpointInformation != null)
             .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this))
             .ForEach(x => CreateFlowTo(x.Resource));
+        base.BuildRelationships(allResources);
     }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)

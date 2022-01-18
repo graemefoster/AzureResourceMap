@@ -11,14 +11,13 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentities
+public class App : AzureResource, ICanBeAccessedViaAHostName
 {
     private VNetIntegration? _azureVNetIntegrationResource;
     private string? _dockerRepo;
     public string? ServerFarmId { get; set; }
     public string? VirtualNetworkSubnetId { get; set; }
     public string Kind { get; set; } = default!;
-    public Identity? Identity { get; set; }
 
     public override string Image => Kind switch
     {
@@ -43,17 +42,6 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
     {
         return EnabledHostNames.Any(
             hn => string.Compare(hn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0);
-    }
-
-    public bool DoYouUseThisUserAssignedClientId(string id)
-    {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
-            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
-    }
-
-    public void CreateManagedIdentityFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
-    {
-        CreateFlowTo(userAssignedManagedIdentity, "AAD Identity", FlowEmphasis.LessImportant);
     }
 
     public override AzureResourceNodeBuilder CreateNodeBuilder()
@@ -237,6 +225,8 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, IUseManagedIdentit
                 CreateFlowViaVNetIntegrationOrDirect(allResources, (AzureResource)x, "calls",
                     hns => hns.Any(x.CanIAccessYouOnThisHostName));
             });
+
+        base.BuildRelationships(allResources);
     }
 
     private void CreateFlowViaVNetIntegrationOrDirect(

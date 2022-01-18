@@ -58,6 +58,7 @@ public class VNet : AzureResource
                 r.subnets.ForEach(s => InjectResourceInto(r.resource, s)));
 
         Subnets.Where(x => x.UdrId != null).ForEach(x => InjectResourceInto(allResources.OfType<UDR>().Single(udr => udr.Id.Equals(x.UdrId)), x.Name ));
+        base.BuildRelationships(allResources);
     }
 
     private IEnumerable<string> SubnetsInsideThisVNet(string[] subnetIdsIAmInjectedInto)

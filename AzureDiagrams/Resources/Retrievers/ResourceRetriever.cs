@@ -76,7 +76,18 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
         var resourceRepresentation = resource.ToObject<T>()!;
         resourceRepresentation.Extensions = _extensions;
         await resourceRepresentation.Enrich(resource, additionalResources);
-        _extensions.ForEach(x => x.Enrich(resourceRepresentation, resource, additionalResources));
+        _extensions.ForEach(x =>
+        {
+            try
+            {
+                x.Enrich(resourceRepresentation, resource, additionalResources);
+            }
+            catch (Exception e)
+            {
+                throw new DiagramException(
+                    $"Failed to run extension {x.GetType().Name} on resource {resourceRepresentation.Id}", e);
+            }
+        });
         return resourceRepresentation;
     }
 }

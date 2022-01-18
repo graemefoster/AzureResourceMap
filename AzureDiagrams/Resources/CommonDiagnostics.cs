@@ -11,5 +11,6 @@ public class CommonDiagnostics : AzureResource
     {
         allResources.OfType<LogAnalyticsWorkspace>().ForEach(OwnsResource);
         allResources.OfType<AppInsights>().ForEach(OwnsResource);
+        base.BuildRelationships(allResources);
     }
 }

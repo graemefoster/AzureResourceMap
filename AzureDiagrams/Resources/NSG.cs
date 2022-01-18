@@ -36,5 +36,6 @@ public class NSG : AzureResource
             allResources.OfType<VNet>().Single(vNet => vNet.Id == string.Join('/', x.Split('/')[..^2]))
                 .AssignNsg(this, x.Split('/')[^1]));
         _networkInterfacesBoundTo.ForEach(x => allResources.OfType<Nic>().Single(nic => nic.Id == x).AssignNsg(this));
+        base.BuildRelationships(allResources);
     }
 }

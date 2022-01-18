@@ -20,5 +20,6 @@ internal class LogAnalyticsWorkspace : AzureResource
     {
         allResources.OfType<ICanWriteToLogAnalyticsWorkspaces>().Where(x => x.DoYouWriteTo(CustomerId))
             .ForEach(x => x.CreateFlowBackToMe(this));
+        base.BuildRelationships(allResources);
     }
 }

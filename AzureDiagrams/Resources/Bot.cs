@@ -27,5 +27,6 @@ public class Bot : AzureResource
                 this.CreateFlowToHostName(allResources, uri.Host, "communicates");
             }
         }
+        base.BuildRelationships(allResources);
     }
 }

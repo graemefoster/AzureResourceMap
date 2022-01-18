@@ -10,5 +10,6 @@ public class AzureActiveDirectory : AzureResource
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         allResources.OfType<UserAssignedManagedIdentity>().ForEach(OwnsResource);
+        base.BuildRelationships(allResources);
     }
 }

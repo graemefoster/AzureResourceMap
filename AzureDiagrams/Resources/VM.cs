@@ -6,23 +6,11 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
+public class VM : AzureResource, IAssociateWithNic
 {
-    public Identity? Identity { get; set; }
     public override string Image => "img/lib/azure2/compute/Virtual_Machine.svg";
     public string SystemDiskId { get; private set; } = default!;
     public string[] Nics { get; private set; } = default!;
-
-    public bool DoYouUseThisUserAssignedClientId(string id)
-    {
-        return Identity?.UserAssignedIdentities?.Keys.Any(k =>
-            string.Compare(k, id, StringComparison.InvariantCultureIgnoreCase) == 0) ?? false;
-    }
-
-    public void CreateManagedIdentityFlowBackToMe(UserAssignedManagedIdentity userAssignedManagedIdentity)
-    {
-        CreateFlowTo(userAssignedManagedIdentity);
-    }
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {
@@ -59,6 +47,7 @@ public class VM : AzureResource, IAssociateWithNic, IUseManagedIdentities
                 .Distinct();
             vnets.ForEach(vnet => vnet.GiveHomeToVirtualMachine(this));
         }
+        base.BuildRelationships(allResources);
     }
 
     public void AddExtension(VMExtension vmExtension)

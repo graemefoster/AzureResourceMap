@@ -11,7 +11,7 @@ public class AppResourceRetriever : ResourceRetriever<App>
     public const string ConnectionStringSettingsList = "config/connectionStrings/list";
 
     public AppResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-01-15", true,
-        new IResourceExtension[] { new PrivateEndpointExtensions()} )
+        new IResourceExtension[] { new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {
     }
 

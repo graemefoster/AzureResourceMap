@@ -11,5 +11,6 @@ public class CoreServices : AzureResource
     {
         allResources.OfType<KeyVault>().ForEach(OwnsResource);
         allResources.OfType<StorageAccount>().ForEach(OwnsResource);
+        base.BuildRelationships(allResources);
     }
 }

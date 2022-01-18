@@ -27,5 +27,6 @@ internal class AppInsights : AzureResource
                 string.Compare(WorkspaceResourceId, x.Id, StringComparison.InvariantCultureIgnoreCase) == 0);
             if (workspace != null) CreateFlowTo(workspace, "logs", FlowEmphasis.LessImportant);
         }
+        base.BuildRelationships(allResources);
     }
 }

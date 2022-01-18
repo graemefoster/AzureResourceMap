@@ -18,5 +18,6 @@ public class VMExtension : AzureResource
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         allResources.OfType<VM>().Single(x => x.Id.ToLowerInvariant() == _vm).AddExtension(this);
+        base.BuildRelationships(allResources);
     }
 }

@@ -51,11 +51,11 @@ public class ArmClient
             "microsoft.network/networkinterfaces" => new ResourceRetriever<Nic>(basicAzureResourceInfo, "2020-11-01",
                 true),
             "microsoft.containerservice/managedclusters" => new ResourceRetriever<AKS>(basicAzureResourceInfo,
-                "2020-11-01", extensions: new[] { new DiagnosticsExtensions() }),
+                "2020-11-01", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new ManagedIdentityExtension() }),
             "microsoft.containerregistry/registries" =>
                 new ResourceRetriever<ACR>(basicAzureResourceInfo, "2021-09-01",
                     extensions: new IResourceExtension[]
-                        { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
+                        { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() }),
             "microsoft.web/serverfarms" => new ResourceRetriever<ASP>(basicAzureResourceInfo,
                 apiVersion: "2021-03-01", fetchFullResource: true, new[] { new DiagnosticsExtensions() }),
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
@@ -131,6 +131,8 @@ public class ArmClient
             "microsoft.web/hostingenvironments" => new ResourceRetriever<ASE>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-02-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-06-01-preview", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
+            "microsoft.eventgrid/topics" => new ResourceRetriever<EventGridTopic>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01-preview", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
         };

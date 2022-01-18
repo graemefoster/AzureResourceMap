@@ -21,9 +21,4 @@ internal class CosmosDb : AzureResource, ICanBeAccessedViaAHostName
             full["properties"]!.Value<string>("documentEndpoint")?.GetHostNameFromUrlString() ?? null;
         return base.Enrich(full, additionalResources);
     }
-
-    public override void BuildRelationships(IEnumerable<AzureResource> allResources)
-    {
-        base.BuildRelationships(allResources);
-    }
 }

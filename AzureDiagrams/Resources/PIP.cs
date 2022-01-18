@@ -14,5 +14,6 @@ internal class PIP : AzureResource
             .Where(x => x.PublicIpAddresses.Any(x =>
                 string.Compare(Id, x, StringComparison.InvariantCultureIgnoreCase) == 0))
             .ForEach(x => CreateFlowTo((AzureResource)x, "From Public Internet"));
+        base.BuildRelationships(allResources);
     }
 }

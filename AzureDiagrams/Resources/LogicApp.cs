@@ -30,5 +30,6 @@ public class LogicApp : AzureResource, ICanBeAccessedViaAHostName
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         Connections.Select(c => allResources.OfType<LogicAppConnector>().Single(x => x.Id.Equals(c, StringComparison.InvariantCultureIgnoreCase))).ForEach(c => CreateFlowTo(c, "uses"));
+        base.BuildRelationships(allResources);
     }
 }
