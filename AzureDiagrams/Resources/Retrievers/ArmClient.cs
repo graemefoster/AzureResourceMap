@@ -37,6 +37,15 @@ public class ArmClient
         Console.WriteLine(
             $"\tFound resource {type.ToLowerInvariant()}: {basicAzureResourceInfo.Value<string>("name")!}");
         Console.ResetColor();
+
+        ResourceRetriever<AzureResource> Unknown()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\tCould not find wrapper for resource {type.ToLowerInvariant()}");
+            Console.ResetColor();
+            return new ResourceRetriever<AzureResource>(basicAzureResourceInfo);
+        }
+
         return type.ToLowerInvariant() switch
         {
             "microsoft.network/virtualnetworks" => new ResourceRetriever<VNet>(basicAzureResourceInfo,
@@ -51,11 +60,14 @@ public class ArmClient
             "microsoft.network/networkinterfaces" => new ResourceRetriever<Nic>(basicAzureResourceInfo, "2020-11-01",
                 true),
             "microsoft.containerservice/managedclusters" => new ResourceRetriever<AKS>(basicAzureResourceInfo,
-                "2020-11-01", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new ManagedIdentityExtension() }),
+                "2020-11-01",
+                extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new ManagedIdentityExtension() }),
             "microsoft.containerregistry/registries" =>
                 new ResourceRetriever<ACR>(basicAzureResourceInfo, "2021-09-01",
                     extensions: new IResourceExtension[]
-                        { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() }),
+                    {
+                        new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension()
+                    }),
             "microsoft.web/serverfarms" => new ResourceRetriever<ASP>(basicAzureResourceInfo,
                 apiVersion: "2021-03-01", fetchFullResource: true, new[] { new DiagnosticsExtensions() }),
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
@@ -109,7 +121,7 @@ public class ArmClient
             "microsoft.network/bastionhosts" => new ResourceRetriever<Bastion>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.eventhub/namespaces" => new ResourceRetriever<EventHub>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-11-01", extensions: new[] { new DiagnosticsExtensions() }),
+                fetchFullResource: true, apiVersion: "2021-11-01", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
@@ -131,13 +143,14 @@ public class ArmClient
             "microsoft.web/hostingenvironments" => new ResourceRetriever<ASE>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-02-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-06-01-preview", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
+                fetchFullResource: true, apiVersion: "2021-06-01-preview",
+                extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.eventgrid/topics" => new ResourceRetriever<EventGridTopic>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-06-01-preview", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
-            _ => new ResourceRetriever<AzureResource>(basicAzureResourceInfo)
+                fetchFullResource: true, apiVersion: "2021-06-01-preview",
+                extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() }),
+            "microsoft.eventgrid/domains" => new EventGridDomainRetriever(basicAzureResourceInfo),
+            _ => Unknown()
         };
-
-        //TODO proper logger and write warning when it's an AzureResource type (e.g. we didn't have a good match for the resource)
     }
 
     internal class AzureList<T>
