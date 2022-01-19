@@ -16,7 +16,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     private readonly IEnumerable<IResourceExtension> _extensions;
 
     public ResourceRetriever(
-        JObject basicAzureResourceJObject, 
+        JObject basicAzureResourceJObject,
         string apiVersion = "2021-02-01",
         bool fetchFullResource = false,
         IEnumerable<IResourceExtension>? extensions = null)
@@ -35,18 +35,28 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
             x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", x.version ?? _apiVersion,
                 x.method).Result);
 
-        var additionalResourcesEnhanced = AdditionalResourcesInternalEnhanced(basicResource, additionalResources).ToDictionary(x => x.key,
-            x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", x.version ?? _apiVersion,
-                x.method).Result);
+        JObject? azureResource = default;
+        if (_fetchFullResource)
+        {
+            azureResource = await client.GetAzResourceAsync<JObject>(basicResource.Id, _apiVersion, HttpMethod.Get);
+        }
+
+        var additionalResourcesEnhanced =
+            AdditionalResourcesInternalEnhanced(basicResource, additionalResources, azureResource).ToDictionary(
+                x => x.key,
+                x => client.GetAzResourceAsync<JObject>(
+                    x.api.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? x.api : $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
+                    x.method).Result);
 
         additionalResources = new Dictionary<string, JObject>(additionalResources.Concat(additionalResourcesEnhanced));
-        
-        if (!_fetchFullResource)
-            return await BuildResource(_basicAzureResourceJObject, additionalResources);
 
-        var azureResource = await client.GetAzResourceAsync<JObject>(basicResource.Id, _apiVersion, HttpMethod.Get);
+        if (!_fetchFullResource)
+        {
+            return await BuildResource(_basicAzureResourceJObject, additionalResources);
+        }
+
         Console.ForegroundColor = ConsoleColor.Yellow;
-        var resource = await BuildResource(azureResource, additionalResources);
+        var resource = await BuildResource(azureResource!, additionalResources);
         Console.WriteLine($"\tProcessed resource {resource.Type}/{resource.Name}");
         Console.ResetColor();
         return resource;
@@ -70,15 +80,18 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
             yield return customResource;
         }
     }
+
     /// <summary>
     ///     Provide any additional resources you need to enrich your object here.
     ///     An example would be the config of a web-app, or the diagnostics settings against an ASP.
     ///     A null version will use the same api version as the original resource.
     /// </summary>
     /// <returns></returns>
-    private IEnumerable<(string key, HttpMethod method, string suffix, string? version)> AdditionalResourcesInternalEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> initialResources)
+    private IEnumerable<(string key, HttpMethod method, string api, string? version)>
+        AdditionalResourcesInternalEnhanced(BasicAzureResourceInfo basicInfo,
+            Dictionary<string, JObject> initialResources, JObject? fullResource)
     {
-        foreach (var customResource in AdditionalResourcesEnhanced(basicInfo, initialResources))
+        foreach (var customResource in AdditionalResourcesEnhanced(basicInfo, initialResources, fullResource))
         {
             yield return customResource;
         }
@@ -88,14 +101,16 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     {
         yield break;
     }
-    
+
     /// <summary>
     /// A more dynamic way to retrive resources where you can build APIs based on the initial responses from other API calls.
     /// </summary>
     /// <param name="basicInfo"></param>
     /// <param name="additionalResources"></param>
     /// <returns></returns>
-    protected virtual IEnumerable<(string key, HttpMethod method, string suffix, string? version)> AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> additionalResources)
+    protected virtual IEnumerable<(string key, HttpMethod method, string api, string? version)>
+        AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> additionalResources,
+            JObject? fullResource)
     {
         yield break;
     }

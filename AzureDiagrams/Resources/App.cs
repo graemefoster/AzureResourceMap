@@ -118,7 +118,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         if (_searchService != null)
         {
-            this.CreateFlowToHostName(allResources, _dockerRepo, "pulls");
+            this.CreateFlowToHostName(allResources, _searchService, "uses");
         }
 
         _hostNameDiscoverer.BuildRelationships(this, allResources);
