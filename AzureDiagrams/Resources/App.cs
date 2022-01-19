@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DrawIo.Azure.Core.Diagrams;
-using DrawIo.Azure.Core.Resources.Retrievers;
 using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-public class App : AzureResource, ICanBeAccessedViaAHostName
+public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 {
-    private VNetIntegration? _azureVNetIntegrationResource;
     private string? _dockerRepo;
+    private string? _searchService;
+    private RelationshipHelper _hostNameDiscoverer = default!;
     public string? ServerFarmId { get; set; }
     public string? VirtualNetworkSubnetId { get; set; }
     public string Kind { get; set; } = default!;
@@ -26,17 +25,9 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
         _ => "img/lib/azure2/app_services/App_Services.svg"
     };
 
-    public (string storageName, string storageSuffix)[] ConnectedStorageAccounts { get; set; } = default!;
-
     public string? AppInsightsKey { get; set; }
 
-    public string[] KeyVaultReferences { get; set; } = default!;
-
     public string[] EnabledHostNames { get; set; } = default!;
-
-    public string[] HostNamesAccessedInAppSettings { get; set; } = default!;
-
-    public (string server, string database)[] DatabaseConnections { get; set; } = default!;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
@@ -56,7 +47,6 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
         ServerFarmId = full["properties"]!["serverFarmId"]?.Value<string>();
 
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
-        var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
 
         var siteProperties = full["properties"]!["siteProperties"]?["properties"]?
             .Select(
@@ -71,78 +61,23 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
             ["properties"]!.ToObject<Dictionary<string, JObject>>()?.Values
             .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!) ?? Array.Empty<string>();
 
+        var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
+        var potentialConnectionStrings = appSettings.Values.Union(connectionStrings).ToArray();
+        _hostNameDiscoverer = new RelationshipHelper(potentialConnectionStrings);
+        _hostNameDiscoverer.Discover();
+
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
             x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
             x.Contains("key", StringComparison.InvariantCultureIgnoreCase));
+        
         if (potentialAppInsightsKey != null) AppInsightsKey = (string)appSettings[potentialAppInsightsKey];
 
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
 
-        var potentialConnectionStrings = appSettings.Values.Union(connectionStrings);
-
-        ConnectedStorageAccounts = potentialConnectionStrings
-            .OfType<string>()
-            .Where(appSetting => appSetting.Contains("DefaultEndpointsProtocol") &&
-                                 appSetting.Contains("AccountName"))
-            .Select(x =>
-            {
-                var parts = x!.Split(';')
-                    .Where(x => !string.IsNullOrEmpty(x))
-                    .Select(x =>
-                        new KeyValuePair<string, string>(x.Split('=')[0].ToLowerInvariant(),
-                            x.Split('=')[1].ToLowerInvariant()))
-                    .ToDictionary(x => x.Key, x => x.Value);
-
-                return (parts["accountname"],
-                    "." + (parts.ContainsKey("endpointsuffix") ? parts["endpointsuffix"] : "core.windows.net"));
-            })
-            .Distinct()
-            .ToArray();
-
-        DatabaseConnections = potentialConnectionStrings
-            .OfType<string>()
-            .Where(appSetting => appSetting.Contains("Data Source=") &&
-                                 appSetting.Contains("Initial Catalog="))
-            .Select(x =>
-            {
-                var csb = new DbConnectionStringBuilder();
-                csb.ConnectionString = x;
-                return ((string)csb["Data Source"], (string)csb["Initial Catalog"]);
-            })
-            .ToArray();
-
-        var kvRegex = new Regex(@"^\@Microsoft\.KeyVault\(VaultName\=(.*?);");
-        KeyVaultReferences = potentialConnectionStrings
-            .OfType<string>()
-            .Select(x => kvRegex.Match(x))
-            .Where(x => x.Success)
-            .Select(x => x.Groups[1].Captures[0].Value)
-            .ToArray();
-
-        var hostNameLikeRegex = new Regex(@"\/\/(([A-Za-z0-9-]{2,100}\.?)+)\b");
-        HostNamesAccessedInAppSettings = appSettings
-            .Values
-            .OfType<string>()
-            .Select(x =>
-                {
-                    if (Uri.TryCreate(x, UriKind.Absolute, out var uri)) return uri.Host;
-
-                    //try look for a URL like pattern in the string
-                    var match = hostNameLikeRegex.Match(x);
-                    if (match.Success)
-                    {
-                        return match.Groups[1].Value;
-                    }
-
-                    return string.Empty;
-                }
-            )
-            .Where(x => !string.IsNullOrEmpty(x))
-            .ToArray();
-
         if (appSettings.ContainsKey("AzureSearchName"))
-            HostNamesAccessedInAppSettings = HostNamesAccessedInAppSettings
-                .Concat(new[] { $"{(string)appSettings["AzureSearchName"]}.search.windows.net" }).ToArray();
+        {
+            _searchService = $"{(string)appSettings["AzureSearchName"]}.search.windows.net";
+        }
     }
 
     /// <summary>
@@ -162,9 +97,8 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
     {
         if (VirtualNetworkSubnetId != null)
         {
-            _azureVNetIntegrationResource =
-                new VNetIntegration($"{Id}.vnetintegration", VirtualNetworkSubnetId);
-            yield return _azureVNetIntegrationResource;
+            VNetIntegration = new VNetIntegration($"{Id}.vnetintegration", VirtualNetworkSubnetId);
+            yield return VNetIntegration;
         }
     }
 
@@ -177,111 +111,25 @@ public class App : AzureResource, ICanBeAccessedViaAHostName
             if (appInsights != null) CreateFlowTo(appInsights, "apm", FlowEmphasis.LessImportant);
         }
 
-        foreach (var storageAccount in ConnectedStorageAccounts)
-        {
-            var storage = allResources.OfType<StorageAccount>()
-                .SingleOrDefault(x => x.Name.ToLowerInvariant() == storageAccount.storageName);
-            if (storage != null)
-            {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, storage, "uses",
-                    hns => hns.Any(hn =>
-                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)));
-            }
-        }
-
-        foreach (var databaseConnection in DatabaseConnections)
-        {
-            //TODO check server name as-well
-            var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
-                string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
-
-            if (database != null)
-            {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, database, "sql",
-                    hns => hns.Any(hn => hn.StartsWith(database.Name)));
-            }
-        }
-
-        foreach (var keyVaultReference in KeyVaultReferences)
-        {
-            //TODO KeyVault via private endpoint. Needs a generic way to look for a host that is accessed via private endpoints.
-
-            //TODO check server name as-well
-            var keyVault = allResources.OfType<KeyVault>().SingleOrDefault(x =>
-                string.Compare(x.Name, keyVaultReference, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (keyVault != null)
-            {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, keyVault, "secrets",
-                    hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)));
-            }
-        }
-
         if (_dockerRepo != null)
         {
-            var acr = allResources.OfType<ACR>().SingleOrDefault(x => x.CanIAccessYouOnThisHostName(_dockerRepo));
-            if (acr != null)
-            {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, acr, "pulls",
-                    hns => hns.Any(hn => acr.CanIAccessYouOnThisHostName(hn)));
-            }
+            this.CreateFlowToHostName(allResources, _dockerRepo, "pulls");
         }
 
-        allResources.OfType<ICanBeAccessedViaAHostName>()
-            .Where(x => HostNamesAccessedInAppSettings.Any(x.CanIAccessYouOnThisHostName))
-            .ForEach(x =>
-            {
-                CreateFlowViaVNetIntegrationOrDirect(allResources, (AzureResource)x, "calls",
-                    hns => hns.Any(x.CanIAccessYouOnThisHostName));
-            });
+        if (_searchService != null)
+        {
+            this.CreateFlowToHostName(allResources, _dockerRepo, "pulls");
+        }
+
+        _hostNameDiscoverer.BuildRelationships(this, allResources);
 
         base.BuildRelationships(allResources);
     }
-
-    private void CreateFlowViaVNetIntegrationOrDirect(
-        IEnumerable<AzureResource> allResources,
-        AzureResource connectTo,
-        string flowName,
-        Func<string[], bool> nicHostNameCheck)
+    private VNetIntegration? VNetIntegration { get; set; }
+    
+    public AzureResource EgressResource()
     {
-        var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
-
-        if (TrafficEgressesInsideVNet(allResources))
-        {
-            if (_azureVNetIntegrationResource != null)
-            {
-                CreateFlowTo(_azureVNetIntegrationResource);
-                if (nics.Any())
-                {
-                    nics.ForEach(nic => _azureVNetIntegrationResource.CreateFlowTo(nic, flowName));
-                }
-                else
-                {
-                    //Assume all traffic going via vnet integration for simplicity.
-                    _azureVNetIntegrationResource.CreateFlowTo(connectTo, flowName);
-                }
-            }
-            else
-            {
-                if (nics.Any())
-                {
-                    nics.ForEach(nic => CreateFlowTo(nic, flowName));
-                }
-                else
-                {
-                    CreateFlowTo(connectTo, flowName);
-                }
-            }
-        }
-        else
-        {
-            //direct flow to the resource (no vnet integration)
-            CreateFlowTo(connectTo, flowName);
-        }
-    }
-
-    private bool TrafficEgressesInsideVNet(IEnumerable<AzureResource> allResources)
-    {
-        return _azureVNetIntegrationResource != null ||
-               allResources.OfType<ASP>().Any(x => x.ContainedResources.Contains(this) && !string.IsNullOrEmpty(x.ASE));
+        if (VNetIntegration != null) return VNetIntegration;
+        return this;
     }
 }

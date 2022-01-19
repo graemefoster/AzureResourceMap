@@ -121,7 +121,8 @@ public class ArmClient
             "microsoft.network/bastionhosts" => new ResourceRetriever<Bastion>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.eventhub/namespaces" => new ResourceRetriever<EventHub>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-11-01", extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
+                fetchFullResource: true, apiVersion: "2021-11-01",
+                extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
@@ -147,6 +148,7 @@ public class ArmClient
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.eventgrid/topics" => new EventGridTopicRetriever(basicAzureResourceInfo),
             "microsoft.eventgrid/domains" => new EventGridDomainRetriever(basicAzureResourceInfo),
+            "microsoft.datafactory/factories" => new AzureDataFactoryRetriever(basicAzureResourceInfo),
             _ => Unknown()
         };
     }
