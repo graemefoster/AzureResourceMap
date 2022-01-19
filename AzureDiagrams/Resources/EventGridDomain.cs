@@ -11,7 +11,7 @@ public class EventGridDomain : AzureResource, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/integration/Event_Grid_Domains.svg";
 
-    public Dictionary<string, JObject> Subscriptions { get; set; }
+    public Dictionary<string, JObject> Subscriptions { get; set; } = default!;
 
     public string HostName { get; private set; } = default!;
 

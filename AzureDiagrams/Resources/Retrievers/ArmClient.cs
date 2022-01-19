@@ -145,9 +145,7 @@ public class ArmClient
             "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01-preview",
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
-            "microsoft.eventgrid/topics" => new ResourceRetriever<EventGridTopic>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-06-01-preview",
-                extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() }),
+            "microsoft.eventgrid/topics" => new EventGridTopicRetriever(basicAzureResourceInfo),
             "microsoft.eventgrid/domains" => new EventGridDomainRetriever(basicAzureResourceInfo),
             _ => Unknown()
         };

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -13,6 +14,7 @@ public class EventGridTopic : AzureResource
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
+        Subscriptions = additionalResources[EventGridTopicRetriever.Subscriptions];
         return base.Enrich(full, additionalResources);
     }
 
@@ -24,15 +26,41 @@ public class EventGridTopic : AzureResource
 
     private void HandleSubscription(JToken jt, IEnumerable<AzureResource> allResources)
     {
-        if (jt["destination"]!.Value<string>("endpointType") == "EventHub")
+        switch (jt["destination"]!.Value<string>("endpointType"))
         {
-            var ehId = jt["destination"]!["properties"]!.Value<string>("resourceId");
-            var eh = allResources.OfType<EventHub>()
-                .SingleOrDefault(x => ehId.StartsWith(x.Id, StringComparison.InvariantCultureIgnoreCase));
-            if (eh != null)
-            {
-                CreateFlowTo(eh, "subscription");
-            }
+            case "EventHub":
+            case "AzureFunction":
+            case "ServiceBus":
+            case "ServiceTopic":
+            case "StorageQueue":
+            case "HybridConnection":
+                HandleResourceSubscription(jt, allResources);
+                break;
+            case "WebHook":
+                HandleUrlSubscription(jt, allResources);
+                break;
+        }
+    }
+
+    private void HandleUrlSubscription(JToken jt, IEnumerable<AzureResource> allResources)
+    {
+        var hostName = jt["destination"]!["properties"]!.Value<string>("endpointBaseUrl")!.GetHostNameFromUrlString();
+        var resource = allResources.OfType<ICanBeAccessedViaAHostName>()
+            .SingleOrDefault(x => x.CanIAccessYouOnThisHostName(hostName));
+        if (resource != null)
+        {
+            CreateFlowTo((AzureResource)resource, "subscription");
+        }
+    }
+
+    private void HandleResourceSubscription(JToken jt, IEnumerable<AzureResource> allResources)
+    {
+        var resourceId = jt["destination"]!["properties"]!.Value<string>("resourceId")!;
+        var resource =
+            allResources.SingleOrDefault(x => resourceId.StartsWith(x.Id, StringComparison.InvariantCultureIgnoreCase));
+        if (resource != null)
+        {
+            CreateFlowTo(resource, "subscription");
         }
     }
 }

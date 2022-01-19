@@ -9,7 +9,6 @@ namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
 public class EventGridDomainRetriever : ResourceRetriever<EventGridDomain>
 {
     public const string Topics = "topics";
-    public const string Subscriptions = "subscriptions";
 
     public EventGridDomainRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
         fetchFullResource: true, apiVersion: "2021-06-01-preview",
