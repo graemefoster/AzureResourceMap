@@ -32,12 +32,15 @@ public static class FlowEx
         string flowName)
     {
         var possibleHosts = allResources.OfType<ICanBeAccessedViaAHostName>().Where(x => x.CanIAccessYouOnThisHostName(hostName));
-        var host = possibleHosts.Single(x => !(x is Nic));
-        fromResource.CreateLayer7Flow(
-            allResources,
-            (AzureResource)host,
-            flowName,
-            hn => hn.Contains(hostName, StringComparer.InvariantCultureIgnoreCase));
+        var host = possibleHosts.SingleOrDefault(x => !(x is Nic));
+        if (host != null)
+        {
+            fromResource.CreateLayer7Flow(
+                allResources,
+                (AzureResource)host,
+                flowName,
+                hn => hn.Contains(hostName, StringComparer.InvariantCultureIgnoreCase));
+        }
     }
 
     public static void CreateLayer7Flow(

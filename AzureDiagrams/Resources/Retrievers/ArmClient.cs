@@ -152,9 +152,10 @@ public class ArmClient
             "microsoft.eventgrid/topics" => new EventGridTopicRetriever(basicAzureResourceInfo),
             "microsoft.eventgrid/domains" => new EventGridDomainRetriever(basicAzureResourceInfo),
             "microsoft.datafactory/factories" => new AzureDataFactoryRetriever(basicAzureResourceInfo),
-            
             //Would like to have a custom fetch, but the control plane is not all on ARM api surface, so if your synapse is private endpointed then I can't necessarily get much from it.
             "microsoft.synapse/workspaces" => new SynapseRetriever(basicAzureResourceInfo, _tokenCredential),
+            "microsoft.synapse/workspaces/bigdatapools" => new ResourceRetriever<BigDataPool>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-06-01"),
             _ => Unknown()
         };
     }
