@@ -62,14 +62,15 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
 
-            var token = new AzureCliCredential().GetToken(
+            var tokenCredential = new AzureCliCredential();
+            var token = tokenCredential.GetToken(
                 new TokenRequestContext(new[] { "https://management.azure.com/" }));
 
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("https://management.azure.com/");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
-            var armClient = new ArmClient(httpClient);
+            var armClient = new ArmClient(httpClient, tokenCredential);
             var resources = (await armClient.Retrieve(subscriptionId, resourceGroups)).ToArray();
             await DrawDiagram(resources, outputFolder, resourceGroups[0]);
         }

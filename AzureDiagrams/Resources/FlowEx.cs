@@ -63,8 +63,8 @@ public static class FlowEx
             }
             else
             {
-                //Assume all traffic going via vnet integration for simplicity.
-                egress.CreateFlowTo(fromResource, flowName);
+                //Assume all traffic going via vnet for simplicity. We can get clever if we want later around public / private IP addresses / introspecting routes, etc.
+                egress.CreateFlowTo(connectTo, flowName);
             }
         }
         else

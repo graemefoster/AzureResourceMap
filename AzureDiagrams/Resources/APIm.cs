@@ -36,7 +36,8 @@ public class APIm : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASu
                                 .Select(x => x.Value<string>()!).ToArray() ??
                             Array.Empty<string>();
 
-        var subnet = full["properties"]!["virtualNetworkConfiguration"]?.Value<string>("subnetResourceId");
+        var vnetConfig  = full["properties"]!["virtualNetworkConfiguration"]!;
+        var subnet = vnetConfig.Type == JTokenType.Null ? null : vnetConfig!.Value<string>("subnetResourceId");
         SubnetIdsIAmInjectedInto = subnet != null ? new[] { subnet! } : Array.Empty<string>();
 
         return base.Enrich(full, additionalResources);

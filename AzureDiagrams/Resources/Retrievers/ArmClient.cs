@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Azure.Core;
 using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
@@ -12,10 +13,12 @@ namespace DrawIo.Azure.Core.Resources.Retrievers;
 public class ArmClient
 {
     private readonly HttpClient _httpClient;
+    private readonly TokenCredential _tokenCredential;
 
-    public ArmClient(HttpClient httpClient)
+    public ArmClient(HttpClient httpClient, TokenCredential tokenCredential)
     {
         _httpClient = httpClient;
+        _tokenCredential = tokenCredential;
     }
 
     public async Task<IEnumerable<AzureResource>> Retrieve(Guid subscriptionId, IEnumerable<string> resourceGroups)
@@ -151,7 +154,7 @@ public class ArmClient
             "microsoft.datafactory/factories" => new AzureDataFactoryRetriever(basicAzureResourceInfo),
             
             //Would like to have a custom fetch, but the control plane is not all on ARM api surface, so if your synapse is private endpointed then I can't necessarily get much from it.
-            "microsoft.synapse/workspaces" => new SynapseRetriever(basicAzureResourceInfo),
+            "microsoft.synapse/workspaces" => new SynapseRetriever(basicAzureResourceInfo, _tokenCredential),
             _ => Unknown()
         };
     }

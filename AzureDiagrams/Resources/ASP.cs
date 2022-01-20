@@ -20,7 +20,11 @@ public class ASP : AzureResource
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
-        ASE = full["properties"]!["hostingEnvironmentProfile"]?.Value<string>("id");
+        var hostingEnvironmentProfile = full["properties"]!["hostingEnvironmentProfile"]!;
+        if (hostingEnvironmentProfile.Type != JTokenType.Null)
+        {
+            ASE = hostingEnvironmentProfile.Value<string>("id");
+        }
         return base.Enrich(full, additionalResources);
     }
 
