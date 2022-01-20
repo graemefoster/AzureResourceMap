@@ -45,7 +45,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
             AdditionalResourcesInternalEnhanced(basicResource, additionalResources, azureResource).ToDictionary(
                 x => x.key,
                 x => client.GetAzResourceAsync<JObject>(
-                    x.api.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? x.api : $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
+                    $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
                     x.method).Result);
 
         additionalResources = new Dictionary<string, JObject>(additionalResources.Concat(additionalResourcesEnhanced));
