@@ -48,7 +48,9 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
                     $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
                     x.method).Result);
 
-        additionalResources = new Dictionary<string, JObject>(additionalResources.Concat(additionalResourcesEnhanced));
+        var additionalResourcesCustom = await AdditionalResourcesCustom(basicResource, additionalResources, azureResource);
+
+        additionalResources = new Dictionary<string, JObject>(additionalResources.Concat(additionalResourcesEnhanced).Concat(additionalResourcesCustom));
 
         if (!_fetchFullResource)
         {
@@ -79,6 +81,16 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
         {
             yield return customResource;
         }
+    }
+
+    /// <summary>
+    ///     If you have completely custom requirements for additional information, implement it here
+    /// </summary>
+    /// <returns></returns>
+    protected virtual Task<Dictionary<string, JObject>> AdditionalResourcesCustom(BasicAzureResourceInfo basicInfo,
+        Dictionary<string, JObject> initialResources, JObject? fullResource)
+    {
+        return Task.FromResult(new Dictionary<string, JObject>());
     }
 
     /// <summary>
