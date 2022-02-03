@@ -14,8 +14,7 @@ public class AzureResource
     private readonly string _id = default!;
 
     /// <summary>
-    ///     Settings this to true stops an icon being drawn for 'this' resource. Instead we just draw a box with the resources
-    ///     that it owns.
+    ///     TODO make this a diagram construct. It is used to mark a resource that is rendered as a container of other resource, with no icon for itself.
     /// </summary>
     public virtual bool IsPureContainer => false;
 
