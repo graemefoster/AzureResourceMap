@@ -50,7 +50,7 @@ public class AzureResource
     /// </summary>
     public bool ContainedByAnotherResource { get; protected internal set; }
 
-    public string Type { get; set; } = default!;
+    public string? Type { get; set; } = default!;
 
     public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {

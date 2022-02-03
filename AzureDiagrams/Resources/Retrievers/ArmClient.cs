@@ -49,6 +49,14 @@ internal class ArmClient
             return new ResourceRetriever<AzureResource>(basicAzureResourceInfo);
         }
 
+        ResourceRetriever<AzureResource> Generic()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine($"\tUsing generic wrapper for resource {type.ToLowerInvariant()}");
+            Console.ResetColor();
+            return new ResourceRetriever<AzureResource>(basicAzureResourceInfo);
+        }
+
         return type.ToLowerInvariant() switch
         {
             "microsoft.network/virtualnetworks" => new ResourceRetriever<VNet>(basicAzureResourceInfo,
@@ -148,15 +156,15 @@ internal class ArmClient
             "microsoft.synapse/workspaces/bigdatapools" => new ResourceRetriever<BigDataPool>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01"),
             
-            "microsoft.compute/virtualmachines/extensions" => new NoOpResourceRetriever(),
-            "microsoft.alertsmanagement/smartdetectoralertrules" => new NoOpResourceRetriever(),
-            "microsoft.compute/sshpublickeys" => new NoOpResourceRetriever(),
-            "microsoft.insights/webtests" => new NoOpResourceRetriever(),
-            "microsoft.insights/actiongroups" => new NoOpResourceRetriever(),
-            "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
-            "microsoft.security/iotsecuritysolutions" => new NoOpResourceRetriever(),
-            "microsoft.insights/autoscalesettings" => new NoOpResourceRetriever(),
-            "microsoft.network/dnszones" => new NoOpResourceRetriever(),
+            "microsoft.compute/virtualmachines/extensions" => Generic(),
+            "microsoft.alertsmanagement/smartdetectoralertrules" => Generic(),
+            "microsoft.compute/sshpublickeys" => Generic(),
+            "microsoft.insights/webtests" => Generic(),
+            "microsoft.insights/actiongroups" => Generic(),
+            "microsoft.network/firewallpolicies" => Generic(),
+            "microsoft.security/iotsecuritysolutions" => Generic(),
+            "microsoft.insights/autoscalesettings" => Generic(),
+            "microsoft.network/dnszones" => Generic(),
 
             _ => Unknown()
         };

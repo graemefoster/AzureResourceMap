@@ -47,7 +47,7 @@ public class AzureResourceNodeBuilder
 
         if (_resource.ContainedResources.Count > 0)
         {
-            container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type, _resource.Name,
+            container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type ?? _resource.GetType().Name, _resource.Name,
                 $"{_resource.InternalId}.container", "#FFE6CC", TextAlignment.Top);
             yield return (_resource, container);
             foreach (var contained in _resource.ContainedResources)
@@ -87,8 +87,25 @@ public class AzureResourceNodeBuilder
         {
             _ when resource is ASP asp => new AppServicePlanAppNodeBuilder(asp),
             _ when resource is DnsZoneVirtualNetworkLink => new IgnoreNodeBuilder(resource),
-            _ when resource is IgnoreMeResource => new IgnoreNodeBuilder(resource),
             _ when resource is VNet vnet => new VNetDiagramResourceBuilder(vnet),
+            _ => GetResourceBuilder(resource)
+        };
+    }
+
+    private static AzureResourceNodeBuilder GetResourceBuilder(AzureResource resource)
+    {
+        return resource.Type?.ToLowerInvariant() switch
+        {
+            null => new AzureResourceNodeBuilder(resource),
+            "microsoft.compute/virtualmachines/extensions" => new IgnoreNodeBuilder(resource),
+            "microsoft.alertsmanagement/smartdetectoralertrules" => new IgnoreNodeBuilder(resource),
+            "microsoft.compute/sshpublickeys" => new IgnoreNodeBuilder(resource),
+            "microsoft.insights/webtests" => new IgnoreNodeBuilder(resource),
+            "microsoft.insights/actiongroups" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/firewallpolicies" => new IgnoreNodeBuilder(resource),
+            "microsoft.security/iotsecuritysolutions" => new IgnoreNodeBuilder(resource),
+            "microsoft.insights/autoscalesettings" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/dnszones" => new IgnoreNodeBuilder(resource),
             _ => new AzureResourceNodeBuilder(resource)
         };
     }
