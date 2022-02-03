@@ -1,20 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
 
-internal class DnsZoneVirtualNetworkLink : AzureResource
+public class DnsZoneVirtualNetworkLink : AzureResource
 {
     private string _dnsZone = default!;
     private string _virtualNetwork = default!;
-
-    public override AzureResourceNodeBuilder CreateNodeBuilder()
-    {
-        return new IgnoreNodeBuilder(this);
-    }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {

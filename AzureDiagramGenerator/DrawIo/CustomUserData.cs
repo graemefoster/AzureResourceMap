@@ -1,8 +1,6 @@
-﻿using System;
+﻿namespace AzureDiagramGenerator.DrawIo;
 
-namespace DrawIo.Azure.Core.Diagrams;
-
-internal class CustomUserData
+public class CustomUserData
 {
     public CustomUserData(Func<string> draw, string name, string id)
     {

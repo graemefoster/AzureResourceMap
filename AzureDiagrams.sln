@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{7A36B0
 		assets\more-complex.drawio.png = assets\more-complex.drawio.png
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDiagramGenerator", "AzureDiagramGenerator\AzureDiagramGenerator.csproj", "{899DE1FB-F964-4325-B52E-44565B7AA1E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14A836C1-11F2-49F4-846C-E50134CD86AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7D9F0244-632E-4566-B45F-5DE92AB6C31D} = {0E6366E5-D9A9-40CE-A7E1-99AF5CD267CB}

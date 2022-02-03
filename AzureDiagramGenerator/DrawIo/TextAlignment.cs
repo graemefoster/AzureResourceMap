@@ -1,4 +1,4 @@
-﻿namespace DrawIo.Azure.Core.Diagrams;
+﻿namespace AzureDiagramGenerator.DrawIo;
 
 public enum TextAlignment
 {

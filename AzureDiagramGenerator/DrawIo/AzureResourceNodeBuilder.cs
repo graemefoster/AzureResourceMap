@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DrawIo.Azure.Core.Resources;
+﻿using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 
-namespace DrawIo.Azure.Core.Diagrams;
+namespace AzureDiagramGenerator.DrawIo;
 
 public class AzureResourceNodeBuilder
 {
@@ -82,5 +79,17 @@ public class AzureResourceNodeBuilder
                 yield return (_resource, resourceNode);
             }
         }
+    }
+
+    public static AzureResourceNodeBuilder CreateNodeBuilder(AzureResource resource)
+    {
+        return resource.GetType() switch
+        {
+            _ when resource is ASP asp => new AppServicePlanAppNodeBuilder(asp),
+            _ when resource is DnsZoneVirtualNetworkLink => new IgnoreNodeBuilder(resource),
+            _ when resource is IgnoreMeResource => new IgnoreNodeBuilder(resource),
+            _ when resource is VNet vnet => new VNetDiagramResourceBuilder(vnet),
+            _ => new AzureResourceNodeBuilder(resource)
+        };
     }
 }

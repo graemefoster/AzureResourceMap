@@ -1,6 +1,6 @@
 ﻿using DrawIo.Azure.Core.Resources;
 
-namespace DrawIo.Azure.Core.Diagrams;
+namespace AzureDiagramGenerator.DrawIo;
 
 public class AppServicePlanAppNodeBuilder : AzureResourceNodeBuilder
 {

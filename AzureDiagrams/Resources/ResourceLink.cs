@@ -1,5 +1,4 @@
-﻿using DrawIo.Azure.Core.Diagrams;
-
+﻿
 namespace DrawIo.Azure.Core.Resources;
 
 public class ResourceLink

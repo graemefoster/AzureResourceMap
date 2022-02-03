@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Diagrams;
 using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources;
@@ -23,11 +21,6 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
     public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
 
     public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
-
-    public override AzureResourceNodeBuilder CreateNodeBuilder()
-    {
-        return new AzureResourceNodeBuilder(this);
-    }
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources.Retrievers.Custom;
 using Newtonsoft.Json.Linq;
 
@@ -35,10 +34,6 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
             hn => string.Compare(hn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0);
     }
 
-    public override AzureResourceNodeBuilder CreateNodeBuilder()
-    {
-        return new AzureResourceNodeBuilder(this);
-    }
 
     public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {

@@ -44,7 +44,7 @@ public class ArmClient
         ResourceRetriever<AzureResource> Unknown()
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\tCould not find wrapper for resource {type.ToLowerInvariant()}");
+            Console.WriteLine($"\tCould not find typed wrapper for resource {type.ToLowerInvariant()}");
             Console.ResetColor();
             return new ResourceRetriever<AzureResource>(basicAzureResourceInfo);
         }
@@ -88,16 +88,11 @@ public class ArmClient
             "microsoft.network/networksecuritygroups" => new ResourceRetriever<NSG>(basicAzureResourceInfo,
                 fetchFullResource: true),
             "microsoft.network/publicipaddresses" => new ResourceRetriever<PIP>(basicAzureResourceInfo),
-            "microsoft.compute/virtualmachines/extensions" => new NoOpResourceRetriever(),
             "microsoft.managedidentity/userassignedidentities" => new ResourceRetriever<UserAssignedManagedIdentity>(
                 basicAzureResourceInfo),
             "microsoft.keyvault/vaults" => new ResourceRetriever<KeyVault>(basicAzureResourceInfo,
                 "2019-09-01", true,
                 new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
-            "microsoft.insights/actiongroups" => new NoOpResourceRetriever(),
-            "microsoft.alertsmanagement/smartdetectoralertrules" => new NoOpResourceRetriever(),
-            "microsoft.compute/sshpublickeys" => new NoOpResourceRetriever(),
-            "microsoft.insights/webtests" => new NoOpResourceRetriever(),
             "microsoft.sql/servers" => new ResourceRetriever<ManagedSqlServer>(basicAzureResourceInfo,
                 apiVersion: "2021-02-01", fetchFullResource: false,
                 new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
@@ -128,20 +123,16 @@ public class ArmClient
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
-            "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
             "microsoft.logic/workflows" => new ResourceRetriever<LogicApp>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2019-05-01"),
             "microsoft.web/connections" => new ResourceRetriever<LogicAppConnector>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2016-06-01"),
             "microsoft.devices/iothubs" => new ResourceRetriever<IotHub>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-07-02", extensions: new[] { new DiagnosticsExtensions() }),
-            "microsoft.security/iotsecuritysolutions" => new NoOpResourceRetriever(),
             "microsoft.network/routetables" => new ResourceRetriever<UDR>(basicAzureResourceInfo),
             "microsoft.dbforpostgresql/servers" => new ResourceRetriever<ManagedSqlDatabase>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2017-12-01",
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
-            "microsoft.insights/autoscalesettings" => new NoOpResourceRetriever(),
-            "microsoft.network/dnszones" => new NoOpResourceRetriever(),
             "microsoft.network/loadbalancers" => new ResourceRetriever<LoadBalancer>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.web/hostingenvironments" => new ResourceRetriever<ASE>(basicAzureResourceInfo,
@@ -156,6 +147,17 @@ public class ArmClient
             "microsoft.synapse/workspaces" => new SynapseRetriever(basicAzureResourceInfo, _tokenCredential),
             "microsoft.synapse/workspaces/bigdatapools" => new ResourceRetriever<BigDataPool>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01"),
+            
+            "microsoft.compute/virtualmachines/extensions" => new NoOpResourceRetriever(),
+            "microsoft.alertsmanagement/smartdetectoralertrules" => new NoOpResourceRetriever(),
+            "microsoft.compute/sshpublickeys" => new NoOpResourceRetriever(),
+            "microsoft.insights/webtests" => new NoOpResourceRetriever(),
+            "microsoft.insights/actiongroups" => new NoOpResourceRetriever(),
+            "microsoft.network/firewallpolicies" => new NoOpResourceRetriever(),
+            "microsoft.security/iotsecuritysolutions" => new NoOpResourceRetriever(),
+            "microsoft.insights/autoscalesettings" => new NoOpResourceRetriever(),
+            "microsoft.network/dnszones" => new NoOpResourceRetriever(),
+
             _ => Unknown()
         };
     }

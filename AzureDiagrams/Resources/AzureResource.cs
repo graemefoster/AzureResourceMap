@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Diagrams;
 using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
@@ -41,8 +40,8 @@ public class AzureResource
 
     public string Name { get; set; } = default!;
     public virtual string? Image { get; }
-
     public string Location { get; set; } = default!;
+    public string ManagedBy { get; set; } = default!;
 
     /// <summary>
     ///     Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
@@ -52,11 +51,6 @@ public class AzureResource
     public bool ContainedByAnotherResource { get; protected internal set; }
 
     public string Type { get; set; } = default!;
-
-    public virtual AzureResourceNodeBuilder CreateNodeBuilder()
-    {
-        return new AzureResourceNodeBuilder(this);
-    }
 
     public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
     {
@@ -79,7 +73,8 @@ public class AzureResource
     /// <param name="allResources"></param>
     public virtual void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        Extensions.ForEach(x => x.BuildRelationships(this, allResources));;
+        Extensions.ForEach(x => x.BuildRelationships(this, allResources));
+        ;
     }
 
     /// <summary>

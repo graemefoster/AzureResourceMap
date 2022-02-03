@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using DrawIo.Azure.Core.Resources;
+﻿using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 
-namespace DrawIo.Azure.Core.Diagrams;
+namespace AzureDiagramGenerator.DrawIo;
 
 internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
 {

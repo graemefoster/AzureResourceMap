@@ -1,17 +1,12 @@
-﻿using System;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
-using DrawIo.Azure.Core.Diagrams;
+using AzureDiagramGenerator.DrawIo;
 using DrawIo.Azure.Core.Resources;
 using DrawIo.Azure.Core.Resources.Retrievers;
 using Microsoft.Msagl.Core.Layout;
@@ -19,7 +14,7 @@ using Microsoft.Msagl.Core.Routing;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 
-namespace DrawIo.Azure.Core;
+namespace AzureDiagramGenerator;
 
 public static class Program
 {
@@ -62,7 +57,7 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
 
-            var tokenCredential = new AzureCliCredential();
+            var tokenCredential = new DefaultAzureCredential();
             var token = tokenCredential.GetToken(
                 new TokenRequestContext(new[] { "https://management.azure.com/" }));
 
@@ -98,7 +93,7 @@ public static class Program
 
         var graph = new GeometryGraph();
 
-        var nodeBuilders = allNodes.ToDictionary(x => x, x => x.CreateNodeBuilder());
+        var nodeBuilders = allNodes.ToDictionary(x => x, AzureResourceNodeBuilder.CreateNodeBuilder);
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
