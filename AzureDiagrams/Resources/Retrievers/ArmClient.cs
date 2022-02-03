@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DrawIo.Azure.Core.Resources.Retrievers;
 
-public class ArmClient
+internal class ArmClient
 {
     private readonly HttpClient _httpClient;
     private readonly TokenCredential _tokenCredential;

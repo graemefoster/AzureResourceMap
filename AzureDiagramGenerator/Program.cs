@@ -2,13 +2,11 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Net.Http.Headers;
 using System.Text;
-using Azure.Core;
 using Azure.Identity;
 using AzureDiagramGenerator.DrawIo;
+using DrawIo.Azure.Core;
 using DrawIo.Azure.Core.Resources;
-using DrawIo.Azure.Core.Resources.Retrievers;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Core.Routing;
 using Microsoft.Msagl.Layout.Layered;
@@ -58,16 +56,13 @@ public static class Program
             Console.ResetColor();
 
             var tokenCredential = new DefaultAzureCredential();
-            var token = tokenCredential.GetToken(
-                new TokenRequestContext(new[] { "https://management.azure.com/" }));
+            var cancellationTokenSource = new CancellationTokenSource();
+            var azureResources = await new AzureModelRetriever().Retrieve(
+                tokenCredential,
+                cancellationTokenSource.Token,
+                subscriptionId, resourceGroups);
 
-            var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://management.azure.com/");
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
-
-            var armClient = new ArmClient(httpClient, tokenCredential);
-            var resources = (await armClient.Retrieve(subscriptionId, resourceGroups)).ToArray();
-            await DrawDiagram(resources, outputFolder, resourceGroups[0]);
+            await DrawDiagram(azureResources, outputFolder, resourceGroups[0]);
         }
         finally
         {
@@ -78,22 +73,10 @@ public static class Program
 
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
-        var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
-
-        //create some common nodes to represent common platform groupings (AAD, Diagnostics)
-        var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };
-        var core = new CoreServices { Id = CommonResources.CoreServices, Name = "Core Services" };
-        var diagnostics = new CommonDiagnostics { Id = CommonResources.Diagnostics, Name = "Diagnostics" };
-        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad, diagnostics, core })
-            .ToArray();
-
-        //Discover hidden links that aren't obvious through the resource manager
-        //For example, a NIC / private endpoint linked to a subnet
-        foreach (var resource in allNodes) resource.BuildRelationships(allNodes);
 
         var graph = new GeometryGraph();
 
-        var nodeBuilders = allNodes.ToDictionary(x => x, AzureResourceNodeBuilder.CreateNodeBuilder);
+        var nodeBuilders = resources.ToDictionary(x => x, AzureResourceNodeBuilder.CreateNodeBuilder);
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
