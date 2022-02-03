@@ -22,6 +22,10 @@ public class AzureResource
     public List<AzureResource> ContainedResources { get; } = new();
     public IEnumerable<IResourceExtension> Extensions { get; internal set; } = Array.Empty<IResourceExtension>();
 
+    public string ResourceGroup => Id.Split('/')[4];
+    public int NestedDepth => (Id.Split('/').Length - 8) / 2;
+    public string ParentId => string.Join('/', Id.Split('/')[^2]);
+
     public string Id
     {
         get => _id;
@@ -40,7 +44,7 @@ public class AzureResource
     public string Name { get; set; } = default!;
     public virtual string? Image { get; }
     public string Location { get; set; } = default!;
-    public string ManagedBy { get; set; } = default!;
+    public string? ManagedBy { get; set; } = default!;
 
     /// <summary>
     ///     Used to indicate if another resource 'owns' this one. Example would be injecting a NIC into a Subnet.
