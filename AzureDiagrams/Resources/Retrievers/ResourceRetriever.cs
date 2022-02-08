@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers;
+namespace AzureDiagrams.Resources.Retrievers;
 
 public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
 {

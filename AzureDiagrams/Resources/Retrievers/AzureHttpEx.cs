@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers;
+namespace AzureDiagrams.Resources.Retrievers;
 
 public static class AzureHttpEx
 {

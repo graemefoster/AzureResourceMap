@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
+namespace AzureDiagrams.Resources.Retrievers.Custom;
 
 /// <summary>
 /// Had hoped to fetch linked-services but you query them on a different api, need a different token, and that api might be on a private endpoint... So leaving for now :(

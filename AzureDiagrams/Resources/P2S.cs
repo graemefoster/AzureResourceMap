@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 public class P2S : AzureResource
 {

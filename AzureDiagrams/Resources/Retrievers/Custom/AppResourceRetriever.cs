@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
+namespace AzureDiagrams.Resources.Retrievers.Custom;
 
 public class AppResourceRetriever : ResourceRetriever<App>
 {

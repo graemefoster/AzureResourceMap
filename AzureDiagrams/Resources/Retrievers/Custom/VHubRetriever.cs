@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
+namespace AzureDiagrams.Resources.Retrievers.Custom;
 
 public class VHubRetriever : ResourceRetriever<VHub>
 {

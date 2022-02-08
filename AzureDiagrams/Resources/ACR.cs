@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 internal class ACR : AzureResource, ICanBeAccessedViaAHostName
 {

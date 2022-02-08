@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 internal class KeyVault : AzureResource, ICanBeAccessedViaAHostName
 {

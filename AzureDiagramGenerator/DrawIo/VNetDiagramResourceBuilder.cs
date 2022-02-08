@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
-using DrawIo.Azure.Core.Resources;
+using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Layout;
 
 namespace AzureDiagramGenerator.DrawIo;

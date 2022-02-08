@@ -1,4 +1,4 @@
-﻿namespace DrawIo.Azure.Core.Resources;
+﻿namespace AzureDiagrams.Resources;
 
 public class EventHub : AzureResource
 {

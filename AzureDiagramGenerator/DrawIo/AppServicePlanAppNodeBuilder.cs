@@ -1,4 +1,4 @@
-﻿using DrawIo.Azure.Core.Resources;
+﻿using AzureDiagrams.Resources;
 
 namespace AzureDiagramGenerator.DrawIo;
 

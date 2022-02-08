@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 internal class PIP : AzureResource
 {

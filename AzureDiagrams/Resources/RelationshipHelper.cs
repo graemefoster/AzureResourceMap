@@ -4,7 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 public class RelationshipHelper
 {

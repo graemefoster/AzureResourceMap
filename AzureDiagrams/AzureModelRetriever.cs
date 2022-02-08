@@ -6,10 +6,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
-using DrawIo.Azure.Core.Resources;
-using DrawIo.Azure.Core.Resources.Retrievers;
+using AzureDiagrams.Resources;
+using AzureDiagrams.Resources.Retrievers;
 
-namespace DrawIo.Azure.Core;
+namespace AzureDiagrams;
 
 public class AzureModelRetriever
 {

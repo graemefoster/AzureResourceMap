@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers.Custom;
+namespace AzureDiagrams.Resources.Retrievers.Custom;
 
 /// <summary>
 ///     Difficult to dive into all operations. So for the moment it only looks at Backends to build relationships.

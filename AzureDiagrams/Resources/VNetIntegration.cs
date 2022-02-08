@@ -1,4 +1,4 @@
-﻿namespace DrawIo.Azure.Core.Resources;
+﻿namespace AzureDiagrams.Resources;
 
 internal class VNetIntegration : AzureResource, ICanInjectIntoASubnet
 {

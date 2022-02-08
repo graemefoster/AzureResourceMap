@@ -1,4 +1,4 @@
-﻿namespace DrawIo.Azure.Core.Resources.Retrievers;
+﻿namespace AzureDiagrams.Resources.Retrievers;
 
 public class BasicAzureResourceInfo
 {

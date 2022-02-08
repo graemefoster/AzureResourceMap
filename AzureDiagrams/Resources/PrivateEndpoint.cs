@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoASubnet
 {

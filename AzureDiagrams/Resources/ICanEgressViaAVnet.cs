@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace DrawIo.Azure.Core.Resources;
+namespace AzureDiagrams.Resources;
 
 /// <summary>
 /// If your traffic may flow via a different resource (example might be VNet integration) then implement this.

@@ -1,4 +1,4 @@
-﻿using DrawIo.Azure.Core.Resources;
+﻿using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;

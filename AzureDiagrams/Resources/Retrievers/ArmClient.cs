@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using Azure.Core;
-using DrawIo.Azure.Core.Resources.Retrievers.Custom;
-using DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+using AzureDiagrams.Resources.Retrievers.Custom;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers;
+namespace AzureDiagrams.Resources.Retrievers;
 
 internal class ArmClient
 {

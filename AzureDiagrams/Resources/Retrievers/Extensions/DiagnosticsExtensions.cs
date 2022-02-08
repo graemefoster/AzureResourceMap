@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers.Extensions;
+namespace AzureDiagrams.Resources.Retrievers.Extensions;
 
 public class DiagnosticsExtensions : IResourceExtension
 {

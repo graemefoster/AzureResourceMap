@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DrawIo.Azure.Core.Resources.Retrievers;
+namespace AzureDiagrams.Resources.Retrievers;
 
 public interface IRetrieveResource
 {
