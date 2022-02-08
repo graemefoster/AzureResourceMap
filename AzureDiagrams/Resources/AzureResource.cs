@@ -39,6 +39,8 @@ public class AzureResource
 
     public string Name { get; set; } = default!;
     public virtual string? Image { get; }
+    public virtual string? Fill { get; }
+
     public string Location { get; set; } = default!;
     public string ManagedBy { get; set; } = default!;
 

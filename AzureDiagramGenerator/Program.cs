@@ -19,17 +19,19 @@ public static class Program
     public static async Task<int> Main(string[] args)
     {
         var subscriptionIdOption = new Option<string>( "--subscription-id") { IsRequired = true };
+        var tenantIdOption = new Option<string>( "--tenant-id") { IsRequired = false };
         var resourceGroupsOption = new Option<string[]>("--resource-group") { IsRequired = true, AllowMultipleArgumentsPerToken = true};
         var outputOption = new Option<string>("--output") { IsRequired = true};
         var rootCommand = new RootCommand("AzureDiagrams")
         {
             subscriptionIdOption,
+            tenantIdOption,
             resourceGroupsOption,
             outputOption
         };
-        rootCommand.Handler = CommandHandler.Create((string subscriptionId, string[] resourceGroup, string output) =>
+        rootCommand.Handler = CommandHandler.Create((string subscriptionId, string? tenantId, string[] resourceGroup, string output) =>
         {
-            DrawDiagram(Guid.Parse(subscriptionId), resourceGroup, output).Wait();
+            DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output).Wait();
         });
 
         var parser =
@@ -46,7 +48,8 @@ public static class Program
         return await parser.InvokeAsync(args);
     }
 
-    private static async Task DrawDiagram(Guid subscriptionId, string[] resourceGroups, string outputFolder)
+    private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
+        string outputFolder)
     {
         try
         {
@@ -55,14 +58,18 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
 
-            var tokenCredential = new DefaultAzureCredential();
+            var tokenCredential = new VisualStudioCredential(new VisualStudioCredentialOptions()
+            {
+                TenantId = tenantId
+            });
+
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
                 tokenCredential,
                 cancellationTokenSource.Token,
-                subscriptionId, resourceGroups);
+                subscriptionId, tenantId, resourceGroups);
 
-            await DrawDiagram(azureResources, outputFolder, resourceGroups[0]);
+            await DrawDiagram(azureResources, outputFolder, resourceGroups[0].Replace("*", ""));
         }
         finally
         {

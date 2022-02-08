@@ -13,7 +13,7 @@ namespace DrawIo.Azure.Core;
 
 public class AzureModelRetriever
 {
-    public async Task<AzureResource[]> Retrieve(TokenCredential tokenCredential, CancellationToken cancellationToken, Guid subscriptionId, params string[] resourceGroups)
+    public async Task<AzureResource[]> Retrieve(TokenCredential tokenCredential, CancellationToken cancellationToken, Guid subscriptionId, string? tenantId = null, params string[] resourceGroups)
     {
         var token = await tokenCredential.GetTokenAsync(
             new TokenRequestContext(new[] { "https://management.azure.com/" }),
@@ -24,7 +24,15 @@ public class AzureModelRetriever
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
         var armClient = new ArmClient(httpClient, tokenCredential);
-        var resources = (await armClient.Retrieve(subscriptionId, resourceGroups)).ToArray();
+
+        var expandedResourceGroups = new List<string>();
+        await foreach(var rg in ExpandWildcardResourceGroups(armClient, subscriptionId, resourceGroups).WithCancellation(cancellationToken))
+        {
+            expandedResourceGroups.Add(rg);
+        }
+
+        var resources = new List<AzureResource>();
+        await foreach (var resource in armClient.Retrieve(subscriptionId, expandedResourceGroups).WithCancellation(cancellationToken)) resources.Add(resource); 
         var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
 
         //create some common nodes to represent common platform groupings (AAD, Diagnostics)
@@ -39,5 +47,10 @@ public class AzureModelRetriever
         foreach (var resource in allNodes) resource.BuildRelationships(allNodes);
 
         return allNodes;
+    }
+
+    private IAsyncEnumerable<string> ExpandWildcardResourceGroups(ArmClient armClient, Guid subscriptionId, string[] resourceGroups)
+    {
+        return armClient.FindResourceGroups(subscriptionId, resourceGroups.Select(rg => rg.Replace("*", "")));
     }
 }

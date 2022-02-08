@@ -1,4 +1,7 @@
-﻿using DrawIo.Azure.Core.Resources;
+﻿using System;
+using System.Security.Cryptography;
+using System.Text;
+using DrawIo.Azure.Core.Resources;
 using Microsoft.Msagl.Core.Layout;
 
 namespace AzureDiagramGenerator.DrawIo;
@@ -27,16 +30,17 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                 AzureResourceDrawer.CreateContainerRectangleNode("", "DNS Zones",
                     _resource.InternalId + ".dnszones", "#E1D5E7", TextAlignment.Bottom);
 
+            var dnsZoneImage = AzureResourceDrawer.CreateSimpleImageNode(_resource.PrivateDnsZones[0].Image, "Private Dns", _resource.Id + "_dns");
             vnetNode.AddChild(privateDnsZoneCluster);
-            foreach (var privateDnsZone in _resource.PrivateDnsZones)
-            {
-                var node = resourceNodeBuilders[privateDnsZone];
-                foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders))
-                {
-                    if (contained.Item2.ClusterParent == null) privateDnsZoneCluster.AddChild(contained.Item2);
-                    yield return contained;
-                }
-            }
+            privateDnsZoneCluster.AddChild(dnsZoneImage);
+
+            var displayText = string.Join("&#xa;", _resource.PrivateDnsZones.Select(x => x.Name));
+            var id = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(displayText))[..16]).ToString();
+            var zoneText = AzureResourceDrawer.CreateTextNode(displayText, id);
+            privateDnsZoneCluster.AddChild(zoneText);
+
+            yield return (_resource, dnsZoneImage);
+            yield return (_resource, zoneText);
         }
 
         foreach (var contained in _resource.ContainedResources)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Azure.Core;
 using DrawIo.Azure.Core.Resources.Retrievers.Custom;
@@ -21,16 +22,36 @@ internal class ArmClient
         _tokenCredential = tokenCredential;
     }
 
-    public async Task<IEnumerable<AzureResource>> Retrieve(Guid subscriptionId, IEnumerable<string> resourceGroups)
+    public async IAsyncEnumerable<AzureResource> Retrieve(Guid subscriptionId, IEnumerable<string> resourceGroups)
     {
-        var allDirectResources = await Task.WhenAll(resourceGroups.Select(rg =>
-            _httpClient.GetAzResourceAsync<AzureList<JObject>>(
-                $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{rg}'", "2020-10-01")));
+        foreach (var rg in resourceGroups)
+        {
+            await foreach (var resource in _httpClient.GetAzResourcesAsync<JObject>(
+                               $"/subscriptions/{subscriptionId}/resources?$filter=resourceGroup eq '{rg}'",
+                               "2020-10-01"))
+            {
+                var resourceRetriever = GetResourceRetriever(resource);
+                yield return await resourceRetriever.FetchResource(_httpClient);
+            }
+        }
+    }
 
-        var allResources = allDirectResources.SelectMany(directResources =>
-            directResources.Value.Select(GetResourceRetriever).Select(r => r.FetchResource(_httpClient)));
+    public async IAsyncEnumerable<string> FindResourceGroups(Guid subscriptionId,
+        IEnumerable<string> resourceGroupPatterns)
+    {
+        var response = await _httpClient.GetAzResourceAsync<AzureList<JObject>>(
+            $"/subscriptions/{subscriptionId}/resourceGroups", "2020-10-01");
 
-        return await Task.WhenAll(allResources);
+        foreach (var rg in response.Value)
+        {
+            var resourceGroupName = rg.Value<string>("name")!;
+            if (resourceGroupPatterns.Any(x =>
+                    resourceGroupName.Contains(x, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                Console.WriteLine($"Found resource group '{resourceGroupName}'");
+                yield return resourceGroupName;
+            }
+        }
     }
 
     private IRetrieveResource GetResourceRetriever(JObject basicAzureResourceInfo)
@@ -156,6 +177,17 @@ internal class ArmClient
             "microsoft.synapse/workspaces/bigdatapools" => new ResourceRetriever<BigDataPool>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01"),
             
+            "microsoft.network/virtualwans" => new ResourceRetriever<VWan>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-03-01"),
+            
+            "microsoft.network/virtualhubs" => new VHubRetriever(basicAzureResourceInfo),
+            
+            "microsoft.network/vpngateways" => new ResourceRetriever<S2S>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-03-01"),
+            
+            "microsoft.network/p2svpngateways" => new ResourceRetriever<P2S>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2021-03-01"),
+
             "microsoft.compute/virtualmachines/extensions" => Generic(),
             "microsoft.alertsmanagement/smartdetectoralertrules" => Generic(),
             "microsoft.compute/sshpublickeys" => Generic(),
@@ -165,6 +197,9 @@ internal class ArmClient
             "microsoft.security/iotsecuritysolutions" => Generic(),
             "microsoft.insights/autoscalesettings" => Generic(),
             "microsoft.network/dnszones" => Generic(),
+            "microsoft.customproviders/resourceproviders" => Generic(),
+            "microsoft.web/certificates" => Generic(),
+            "microsoft.network/vpnserverconfigurations" => Generic(),
 
             _ => Unknown()
         };

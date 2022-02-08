@@ -8,11 +8,21 @@ namespace AzureDiagramGenerator.DrawIo;
 internal static class AzureResourceDrawer
 {
     public static Node CreateSimpleRectangleNode(string type, string name, string id,
-        string backgroundColour = "#dae8fc", TextAlignment textAlignment = TextAlignment.Middle)
+        string? backgroundColour = null, TextAlignment textAlignment = TextAlignment.Middle)
     {
         var node = new Node(CurveFactory.CreateRectangle(150, 75, new Point())) { UserData = name };
         node.UserData = new CustomUserData(
-            () => DrawSimpleRectangleNode(node, type, name, id, backgroundColour, textAlignment), name,
+            () => DrawSimpleRectangleNode(node, type, name, id, backgroundColour ?? "#dae8fc", textAlignment), name,
+            id);
+        return node;
+    }
+
+    public static Node CreateTextNode(string text, string id)
+    {
+        var node = new Node(CurveFactory.CreateRectangle(150, 75, new Point())) { UserData = text };
+        node.UserData = new CustomUserData(
+            () => DrawSimpleTextNode(node, text, id),
+            id,
             id);
         return node;
     }
@@ -25,11 +35,11 @@ internal static class AzureResourceDrawer
     }
 
     public static Cluster CreateContainerRectangleNode(string type, string name, string id,
-        string backgroundColour = "#dae8fc", TextAlignment textAlignment = TextAlignment.Middle)
+        string? backgroundColour = null, TextAlignment textAlignment = TextAlignment.Middle)
     {
         var node = new Cluster { BoundaryCurve = CurveFactory.CreateRectangle(200, 100, new Point()) };
         node.UserData = new CustomUserData(
-            () => DrawSimpleRectangleNode(node, type, name, id, backgroundColour, textAlignment), name,
+            () => DrawSimpleRectangleNode(node, type, name, id, backgroundColour ?? "#FFE6CC", textAlignment), name,
             id);
         return node;
     }
@@ -49,9 +59,9 @@ internal static class AzureResourceDrawer
 
         var parent = "1";
 
-        if (node.ClusterParent is Cluster cluster)
-            if (!IsRootCluster(cluster))
-                parent = ((CustomUserData)cluster.UserData).Id;
+        if (node.ClusterParent != null)
+            if (!IsRootCluster(node.ClusterParent))
+                parent = ((CustomUserData)node.ClusterParent.UserData).Id;
 
         var text = name;
         if (!string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
@@ -77,14 +87,38 @@ internal static class AzureResourceDrawer
 
         var parent = "1";
 
-        if (node.ClusterParent is Cluster cluster)
-            if (!IsRootCluster(cluster))
-                parent = ((CustomUserData)cluster.UserData).Id;
+        if (node.ClusterParent != null)
+            if (!IsRootCluster(node.ClusterParent))
+                parent = ((CustomUserData)node.ClusterParent.UserData).Id;
 
         return
             @$"<mxCell id=""{id}"" value=""{name}"" style=""html=1;image;image={image};fontSize=12;labelPosition=bottom"" vertex=""1"" parent=""{parent}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
+</mxCell>";
+    }
+
+    private static string DrawSimpleTextNode(Node node, string text, string id)
+    {
+        var boundingBoxWidth = node.BoundingBox.Width;
+        var boundingBoxHeight = node.BoundingBox.Height;
+        var boundingBoxLeft = node.BoundingBox.Left;
+        var boundingBoxTop = node.BoundingBox.Bottom;
+        if (node.ClusterParent != null)
+        {
+            boundingBoxLeft -= node.ClusterParent.BoundingBox.Left;
+            boundingBoxTop -= node.ClusterParent.BoundingBox.Bottom;
+        }
+
+        var parent = "1";
+
+        if (node.ClusterParent != null)
+            if (!IsRootCluster(node.ClusterParent))
+                parent = ((CustomUserData)node.ClusterParent.UserData).Id;
+
+        return
+            @$"<mxCell id=""{id}"" value=""{text}"" style=""text;align=left;fontSize=12;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;"" vertex=""1"" parent=""{parent}"">
+    <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" as=""geometry"" />
 </mxCell>";
     }
 
@@ -100,7 +134,7 @@ internal static class AzureResourceDrawer
             FlowEmphasis.LessImportant => Pattern.Dashed,
             _ => Pattern.Solid
         };
-        
+
         var edge = new Edge(source, target)
         {
             UserData = new CustomUserData(
