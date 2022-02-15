@@ -9,8 +9,8 @@ namespace AzureDiagrams.Resources;
 public class VM : AzureResource, IAssociateWithNic
 {
     public override string Image => "img/lib/azure2/compute/Virtual_Machine.svg";
-    public string SystemDiskId { get; private set; } = default!;
-    public string[] Nics { get; private set; } = default!;
+    public string SystemDiskId { get; protected set; } = default!;
+    public string[] Nics { get; protected set; } = default!;
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
     {

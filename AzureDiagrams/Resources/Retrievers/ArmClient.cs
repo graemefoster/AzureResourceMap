@@ -49,6 +49,10 @@ internal class ArmClient
                 Console.WriteLine($"Found resource group '{resourceGroupName}'");
                 yield return resourceGroupName;
             }
+            else
+            {
+                Console.WriteLine($"Ignoring resource group '{resourceGroupName}'");
+            }
         }
     }
 
@@ -103,6 +107,8 @@ internal class ArmClient
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
             "microsoft.apimanagement/service" => new ApimServiceResourceRetriever(basicAzureResourceInfo),
             "microsoft.compute/virtualmachines" => new ResourceRetriever<VM>(basicAzureResourceInfo,
+                "2021-07-01", true, extensions: new[] { new DiagnosticsExtensions() }),
+            "microsoft.compute/virtualmachinescalesets" => new ResourceRetriever<VMSS>(basicAzureResourceInfo,
                 "2021-07-01", true, extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.compute/disks" => new ResourceRetriever<Disk>(basicAzureResourceInfo),
             "microsoft.operationalinsights/workspaces" => new ResourceRetriever<LogAnalyticsWorkspace>(
