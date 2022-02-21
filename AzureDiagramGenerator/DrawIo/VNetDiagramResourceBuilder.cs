@@ -20,9 +20,9 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
     {
         var vnetNode =
             AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, "#FFE6CC",
-                TextAlignment.Top);
+                TextAlignment.Top, _resource.Image);
+        
         yield return (_resource, vnetNode);
-
 
         if (_resource.PrivateDnsZones.Count > 0)
         {

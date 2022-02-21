@@ -58,10 +58,7 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
 
-            var tokenCredential = new VisualStudioCredential(new VisualStudioCredentialOptions()
-            {
-                TenantId = tenantId
-            });
+            var tokenCredential = new DefaultAzureCredential();
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(

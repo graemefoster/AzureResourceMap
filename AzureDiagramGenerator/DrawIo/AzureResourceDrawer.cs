@@ -1,4 +1,5 @@
-﻿using AzureDiagrams.Resources;
+﻿using System.Diagnostics.Contracts;
+using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
@@ -35,17 +36,17 @@ internal static class AzureResourceDrawer
     }
 
     public static Cluster CreateContainerRectangleNode(string type, string name, string id,
-        string? backgroundColour = null, TextAlignment textAlignment = TextAlignment.Middle)
+        string? backgroundColour = null, TextAlignment textAlignment = TextAlignment.Middle, string? image = null)
     {
         var node = new Cluster { BoundaryCurve = CurveFactory.CreateRectangle(200, 100, new Point()) };
         node.UserData = new CustomUserData(
-            () => DrawSimpleRectangleNode(node, type, name, id, backgroundColour ?? "#FFE6CC", textAlignment), name,
+            () =>  DrawSimpleRectangleNode(node, type, name, id, backgroundColour ?? "#FFE6CC", textAlignment, image), name,
             id);
         return node;
     }
 
     private static string DrawSimpleRectangleNode(Node node, string type, string name, string id,
-        string backgroundColour, TextAlignment textAlignment = TextAlignment.Middle)
+        string backgroundColour, TextAlignment textAlignment = TextAlignment.Middle, string? image = null)
     {
         var boundingBoxWidth = node.BoundingBox.Width;
         var boundingBoxHeight = node.BoundingBox.Height;
@@ -64,13 +65,23 @@ internal static class AzureResourceDrawer
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
 
         var text = name;
-        if (!string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
+        if (string.IsNullOrEmpty(image) && !string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
 
-        return
+        var container = 
             @$"<mxCell id=""{id}"" value=""{text}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor={backgroundColour};verticalAlign={textAlignment.ToString().ToLowerInvariant()}"" vertex=""1"" parent=""{parent}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
 </mxCell>";
+
+        if (image == null) return container;
+        const int imageSize = 50;
+        var imageCell =
+            @$"<mxCell id=""{id}.image"" style=""html=1;image;image={image};fontSize=12;labelPosition=bottom"" vertex=""1"" parent=""{id}"">
+    <mxGeometry x=""{boundingBoxWidth - imageSize - 10}"" y=""0"" width=""{imageSize}"" height=""{imageSize}"" 
+    as=""geometry"" />
+</mxCell>";
+
+        return $"{container}{Environment.NewLine}{imageCell}";
     }
 
     private static string DrawSimpleImageNode(Node node, string image, string name, string id)
