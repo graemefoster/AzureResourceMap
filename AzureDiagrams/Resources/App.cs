@@ -35,7 +35,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     }
 
 
-    public override async Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override async Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         await base.Enrich(full, additionalResources);
         VirtualNetworkSubnetId = full["properties"]!["virtualNetworkSubnetId"]?.Value<string>();
@@ -52,11 +52,12 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         LookForContainerLink(siteProperties);
 
-        var connectionStrings = additionalResources[AppResourceRetriever.ConnectionStringSettingsList]
+        var connectionStrings = additionalResources[AppResourceRetriever.ConnectionStringSettingsList]?
             ["properties"]!.ToObject<Dictionary<string, JObject>>()?.Values
             .Select(x => x.Value<string>("value")).Where(x => x != null).Select(x => x!) ?? Array.Empty<string>();
 
-        var appSettings = config["properties"]!.ToObject<Dictionary<string, object>>()!;
+        var appSettings = config?["properties"]!.ToObject<Dictionary<string, object>>() ??
+                          new Dictionary<string, object>();
         var potentialConnectionStrings = appSettings.Values.Union(connectionStrings).ToArray();
         _hostNameDiscoverer = new RelationshipHelper(potentialConnectionStrings);
         _hostNameDiscoverer.Discover();
@@ -64,7 +65,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
             x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
             x.Contains("key", StringComparison.InvariantCultureIgnoreCase));
-        
+
         if (potentialAppInsightsKey != null) AppInsightsKey = (string)appSettings[potentialAppInsightsKey];
 
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
@@ -120,8 +121,9 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         base.BuildRelationships(allResources);
     }
+
     private VNetIntegration? VNetIntegration { get; set; }
-    
+
     public AzureResource EgressResource()
     {
         if (VNetIntegration != null) return VNetIntegration;

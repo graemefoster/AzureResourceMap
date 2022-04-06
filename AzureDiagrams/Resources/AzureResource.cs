@@ -53,7 +53,7 @@ public class AzureResource
 
     public string? Type { get; set; } = default!;
 
-    public virtual Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public virtual Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         return Task.CompletedTask;
     }

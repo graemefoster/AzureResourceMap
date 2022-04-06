@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AzureDiagrams.Resources.Retrievers.Extensions;
@@ -32,8 +33,21 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
         var basicResource = _basicAzureResourceJObject.ToObject<BasicAzureResourceInfo>()!;
 
         var additionalResources = AdditionalResourcesInternal().ToDictionary(x => x.key,
-            x => client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}", x.version ?? _apiVersion,
-                x.method).Result);
+            x =>
+            {
+                try
+                {
+                    return client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}",
+                        x.version ?? _apiVersion, x.method).Result;
+                }
+                catch (AggregateException ae) when (ae.InnerException is HttpRequestException
+                                                    {
+                                                        StatusCode: HttpStatusCode.Forbidden
+                                                    })
+                {
+                    return null;
+                }
+            });
 
         JObject? azureResource = default;
         if (_fetchFullResource)
@@ -44,13 +58,28 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
         var additionalResourcesEnhanced =
             AdditionalResourcesInternalEnhanced(basicResource, additionalResources, azureResource).ToDictionary(
                 x => x.key,
-                x => client.GetAzResourceAsync<JObject>(
-                    $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
-                    x.method).Result);
+                x =>
+                {
+                    try
+                    {
+                        return client.GetAzResourceAsync<JObject>(
+                            $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
+                            x.method).Result;
+                    }
+                    catch (AggregateException ae) when (ae.InnerException is HttpRequestException
+                                                        {
+                                                            StatusCode: HttpStatusCode.Forbidden
+                                                        })
+                    {
+                        return null;
+                    }
+                });
 
-        var additionalResourcesCustom = await AdditionalResourcesCustom(basicResource, additionalResources, azureResource);
+        var additionalResourcesCustom =
+            await AdditionalResourcesCustom(basicResource, additionalResources, azureResource);
 
-        additionalResources = new Dictionary<string, JObject>(additionalResources.Concat(additionalResourcesEnhanced).Concat(additionalResourcesCustom));
+        additionalResources = new Dictionary<string, JObject?>(additionalResources.Concat(additionalResourcesEnhanced)
+            .Concat(additionalResourcesCustom));
 
         if (!_fetchFullResource)
         {
@@ -87,10 +116,10 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     ///     If you have completely custom requirements for additional information, implement it here
     /// </summary>
     /// <returns></returns>
-    protected virtual Task<Dictionary<string, JObject>> AdditionalResourcesCustom(BasicAzureResourceInfo basicInfo,
-        Dictionary<string, JObject> initialResources, JObject? fullResource)
+    protected virtual Task<Dictionary<string, JObject?>> AdditionalResourcesCustom(BasicAzureResourceInfo basicInfo,
+        Dictionary<string, JObject?> initialResources, JObject? fullResource)
     {
-        return Task.FromResult(new Dictionary<string, JObject>());
+        return Task.FromResult(new Dictionary<string, JObject?>());
     }
 
     /// <summary>
@@ -101,7 +130,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     /// <returns></returns>
     private IEnumerable<(string key, HttpMethod method, string api, string? version)>
         AdditionalResourcesInternalEnhanced(BasicAzureResourceInfo basicInfo,
-            Dictionary<string, JObject> initialResources, JObject? fullResource)
+            Dictionary<string, JObject?> initialResources, JObject? fullResource)
     {
         foreach (var customResource in AdditionalResourcesEnhanced(basicInfo, initialResources, fullResource))
         {
@@ -121,14 +150,14 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     /// <param name="additionalResources"></param>
     /// <returns></returns>
     protected virtual IEnumerable<(string key, HttpMethod method, string api, string? version)>
-        AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> additionalResources,
+        AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources,
             JObject? fullResource)
     {
         yield break;
     }
 
 
-    private async Task<AzureResource> BuildResource(JObject resource, Dictionary<string, JObject> additionalResources)
+    private async Task<AzureResource> BuildResource(JObject resource, Dictionary<string, JObject?> additionalResources)
     {
         var resourceRepresentation = resource.ToObject<T>()!;
         resourceRepresentation.Extensions = _extensions;

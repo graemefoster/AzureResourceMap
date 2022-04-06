@@ -12,10 +12,10 @@ public class VHub : AzureResource
     public override string Image => "img/lib/azure2/networking/Virtual_WANs.svg";
     public override string Fill => "#d5e8d4";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         VWanId = full["properties"]!["virtualWan"]!.Value<string>("id")!;
-        ConnectedVirtualNetworkIds = additionalResources[VHubRetriever.VirtualNetworkConnections]["value"]?
+        ConnectedVirtualNetworkIds = additionalResources[VHubRetriever.VirtualNetworkConnections]!["value"]?
                                          .Select(x => x["properties"]!["remoteVirtualNetwork"]!.Value<string>("id"))
                                          .Select(x => x!).ToArray() ??
                                      Array.Empty<string>();
@@ -34,17 +34,24 @@ public class VHub : AzureResource
     {
         if (FirewallId != null)
         {
-            var firewall = allResources.OfType<Firewall>().SingleOrDefault(x => x.Id.Equals(FirewallId, StringComparison.InvariantCultureIgnoreCase));
+            var firewall = allResources.OfType<Firewall>()
+                .SingleOrDefault(x => x.Id.Equals(FirewallId, StringComparison.InvariantCultureIgnoreCase));
             if (firewall != null)
             {
                 OwnsResource(firewall);
             }
         }
 
-        allResources.OfType<P2S>().Where(x => x.VHubId?.Equals(Id, StringComparison.InvariantCultureIgnoreCase) ?? false).ForEach(OwnsResource);
-        allResources.OfType<S2S>().Where(x => x.VHubId?.Equals(Id, StringComparison.InvariantCultureIgnoreCase) ?? false).ForEach(OwnsResource);
+        allResources.OfType<P2S>()
+            .Where(x => x.VHubId?.Equals(Id, StringComparison.InvariantCultureIgnoreCase) ?? false)
+            .ForEach(OwnsResource);
+        allResources.OfType<S2S>()
+            .Where(x => x.VHubId?.Equals(Id, StringComparison.InvariantCultureIgnoreCase) ?? false)
+            .ForEach(OwnsResource);
 
-        ConnectedVirtualNetworkIds.ForEach(x => allResources.SingleOrDefault(r => r.Id.Equals(x, StringComparison.InvariantCultureIgnoreCase))?.CreateFlowTo(this));
+        ConnectedVirtualNetworkIds.ForEach(x =>
+            allResources.SingleOrDefault(r => r.Id.Equals(x, StringComparison.InvariantCultureIgnoreCase))
+                ?.CreateFlowTo(this));
         base.BuildRelationships(allResources);
     }
 }

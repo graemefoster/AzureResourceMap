@@ -9,7 +9,7 @@ public class VMExtension : AzureResource
 {
     private string _vm = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _vm = string.Join('/', Id.Split('/')[..^2]).ToLowerInvariant();
         return base.Enrich(full, additionalResources);

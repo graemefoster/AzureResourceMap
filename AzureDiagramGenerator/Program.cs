@@ -18,10 +18,11 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        var subscriptionIdOption = new Option<string>( "--subscription-id") { IsRequired = true };
-        var tenantIdOption = new Option<string>( "--tenant-id") { IsRequired = false };
-        var resourceGroupsOption = new Option<string[]>("--resource-group") { IsRequired = true, AllowMultipleArgumentsPerToken = true};
-        var outputOption = new Option<string>("--output") { IsRequired = true};
+        var subscriptionIdOption = new Option<string>("--subscription-id") { IsRequired = true };
+        var tenantIdOption = new Option<string>("--tenant-id") { IsRequired = false };
+        var resourceGroupsOption = new Option<string[]>("--resource-group")
+            { IsRequired = true, AllowMultipleArgumentsPerToken = true };
+        var outputOption = new Option<string>("--output") { IsRequired = true };
         var rootCommand = new RootCommand("AzureDiagrams")
         {
             subscriptionIdOption,
@@ -29,10 +30,11 @@ public static class Program
             resourceGroupsOption,
             outputOption
         };
-        rootCommand.Handler = CommandHandler.Create((string subscriptionId, string? tenantId, string[] resourceGroup, string output) =>
-        {
-            DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output).Wait();
-        });
+        rootCommand.Handler =
+            CommandHandler.Create((string subscriptionId, string? tenantId, string[] resourceGroup, string output) =>
+            {
+                DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output).Wait();
+            });
 
         var parser =
             new CommandLineBuilder(rootCommand)
@@ -58,7 +60,7 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.ResetColor();
 
-            var tokenCredential = new DefaultAzureCredential();
+            var tokenCredential = new AzureCliCredential();
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
@@ -77,7 +79,6 @@ public static class Program
 
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
-
         var graph = new GeometryGraph();
 
         var nodeBuilders = resources.ToDictionary(x => x, AzureResourceNodeBuilder.CreateNodeBuilder);
@@ -117,7 +118,6 @@ public static class Program
             EdgeRoutingSettings = routingSettings,
             NodeSeparation = 25,
             ClusterMargin = 50,
-            
         };
 
         LayoutHelpers.CalculateLayout(graph, settings, null);

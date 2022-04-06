@@ -13,9 +13,9 @@ public class ADF : AzureResource
 
     public override string Image => "img/lib/azure2/databases/Data_Factory.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
-        _linkedServices = additionalResources[AzureDataFactoryRetriever.LinkedServices];
+        _linkedServices = additionalResources[AzureDataFactoryRetriever.LinkedServices]!;
         return base.Enrich(full, additionalResources);
     }
 

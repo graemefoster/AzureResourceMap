@@ -12,7 +12,7 @@ internal class ManagedSqlDatabase : AzureResource
 
     public string ServerId { get; private set; } = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         ServerId = string.Join('/', Id.Split('/')[..^2]);
         return base.Enrich(full, additionalResources);

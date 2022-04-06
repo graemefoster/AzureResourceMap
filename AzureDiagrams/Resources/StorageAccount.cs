@@ -11,7 +11,7 @@ internal class StorageAccount : AzureResource, ICanBeAccessedViaAHostName
     public string[] HostNames { get; private set; } = default!;
     public override string Image => "img/lib/azure2/storage/Storage_Accounts.svg";
 
-    public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         HostNames = jObject["properties"]!["primaryEndpoints"]?.ToObject<Dictionary<string, string>>()?.Values.Select(x => x.GetHostNameFromUrlString()).ToArray() ??
                     Array.Empty<string>();

@@ -12,11 +12,11 @@ public class Synapse : AzureResource, ICanBeAccessedViaAHostName
     private JObject _linkedServices = default!;
     public override string Image => "img/lib/azure2/databases/Data_Factory.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         HostNames = full["properties"]!["connectivityEndpoints"]!.ToObject<Dictionary<string, string>>()!.Values
             .Select(x => x.GetHostNameFromUrlStringOrNull() ?? x).ToArray();
-        _linkedServices = additionalResources[SynapseRetriever.LinkedServices];
+        _linkedServices = additionalResources[SynapseRetriever.LinkedServices]!;
         return base.Enrich(full, additionalResources);
     }
 

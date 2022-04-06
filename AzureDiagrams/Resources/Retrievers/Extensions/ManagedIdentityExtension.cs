@@ -12,7 +12,7 @@ public class ManagedIdentityExtension : IResourceExtension
 
     public (string key, HttpMethod method, string suffix, string? version)? ApiCall { get; }
 
-    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject> additionalResources)
+    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject?> additionalResources)
     {
         Identity = raw["identity"]?.ToObject<Identity>();
         return Task.CompletedTask;

@@ -11,7 +11,7 @@ public class Bot : AzureResource
 
     public string? BotEndpoint { get; set; }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         BotEndpoint = full["properties"]!.Value<string>("endpoint");
         return base.Enrich(full, additionalResources);

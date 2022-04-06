@@ -29,7 +29,7 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
         base.BuildRelationships(allResources);
     }
 
-    public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         _ipConfigurations = new IpConfigurations(jObject);
         return Task.CompletedTask;

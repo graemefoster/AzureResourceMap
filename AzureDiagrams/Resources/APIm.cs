@@ -23,11 +23,11 @@ public class APIm : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASu
     public string[] PublicIpAddresses { get; private set; } = default!;
     public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         HostNames = full["properties"]!["hostnameConfigurations"]!.Select(x => x.Value<string>("hostName")!).ToArray();
 
-        Backends = additionalResources[ApimServiceResourceRetriever.BackendList]["value"]
+        Backends = additionalResources[ApimServiceResourceRetriever.BackendList]!["value"]
             ?.Select(x => x["properties"]!.Value<string>("url")!)
             .Select(x => new Uri(x).Host)
             .ToArray() ?? Array.Empty<string>();
@@ -36,7 +36,7 @@ public class APIm : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASu
                                 .Select(x => x.Value<string>()!).ToArray() ??
                             Array.Empty<string>();
 
-        var vnetConfig  = full["properties"]!["virtualNetworkConfiguration"]!;
+        var vnetConfig = full["properties"]!["virtualNetworkConfiguration"]!;
         var subnet = vnetConfig.Type == JTokenType.Null ? null : vnetConfig!.Value<string>("subnetResourceId");
         SubnetIdsIAmInjectedInto = subnet != null ? new[] { subnet! } : Array.Empty<string>();
 

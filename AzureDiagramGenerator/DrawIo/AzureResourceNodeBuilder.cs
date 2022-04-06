@@ -47,8 +47,9 @@ public class AzureResourceNodeBuilder
 
         if (_resource.ContainedResources.Count > 0)
         {
-            container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type ?? _resource.GetType().Name, _resource.Name,
-                $"{_resource.InternalId}.container",  _resource.Fill, TextAlignment.Top);
+            container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type ?? _resource.GetType().Name,
+                _resource.Name,
+                $"{_resource.InternalId}.container", _resource.Fill, TextAlignment.Top);
             yield return (_resource, container);
             foreach (var contained in _resource.ContainedResources)
             {
@@ -67,7 +68,7 @@ public class AzureResourceNodeBuilder
             {
                 var resourceNode =
                     AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
-                        _resource.InternalId, backgroundColour:_resource.Fill);
+                        _resource.InternalId, backgroundColour: _resource.Fill);
                 if (container != null) container.AddChild(resourceNode);
                 yield return (_resource, resourceNode);
             }
@@ -85,7 +86,6 @@ public class AzureResourceNodeBuilder
     {
         return resource.GetType() switch
         {
-            _ when resource is ASP asp => new AppServicePlanAppNodeBuilder(asp),
             _ when resource is DnsZoneVirtualNetworkLink => new IgnoreNodeBuilder(resource),
             _ when resource is VNet vnet => new VNetDiagramResourceBuilder(vnet),
             _ => GetResourceBuilder(resource)

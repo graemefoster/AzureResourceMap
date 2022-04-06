@@ -14,9 +14,9 @@ public class DiagnosticsExtensions : IResourceExtension
     public (string key, HttpMethod method, string suffix, string? version)? ApiCall => ("diagnostics", HttpMethod.Get,
         "providers/microsoft.insights/diagnosticSettings", "2021-05-01-preview");
 
-    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject> additionalResources)
+    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject?> additionalResources)
     {
-        var workspaces = additionalResources[ApiCall!.Value.key]["value"]!;
+        var workspaces = additionalResources[ApiCall!.Value.key]!["value"]!;
         if (workspaces.Any()) _diagnosticsWorkspaceId = workspaces[0]?["properties"]?.Value<string>("workspaceId");
         return Task.CompletedTask;
     }

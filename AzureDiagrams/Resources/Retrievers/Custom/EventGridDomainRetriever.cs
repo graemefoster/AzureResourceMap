@@ -22,9 +22,9 @@ public class EventGridDomainRetriever : ResourceRetriever<EventGridDomain>
         yield return (Topics, HttpMethod.Get, Topics, null);
     }
 
-    protected override IEnumerable<(string key, HttpMethod method, string api, string? version)> AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> additionalResources, JObject? fullResource)
+    protected override IEnumerable<(string key, HttpMethod method, string api, string? version)> AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources, JObject? fullResource)
     {
-        foreach (var topic in additionalResources[Topics]
+        foreach (var topic in additionalResources[Topics]!
                      ["value"]!.Select(x => x!.Value<string>("name")!))
         {
             yield return ($"{topic}-subscriptions", HttpMethod.Get, $"topics/{topic}/providers/Microsoft.EventGrid/eventSubscriptions", null);

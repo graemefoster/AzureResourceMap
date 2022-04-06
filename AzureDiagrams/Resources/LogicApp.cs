@@ -13,7 +13,7 @@ public class LogicApp : AzureResource, ICanBeAccessedViaAHostName
     public string AccessEndpoint { get; set; } = default!;
     public string[] Connections { get; set; } = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         Connections = full["properties"]!["parameters"]?["$connections"]?["value"]?
             .ToObject<Dictionary<string, JObject>>()?

@@ -10,7 +10,7 @@ public class DnsZoneVirtualNetworkLink : AzureResource
     private string _dnsZone = default!;
     private string _virtualNetwork = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _virtualNetwork = full["properties"]!["virtualNetwork"]!.Value<string>("id")!;
         _dnsZone = string.Join('/', Id.Split("/").ToArray()[..^2]);

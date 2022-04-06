@@ -16,7 +16,7 @@ public class LoadBalancer : AzureResource, ICanInjectIntoASubnet, ICanExposePubl
 
     public string[] SubnetIdsIAmInjectedInto => _frontendIpConfigurations.SubnetAttachments;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _frontendIpConfigurations = new IpConfigurations(full, "frontendIPConfigurations");
         _backendNics = full["properties"]!["backendAddressPools"]!.SelectMany(x =>

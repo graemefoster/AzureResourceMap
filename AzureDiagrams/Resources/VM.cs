@@ -12,7 +12,7 @@ public class VM : AzureResource, IAssociateWithNic
     public string SystemDiskId { get; protected set; } = default!;
     public string[] Nics { get; protected set; } = default!;
 
-    public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         SystemDiskId = jObject["properties"]!["storageProfile"]!["osDisk"]!["managedDisk"]!.Value<string>("id")!;
         Nics = jObject["properties"]!["networkProfile"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!)

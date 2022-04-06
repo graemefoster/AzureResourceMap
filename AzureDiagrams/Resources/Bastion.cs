@@ -11,7 +11,7 @@ public class Bastion : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPA
     public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
     public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _ipConfigurations = new IpConfigurations(full);
         return base.Enrich(full, additionalResources);

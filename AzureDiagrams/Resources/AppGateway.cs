@@ -25,7 +25,7 @@ public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectI
 
     public bool IsWaf { get; set; }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         IsWaf = full["properties"]!["sku"]!.Value<string>("tier")!.Contains("waf",
             StringComparison.CurrentCultureIgnoreCase);

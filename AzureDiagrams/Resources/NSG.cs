@@ -13,7 +13,7 @@ public class NSG : AzureResource
 
     public override string Image => "img/lib/azure2/networking/Network_Security_Groups.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         if (full["properties"]!["networkInterfaces"] != null)
             _networkInterfacesBoundTo =

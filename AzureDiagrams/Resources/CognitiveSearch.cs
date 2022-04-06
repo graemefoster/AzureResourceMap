@@ -16,7 +16,7 @@ public class CognitiveSearch : AzureResource, ICanBeAccessedViaAHostName
         return string.Compare(HostName, hostname, StringComparison.InvariantCultureIgnoreCase) == 0;
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         HostName = $"{Name.ToLowerInvariant()}.search.windows.net";
         return base.Enrich(full, additionalResources);

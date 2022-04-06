@@ -10,7 +10,7 @@ internal class LogAnalyticsWorkspace : AzureResource
     public override string Image => "img/lib/azure2/analytics/Log_Analytics_Workspaces.svg";
     public string CustomerId { get; private set; } = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         CustomerId = full["properties"]!.Value<string>("customerId")!;
         return base.Enrich(full, additionalResources);

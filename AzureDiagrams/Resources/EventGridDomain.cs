@@ -22,12 +22,12 @@ public class EventGridDomain : AzureResource, ICanBeAccessedViaAHostName
         return HostName.Equals(hostname, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
-        Topics = additionalResources[EventGridDomainRetriever.Topics]
+        Topics = additionalResources[EventGridDomainRetriever.Topics]!
             ["value"]!.Select(x => x!.Value<string>("name")!).ToArray();
 
-        Subscriptions = Topics.ToDictionary(t => t, t => additionalResources[$"{t}-subscriptions"]);
+        Subscriptions = Topics.ToDictionary(t => t, t => additionalResources[$"{t}-subscriptions"]!);
 
         HostName = full["properties"]!.Value<string>("endpoint")!.GetHostNameFromUrlString();
 

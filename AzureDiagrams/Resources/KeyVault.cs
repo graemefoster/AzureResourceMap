@@ -14,7 +14,7 @@ internal class KeyVault : AzureResource, ICanBeAccessedViaAHostName
         return VaultUri.Equals(hostname, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         VaultUri = jObject["properties"]!.Value<string>("vaultUri")!.GetHostNameFromUrlString();
         return base.Enrich(jObject, additionalResources);

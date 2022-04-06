@@ -10,13 +10,16 @@ public class VMSS : AzureResource, ICanInjectIntoASubnet
 {
     public override string Image => "img/lib/azure2/compute/VM_Scale_Sets.svg";
 
-    public override Task Enrich(JObject jObject, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         var nicConfigurations =
-            jObject["properties"]!["virtualMachineProfile"]!["networkProfile"]!["networkInterfaceConfigurations"]?.SelectMany(x => x["properties"]!["ipConfigurations"]!);
+            jObject["properties"]!["virtualMachineProfile"]!["networkProfile"]!["networkInterfaceConfigurations"]
+                ?.SelectMany(x => x["properties"]!["ipConfigurations"]!)?.ToArray();
 
-        LoadBalancerRelationships = nicConfigurations.SelectMany(GetLoadBalancersFromIpConfiguration).Distinct();
-        SubnetIdsIAmInjectedInto = nicConfigurations.Select(GetSubnetFromIpConfiguration).Where(x => x != null).Distinct().Select(x => x!).ToArray();
+        LoadBalancerRelationships = nicConfigurations?.SelectMany(GetLoadBalancersFromIpConfiguration).Distinct() ??
+                                    Array.Empty<string>();
+        SubnetIdsIAmInjectedInto = nicConfigurations?.Select(GetSubnetFromIpConfiguration).Where(x => x != null).Distinct().Select(x => x!)
+                .ToArray() ?? Array.Empty<string>();
 
         return Task.CompletedTask;
     }
@@ -51,5 +54,5 @@ public class VMSS : AzureResource, ICanInjectIntoASubnet
         base.BuildRelationships(allResources);
     }
 
-    public string[] SubnetIdsIAmInjectedInto { get; private set; }
+    public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 }

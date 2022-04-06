@@ -20,7 +20,7 @@ internal class ContainerApp : AzureResource, ICanBeAccessedViaAHostName
         return string.Compare(IngressFqdn, hostname, StringComparison.InvariantCultureIgnoreCase) == 0;
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         KubeEnvironmentId = full["properties"]!.Value<string>("kubeEnvironmentId")!;
         IngressFqdn = full["properties"]!["configuration"]!["ingress"]!.Value<string>("fqdn")!;

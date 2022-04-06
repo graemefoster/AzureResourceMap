@@ -18,7 +18,7 @@ public class CognitiveServices : AzureResource, ICanBeAccessedViaAHostName
         return HostNames.Contains(hostname.ToLowerInvariant());
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         HostNames = full["properties"]!["endpoints"]!.ToObject<Dictionary<string, string>>()!.Values
             .Select(x => x.GetHostNameFromUrlString()).ToArray();

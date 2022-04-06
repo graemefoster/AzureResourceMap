@@ -28,15 +28,16 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
         _tokenCredential = tokenCredential;
     }
 
-    protected override async Task<Dictionary<string, JObject>> AdditionalResourcesCustom(
-        BasicAzureResourceInfo basicInfo, Dictionary<string, JObject> initialResources, JObject? fullResource)
+    protected override async Task<Dictionary<string, JObject?>> AdditionalResourcesCustom(
+        BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> initialResources, JObject? fullResource)
     {
         var token = await _tokenCredential.GetTokenAsync(
             new TokenRequestContext(new[] { "https://dev.azuresynapse.net" }), CancellationToken.None);
         var devEndpoint = fullResource!["properties"]!["connectivityEndpoints"]!.Value<string>("dev")!;
         var client = new HttpClient(); //TODO - might be nice to pull this out so I'm not newing this up. Minor though.
         client.Timeout = TimeSpan.FromSeconds(5);
-        var msg = new HttpRequestMessage(HttpMethod.Get, $"{devEndpoint}/linkedServices?api-version=2019-06-01-preview");
+        var msg = new HttpRequestMessage(HttpMethod.Get,
+            $"{devEndpoint}/linkedServices?api-version=2019-06-01-preview");
         msg.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
         try
         {
@@ -44,7 +45,7 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                return new Dictionary<string, JObject>()
+                return new Dictionary<string, JObject?>()
                 {
                     [LinkedServices] = JsonConvert.DeserializeObject<JObject>(responseContent)!
                 };
@@ -54,7 +55,7 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
             Console.WriteLine(
                 $"\tFailed to fetch linked services from {devEndpoint}. Response {response.StatusCode}|{await response.Content.ReadAsStringAsync()}. If Synapse uses Private Endpoints you will need to run this from a location with access.");
             Console.ResetColor();
-            return new Dictionary<string, JObject>();
+            return new Dictionary<string, JObject?>();
         }
         catch (TimeoutException)
         {
@@ -62,7 +63,7 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
             Console.WriteLine(
                 $"\tFailed to fetch linked services from {devEndpoint}. Timed out. If Synapse uses Private Endpoints you will need to run this from a location with access.");
             Console.ResetColor();
-            return new Dictionary<string, JObject>();
+            return new Dictionary<string, JObject?>();
         }
     }
 }

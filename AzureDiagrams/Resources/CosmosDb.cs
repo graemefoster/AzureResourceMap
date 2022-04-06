@@ -15,7 +15,7 @@ internal class CosmosDb : AzureResource, ICanBeAccessedViaAHostName
         return DocumentEndpointHost?.CompareTo(hostname.ToLowerInvariant()) == 0;
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         DocumentEndpointHost =
             full["properties"]!.Value<string>("documentEndpoint")?.GetHostNameFromUrlString() ?? null;

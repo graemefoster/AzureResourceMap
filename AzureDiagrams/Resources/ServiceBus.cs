@@ -17,7 +17,7 @@ public class ServiceBus : AzureResource, ICanBeAccessedViaAHostName
         return HostNames.Contains(hostname, StringComparer.InvariantCultureIgnoreCase);
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         HostNames = new[] { full["properties"]!.Value<string>("serviceBusEndpoint")!.GetHostNameFromUrlString() };
         return base.Enrich(full, additionalResources);

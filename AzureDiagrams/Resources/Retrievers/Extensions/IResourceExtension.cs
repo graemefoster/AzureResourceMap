@@ -19,7 +19,7 @@ public interface IResourceExtension
     /// <param name="raw"></param>
     /// <param name="additionalResources"></param>
     /// <returns></returns>
-    Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject> additionalResources);
+    Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject?> additionalResources);
 
     /// <summary>
     /// Create any relationships between the resource holding the extension, and other resources

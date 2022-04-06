@@ -13,7 +13,7 @@ public class VNet : AzureResource
 
     public override string Image => "img/lib/azure2/networking/Virtual_Networks.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         Subnets = full["properties"]!["subnets"]!.Select(x => new Subnet
         {

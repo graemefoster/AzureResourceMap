@@ -12,7 +12,7 @@ public class ASE : AzureResource, ICanInjectIntoASubnet
 
     public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         SubnetIdsIAmInjectedInto = new[] { full["properties"]!["virtualNetwork"]!.Value<string>("id")! };
         return base.Enrich(full, additionalResources);

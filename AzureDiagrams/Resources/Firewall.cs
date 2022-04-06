@@ -9,7 +9,7 @@ public class Firewall : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIP
     private IpConfigurations _ipConfigurations = default!;
     public override string Image => "img/lib/azure2/networking/Firewalls.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _ipConfigurations = new IpConfigurations(full);
         return base.Enrich(full, additionalResources);

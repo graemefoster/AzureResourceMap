@@ -19,7 +19,7 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
         CreateFlowTo(workspace, "logs", FlowEmphasis.LessImportant);
     }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         LogAnalyticsCustomerId = full["properties"]!["appLogsConfiguration"]?["logAnalyticsConfiguration"]
             ?.Value<string>("customerId");

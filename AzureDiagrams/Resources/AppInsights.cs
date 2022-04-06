@@ -12,7 +12,7 @@ internal class AppInsights : AzureResource
     public string InstrumentationKey { get; private set; } = default!;
     public string? WorkspaceResourceId { get; private set; }
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         InstrumentationKey = full["properties"]!.Value<string>("InstrumentationKey")!;
         WorkspaceResourceId = full["properties"]!.Value<string>("WorkspaceResourceId");

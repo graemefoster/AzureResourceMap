@@ -13,7 +13,7 @@ public class PrivateEndpointExtensions : IResourceExtension
 
     public (string key, HttpMethod method, string suffix, string? version)? ApiCall => null;
 
-    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject> additionalResources)
+    public Task Enrich(AzureResource resource, JObject raw, Dictionary<string, JObject?> additionalResources)
     {
         //Private endpoints are expressed in a common way across the platform. To generalise I've added the check to AzureResource.
         _privateEndpointConnections =

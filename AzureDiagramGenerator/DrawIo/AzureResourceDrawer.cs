@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using AzureDiagrams.Resources;
+﻿using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;

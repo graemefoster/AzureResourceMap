@@ -12,7 +12,7 @@ public class EventGridTopic : AzureResource
     public JObject? Subscriptions { get; internal set; }
     public override string Image => "img/lib/azure2/integration/Event_Grid_Topics.svg";
 
-    public override Task Enrich(JObject full, Dictionary<string, JObject> additionalResources)
+    public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         Subscriptions = additionalResources[EventGridTopicRetriever.Subscriptions];
         return base.Enrich(full, additionalResources);
