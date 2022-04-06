@@ -9,8 +9,8 @@ public class CommonDiagnostics : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<LogAnalyticsWorkspace>().ForEach(OwnsResource);
-        allResources.OfType<AppInsights>().ForEach(OwnsResource);
+        allResources.OfType<LogAnalyticsWorkspace>().Where(x => x.Location == Location).ForEach(OwnsResource);
+        allResources.OfType<AppInsights>().Where(x => x.Location == Location).ForEach(OwnsResource);
         base.BuildRelationships(allResources);
     }
 }

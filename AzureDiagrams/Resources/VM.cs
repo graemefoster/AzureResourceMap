@@ -10,11 +10,16 @@ public class VM : AzureResource, IAssociateWithNic
 {
     public override string Image => "img/lib/azure2/compute/Virtual_Machine.svg";
     public string SystemDiskId { get; protected set; } = default!;
+    public string BootDiagnosticsStorageHost { get; protected set; } = default!;
     public string[] Nics { get; protected set; } = default!;
 
     public override Task Enrich(JObject jObject, Dictionary<string, JObject?> additionalResources)
     {
         SystemDiskId = jObject["properties"]!["storageProfile"]!["osDisk"]!["managedDisk"]!.Value<string>("id")!;
+
+        BootDiagnosticsStorageHost =
+            jObject["properties"]!["diagnosticsProfile"]!["bootDiagnostics"]!.Value<string>("storageUri")!;
+
         Nics = jObject["properties"]!["networkProfile"]!["networkInterfaces"]!.Select(x => x.Value<string>("id")!)
             .ToArray();
 
@@ -47,6 +52,21 @@ public class VM : AzureResource, IAssociateWithNic
                 .Distinct();
             vnets.ForEach(vnet => vnet.GiveHomeToVirtualMachine(this));
         }
+
+        if (!string.IsNullOrEmpty(BootDiagnosticsStorageHost))
+        {
+            var hostname = BootDiagnosticsStorageHost.GetHostNameFromUrlString();
+            var storage = allResources.OfType<ICanBeAccessedViaAHostName>()
+                .SingleOrDefault(x =>
+                    x.CanIAccessYouOnThisHostName(BootDiagnosticsStorageHost.GetHostNameFromUrlString()));
+
+            if (storage != null)
+            {
+                this.CreateLayer7Flow(allResources, (AzureResource)storage, "boot-diagnostics",
+                    hns => hns.Any(hn => hn.Contains(hostname)));
+            }
+        }
+
         base.BuildRelationships(allResources);
     }
 

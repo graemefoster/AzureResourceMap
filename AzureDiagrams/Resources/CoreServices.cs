@@ -9,8 +9,9 @@ public class CoreServices : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<KeyVault>().ForEach(OwnsResource);
-        allResources.OfType<StorageAccount>().ForEach(OwnsResource);
+        allResources.OfType<KeyVault>().Where(x => x.Location == Location).ForEach(OwnsResource);
+        allResources.OfType<StorageAccount>().Where(x => x.Location == Location).ForEach(OwnsResource);
+        allResources.OfType<ACR>().Where(x => x.Location == Location).ForEach(OwnsResource);
         base.BuildRelationships(allResources);
     }
 }

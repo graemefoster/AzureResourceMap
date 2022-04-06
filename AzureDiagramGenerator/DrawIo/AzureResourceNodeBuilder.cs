@@ -102,6 +102,7 @@ public class AzureResourceNodeBuilder
             "microsoft.compute/sshpublickeys" => new IgnoreNodeBuilder(resource),
             "microsoft.insights/webtests" => new IgnoreNodeBuilder(resource),
             "microsoft.insights/actiongroups" => new IgnoreNodeBuilder(resource),
+            "microsoft.operationsmanagement/solutions" => new IgnoreNodeBuilder(resource),
             "microsoft.network/firewallpolicies" => new IgnoreNodeBuilder(resource),
             "microsoft.security/iotsecuritysolutions" => new IgnoreNodeBuilder(resource),
             "microsoft.insights/autoscalesettings" => new IgnoreNodeBuilder(resource),

@@ -31,7 +31,8 @@ public static class FlowEx
         string hostName,
         string flowName)
     {
-        var possibleHosts = allResources.OfType<ICanBeAccessedViaAHostName>().Where(x => x.CanIAccessYouOnThisHostName(hostName));
+        var possibleHosts = allResources.OfType<ICanBeAccessedViaAHostName>()
+            .Where(x => x.CanIAccessYouOnThisHostName(hostName));
         var host = possibleHosts.SingleOrDefault(x => !(x is Nic));
         if (host != null)
         {
@@ -72,8 +73,16 @@ public static class FlowEx
         }
         else
         {
-            //direct flow to the resource (no vnet integration)
-            fromResource.CreateFlowTo(connectTo, flowName);
+            //direct flow to the resource (no vnet integration).
+            //If we found a nic that listened on the hostname then flow to that.
+            if (nics.Any())
+            {
+                nics.ForEach(nic => fromResource.CreateFlowTo(nic, flowName));
+            }
+            else
+            {
+                fromResource.CreateFlowTo(connectTo, flowName);
+            }
         }
     }
 }

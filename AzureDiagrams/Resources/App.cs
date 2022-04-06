@@ -119,6 +119,11 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         _hostNameDiscoverer.BuildRelationships(this, allResources);
 
+        if (VNetIntegration != null)
+        {
+            CreateFlowTo(VNetIntegration);
+        }
+
         base.BuildRelationships(allResources);
     }
 
