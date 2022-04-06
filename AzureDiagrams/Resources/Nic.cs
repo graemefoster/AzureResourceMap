@@ -20,7 +20,7 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
 
     public string[] PublicIpAddresses => _ipConfigurations.PublicIpAddresses;
 
-    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments;
+    public string[] SubnetIdsIAmInjectedInto => _ipConfigurations.SubnetAttachments.Distinct().ToArray();
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
