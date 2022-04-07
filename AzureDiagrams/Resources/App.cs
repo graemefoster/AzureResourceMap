@@ -20,6 +20,9 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     public override string Image => Kind switch
     {
         "functionapp,workflowapp" => "img/lib/azure2/integration/Logic_Apps.svg",
+        "app,linux,container" => "img/lib/azure2/containers/App_Services.svg",
+        "app,container" => "img/lib/azure2/containers/App_Services.svg",
+        "functionapp,linux" => "img/lib/azure2/iot/Function_Apps.svg",
         "functionapp" => "img/lib/azure2/iot/Function_Apps.svg",
         _ => "img/lib/azure2/app_services/App_Services.svg"
     };

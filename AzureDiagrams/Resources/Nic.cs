@@ -10,7 +10,7 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
 
     private IpConfigurations _ipConfigurations = default!;
-
+    
     public string[] HostNames => _ipConfigurations.HostNames;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
