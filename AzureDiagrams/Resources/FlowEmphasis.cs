@@ -3,5 +3,6 @@
 public enum FlowEmphasis
 {
     Important,
-    LessImportant
+    LessImportant,
+    Inferred
 }

@@ -22,12 +22,14 @@ public class AzureResourceNodeBuilder
         foreach (var node in CreateNodesInternal(resourceNodeBuilders, diagramAdjustor)) yield return node;
     }
 
-    public virtual IEnumerable<Edge> CreateEdges(
+    public IEnumerable<Edge> CreateEdges(
         IDictionary<AzureResource, Node[]> nodes,
         IDiagramAdjustor diagramAdjustor)
     {
         foreach (var link in _resource.Links)
         {
+            if (!diagramAdjustor.DisplayLink(link)) continue;
+            
             var fromResource = diagramAdjustor.ReplacementFor(link.From) ?? link.From;
             var toResource = diagramAdjustor.ReplacementFor(link.To) ?? link.To;
 

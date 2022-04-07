@@ -5,10 +5,12 @@ namespace AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 
 public class CondensedDiagramAdjustor : IDiagramAdjustor
 {
+    private readonly bool _noInfer;
     private readonly Dictionary<AzureResource, AzureResource> _replacements;
 
-    public CondensedDiagramAdjustor(AzureResource[] allResources)
+    public CondensedDiagramAdjustor(AzureResource[] allResources, bool noInfer)
     {
+        _noInfer = noInfer;
         //Get rid of Private Endpoints where there is a NIC attached.
         var replacements = allResources.OfType<Nic>().Where(x => x.ConnectedPrivateEndpoint != null)
             .Select(x => (remove: (AzureResource)x.ConnectedPrivateEndpoint!, replaceWith: (AzureResource)x))
@@ -69,4 +71,10 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         }
         return null;
     }
+    
+    public bool DisplayLink(ResourceLink link)
+    {
+        return !_noInfer || link.FlowEmphasis != FlowEmphasis.Inferred;
+    }
+
 }

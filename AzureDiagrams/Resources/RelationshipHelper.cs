@@ -103,7 +103,7 @@ public class RelationshipHelper
             {
                 from.CreateLayer7Flow(allResources, storage, "uses",
                     hns => hns.Any(hn =>
-                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)));
+                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)), FlowEmphasis.Inferred);
             }
         }
 
@@ -116,7 +116,7 @@ public class RelationshipHelper
             if (database != null)
             {
                 from.CreateLayer7Flow(allResources, database, "sql",
-                    hns => hns.Any(hn => hn.StartsWith(database.Name)));
+                    hns => hns.Any(hn => hn.StartsWith(database.Name)), FlowEmphasis.Inferred);
             }
         }
 
@@ -130,7 +130,7 @@ public class RelationshipHelper
             if (keyVault != null)
             {
                 from.CreateLayer7Flow(allResources, keyVault, "secrets",
-                    hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)));
+                    hns => hns.Any(hn => keyVault.CanIAccessYouOnThisHostName(hn)), FlowEmphasis.Inferred);
             }
         }
 
@@ -139,7 +139,7 @@ public class RelationshipHelper
             .ForEach(x =>
             {
                 from.CreateLayer7Flow(allResources, (AzureResource)x, "calls",
-                    hns => hns.Any(x.CanIAccessYouOnThisHostName));
+                    hns => hns.Any(x.CanIAccessYouOnThisHostName), FlowEmphasis.Inferred);
             });
     }
 }

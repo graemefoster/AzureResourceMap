@@ -4,6 +4,13 @@ namespace AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 
 public class NoOpDiagramAdjustor : IDiagramAdjustor
 {
+    private readonly bool _noInfer;
+
+    public NoOpDiagramAdjustor(bool noInfer)
+    {
+        _noInfer = noInfer;
+    }
+
     public string ImageFor(AzureResource resource)
     {
         return resource.Image;
@@ -17,6 +24,11 @@ public class NoOpDiagramAdjustor : IDiagramAdjustor
     public bool DrawNode(AzureResource resource)
     {
         return true;
+    }
+
+    public bool DisplayLink(ResourceLink link)
+    {
+        return !_noInfer || link.FlowEmphasis != FlowEmphasis.Inferred;
     }
     
     public AzureResource? ReplacementFor(AzureResource resource)

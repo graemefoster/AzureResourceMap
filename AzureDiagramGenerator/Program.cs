@@ -19,25 +19,27 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        var subscriptionIdOption = new Option<string>("--subscription-id") { IsRequired = true };
+        var subscriptionIdOption = new Option<string>("--subscription-id") { IsRequired = true};
         var tenantIdOption = new Option<string>("--tenant-id") { IsRequired = false };
         var resourceGroupsOption = new Option<string[]>("--resource-group")
-            { IsRequired = true, AllowMultipleArgumentsPerToken = true };
-        var outputOption = new Option<string>("--output") { IsRequired = true };
-        var condensedOption = new Option<bool>("--condensed") { IsRequired = false };
+            { IsRequired = true, AllowMultipleArgumentsPerToken = true, Description = "Resource group(s) containing resources. You can pass multiple, and used the wildcard * character."};
+        var outputOption = new Option<string>("--output") { IsRequired = true, Description = "Output folder for generated diagram" };
+        var condensedOption = new Option<bool>("--condensed") { IsRequired = false, Description = "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram." };
+        var noInferOption = new Option<bool>("--no-infer") { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
         var rootCommand = new RootCommand("AzureDiagrams")
         {
             subscriptionIdOption,
             tenantIdOption,
             resourceGroupsOption,
             outputOption,
-            condensedOption
+            condensedOption,
+            noInferOption
         };
         rootCommand.Handler =
             CommandHandler.Create(
-                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed) =>
+                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed, bool noInfer) =>
                 {
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed).Wait();
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer).Wait();
                 });
 
         var parser =
@@ -55,7 +57,7 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed)
+        string outputFolder, bool condensed, bool noInfer)
     {
         try
         {
@@ -64,6 +66,7 @@ public static class Program
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             Console.WriteLine($"Output Folder: {outputFolder}");
             Console.WriteLine($"Condensed: {condensed}");
+            Console.WriteLine($"NoInfer: {noInfer}");
             Console.ResetColor();
 
             var tokenCredential = new AzureCliCredential();
@@ -72,9 +75,16 @@ public static class Program
             var azureResources = await new AzureModelRetriever().Retrieve(
                 tokenCredential,
                 cancellationTokenSource.Token,
-                subscriptionId, tenantId, resourceGroups);
+                subscriptionId, 
+                tenantId, 
+                resourceGroups);
 
-            await DrawDiagram(azureResources, outputFolder, resourceGroups[0].Replace("*", ""), condensed);
+            await DrawDiagram(
+                azureResources, 
+                outputFolder, 
+                resourceGroups[0].Replace("*", ""), 
+                condensed,
+                noInfer);
         }
         finally
         {
@@ -83,11 +93,16 @@ public static class Program
     }
 
 
-    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName,
-        bool condensed)
+    private static async Task DrawDiagram(
+        AzureResource[] resources, 
+        string directoryName, 
+        string outputName,
+        bool condensed, 
+        bool noInfer)
     {
         var graph = new GeometryGraph();
-        IDiagramAdjustor adjustor = condensed ? new CondensedDiagramAdjustor(resources) : new NoOpDiagramAdjustor();
+        
+        IDiagramAdjustor adjustor = condensed ? new CondensedDiagramAdjustor(resources, noInfer) : new NoOpDiagramAdjustor(noInfer);
 
         var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();
