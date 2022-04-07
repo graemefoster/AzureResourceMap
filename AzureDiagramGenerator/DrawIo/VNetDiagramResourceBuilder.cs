@@ -35,7 +35,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
             privateDnsZoneCluster.AddChild(dnsZoneImage);
 
             var displayText = string.Join("&#xa;", _resource.PrivateDnsZones.Select(x => x.Name));
-            var id = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(displayText))[..16]).ToString();
+            var id = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes(displayText + _resource.InternalId))[..16]).ToString();
             var zoneText = AzureResourceDrawer.CreateTextNode(displayText, id);
             privateDnsZoneCluster.AddChild(zoneText);
 

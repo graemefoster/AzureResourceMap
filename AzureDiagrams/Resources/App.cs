@@ -89,7 +89,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
             .Value;
     }
 
-    public override IEnumerable<AzureResource> DiscoverNewNodes()
+    public override IEnumerable<AzureResource> DiscoverNewNodes(List<AzureResource> azureResources)
     {
         if (VirtualNetworkSubnetId != null)
         {

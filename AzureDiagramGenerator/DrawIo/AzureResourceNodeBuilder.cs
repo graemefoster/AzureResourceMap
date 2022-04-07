@@ -111,6 +111,8 @@ public class AzureResourceNodeBuilder
             "microsoft.web/certificates" => new IgnoreNodeBuilder(resource),
             "microsoft.network/vpnserverconfigurations" => new IgnoreNodeBuilder(resource),
             "microsoft.network/privatednszones" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/networkprofiles" => new IgnoreNodeBuilder(resource),
+            "microsoft.resources/deploymentscripts" => new IgnoreNodeBuilder(resource),
             _ => new AzureResourceNodeBuilder(resource)
         };
     }

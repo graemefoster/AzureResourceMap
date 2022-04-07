@@ -34,7 +34,7 @@ public class EventGridDomain : AzureResource, ICanBeAccessedViaAHostName
         return base.Enrich(full, additionalResources);
     }
 
-    public override IEnumerable<AzureResource> DiscoverNewNodes()
+    public override IEnumerable<AzureResource> DiscoverNewNodes(List<AzureResource> azureResources)
     {
         return Topics.Select(x =>
         {

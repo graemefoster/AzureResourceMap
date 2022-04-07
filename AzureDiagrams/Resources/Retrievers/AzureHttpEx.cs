@@ -37,7 +37,7 @@ public static class AzureHttpEx
         var request = new HttpRequestMessage(method ?? HttpMethod.Get, resourceUri);
         var httpResponseMessage = await httpClient.SendAsync(request);
         var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
-
+        
         httpResponseMessage.EnsureSuccessStatusCode();
         var response = JsonConvert.DeserializeObject<T>(responseContent)!;
         return response;

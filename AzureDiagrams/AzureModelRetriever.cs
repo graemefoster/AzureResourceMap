@@ -33,7 +33,7 @@ public class AzureModelRetriever
 
         var resources = new List<AzureResource>();
         await foreach (var resource in armClient.Retrieve(subscriptionId, expandedResourceGroups).WithCancellation(cancellationToken)) resources.Add(resource); 
-        var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes());
+        var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes(resources));
 
         //create some common nodes to represent common platform groupings (AAD, Diagnostics)
         var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };

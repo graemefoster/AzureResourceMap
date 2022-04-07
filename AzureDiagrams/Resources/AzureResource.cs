@@ -68,7 +68,8 @@ public class AzureResource
     ///     Opportunity to explode any 'new' nodes that aren't represented by ARM resources, but important to the diagram.
     ///     Example is App-Service VNet Integration. We want to show flows going through the vnet-integrated subnet.
     /// </summary>
-    public virtual IEnumerable<AzureResource> DiscoverNewNodes()
+    /// <param name="azureResources"></param>
+    public virtual IEnumerable<AzureResource> DiscoverNewNodes(List<AzureResource> azureResources)
     {
         yield break;
     }

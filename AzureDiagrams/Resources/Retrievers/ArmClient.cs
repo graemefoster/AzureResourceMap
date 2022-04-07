@@ -157,7 +157,7 @@ internal class ArmClient
             "microsoft.network/azurefirewalls" => new ResourceRetriever<Firewall>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-05-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.logic/workflows" => new ResourceRetriever<LogicApp>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2019-05-01"),
+                "2019-05-01", true, new IResourceExtension[] { new DiagnosticsExtensions(), new ManagedIdentityExtension()}),
             "microsoft.web/connections" => new ResourceRetriever<LogicAppConnector>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2016-06-01"),
             "microsoft.devices/iothubs" => new ResourceRetriever<IotHub>(basicAzureResourceInfo,
@@ -180,15 +180,15 @@ internal class ArmClient
             "microsoft.synapse/workspaces" => new SynapseRetriever(basicAzureResourceInfo, _tokenCredential),
             "microsoft.synapse/workspaces/bigdatapools" => new ResourceRetriever<BigDataPool>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01"),
-            
+
             "microsoft.network/virtualwans" => new ResourceRetriever<VWan>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01"),
-            
+
             "microsoft.network/virtualhubs" => new VHubRetriever(basicAzureResourceInfo),
-            
+
             "microsoft.network/vpngateways" => new ResourceRetriever<S2S>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01"),
-            
+
             "microsoft.network/p2svpngateways" => new ResourceRetriever<P2S>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01"),
 
@@ -204,6 +204,20 @@ internal class ArmClient
             "microsoft.customproviders/resourceproviders" => Generic(),
             "microsoft.web/certificates" => Generic(),
             "microsoft.network/vpnserverconfigurations" => Generic(),
+            "microsoft.web/staticsites" => new ResourceRetriever<StaticSite>(
+                basicAzureResourceInfo,
+                "2019-12-01-preview",
+                true,
+                new IResourceExtension[] { new PrivateEndpointExtensions(), new ManagedIdentityExtension() }),
+            "microsoft.containerinstance/containergroups" => new ResourceRetriever<ContainerInstance>(
+                basicAzureResourceInfo,
+                "2019-12-01",
+                true,
+                new IResourceExtension[] { new PrivateEndpointExtensions(), new ManagedIdentityExtension(), new DiagnosticsExtensions() }),
+            "microsoft.network/networkprofiles" => new ResourceRetriever<NetworkProfile>(
+                basicAzureResourceInfo,
+                "2021-12-01",
+                true),
 
             _ => Unknown()
         };

@@ -87,7 +87,7 @@ public static class Program
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
         var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary)).ToArray();
 
-        nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
+         nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
         {
             if (n is Cluster)
             {
