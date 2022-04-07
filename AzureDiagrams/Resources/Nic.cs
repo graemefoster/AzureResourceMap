@@ -5,12 +5,17 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaAHostName
+public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaAHostName
 {
-    public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
+    public override string Image => ConnectedPrivateEndpoint switch
+    {
+        not null => "img/lib/azure2/networking/Private_Link.svg",
+        _ => "img/lib/azure2/networking/Network_Interfaces.svg"
+    };
 
     private IpConfigurations _ipConfigurations = default!;
-    
+    public PrivateEndpoint? ConnectedPrivateEndpoint { get; private set; }
+
     public string[] HostNames => _ipConfigurations.HostNames;
 
     public bool CanIAccessYouOnThisHostName(string hostname)
@@ -24,7 +29,8 @@ internal class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAdd
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.OfType<PrivateEndpoint>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm));
+        ConnectedPrivateEndpoint = allResources.OfType<PrivateEndpoint>().SingleOrDefault(x => x.Nics.Contains(Id));
+        ConnectedPrivateEndpoint?.CreateFlowTo(this);
         allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm));
         base.BuildRelationships(allResources);
     }

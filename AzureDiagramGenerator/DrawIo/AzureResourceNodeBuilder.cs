@@ -19,19 +19,32 @@ public class AzureResourceNodeBuilder
         foreach (var node in CreateNodesInternal(resourceNodeBuilders)) yield return node;
     }
 
-    public IEnumerable<Edge> CreateEdges(IDictionary<AzureResource, Node[]> nodes)
+    public IEnumerable<Edge> CreateEdges(
+        IDictionary<AzureResource, Node[]> nodes,
+        Dictionary<AzureResource, AzureResource> replacements)
     {
         foreach (var link in _resource.Links)
-            if (!(nodes.ContainsKey(link.To) && nodes.ContainsKey(_resource)))
+        {
+            var fromResource = replacements.ContainsKey(link.From) ? replacements[link.From] : link.From;
+            var toResource = replacements.ContainsKey(link.To) ? replacements[link.To] : link.To;
+
+            if (fromResource == toResource)
             {
-                Console.WriteLine("Ignoring edge as not all nodes represented");
+                break;
+            }
+
+            if (!(nodes.ContainsKey(toResource) && nodes.ContainsKey(fromResource)))
+            {
+                Console.WriteLine(
+                    $"Ignoring edge from {fromResource.Name} -> {toResource.Name} as not all nodes represented");
             }
             else
             {
-                var from = nodes[_resource].Single(x => ((CustomUserData)x.UserData).Id == link.From.InternalId);
-                var to = nodes[link.To].Single(x => ((CustomUserData)x.UserData).Id == link.To.InternalId);
+                var from = nodes[fromResource].Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
+                var to = nodes[toResource].Single(x => ((CustomUserData)x.UserData).Id == toResource.InternalId);
                 yield return AzureResourceDrawer.CreateSimpleEdge(from, to, link.Details, link.FlowEmphasis);
             }
+        }
     }
 
     protected IEnumerable<(AzureResource, Node)> CreateOtherResourceNodes(AzureResourceNodeBuilder otherResource,

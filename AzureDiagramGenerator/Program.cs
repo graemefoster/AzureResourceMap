@@ -2,6 +2,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Net.NetworkInformation;
 using System.Text;
 using Azure.Identity;
 using AzureDiagramGenerator.DrawIo;
@@ -85,9 +86,13 @@ public static class Program
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
-        var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary)).ToArray();
+        var replacements = resources.OfType<Nic>().Where(x => x.ConnectedPrivateEndpoint != null)
+            .Select(x => (remove: (AzureResource)x.ConnectedPrivateEndpoint!, replaceWith: (AzureResource)x))
+            .ToDictionary(x => x.remove, x => x.replaceWith);
 
-         nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
+        var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary, replacements)).ToArray();
+
+        nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
         {
             if (n is Cluster)
             {

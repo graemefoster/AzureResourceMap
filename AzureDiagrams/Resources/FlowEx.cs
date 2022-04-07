@@ -49,7 +49,8 @@ public static class FlowEx
         IEnumerable<AzureResource> allResources,
         AzureResource connectTo,
         string flowName,
-        Func<string[], bool> nicHostNameCheck)
+        Func<string[], bool> nicHostNameCheck,
+        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
         var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
 

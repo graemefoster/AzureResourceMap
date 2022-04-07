@@ -63,7 +63,7 @@ public class VM : AzureResource, IAssociateWithNic
             if (storage != null)
             {
                 this.CreateLayer7Flow(allResources, (AzureResource)storage, "boot-diagnostics",
-                    hns => hns.Any(hn => hn.Contains(hostname)));
+                    hns => hns.Any(hn => hn.Contains(hostname)), FlowEmphasis.LessImportant);
             }
         }
 
