@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -20,8 +21,18 @@ public class DnsZoneVirtualNetworkLink : AzureResource
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         var dnsZone = allResources.OfType<PrivateDnsZone>().Single(x => x.Id == _dnsZone);
-        allResources.OfType<VNet>().Single(x => x.Id == _virtualNetwork).AssignPrivateDnsZone(dnsZone);
-        dnsZone.ContainedByAnotherResource = true;
+        var vnet = allResources.OfType<VNet>().SingleOrDefault(x => x.Id == _virtualNetwork);
+        if (vnet != null)
+        {
+            vnet?.AssignPrivateDnsZone(dnsZone);
+            dnsZone.ContainedByAnotherResource = true;
+        }
+
+        else
+        {
+            Console.WriteLine($"Failed to find VNET {_virtualNetwork} to link to DNS Zone {_dnsZone}");
+        }
+
         base.BuildRelationships(allResources);
     }
 }
