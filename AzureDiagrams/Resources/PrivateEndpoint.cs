@@ -8,11 +8,7 @@ namespace AzureDiagrams.Resources;
 
 public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoASubnet
 {
-    public override string Image => ResourceAccessedByMe switch
-    {
-        null => "img/lib/azure2/networking/Private_Link.svg",
-        _ => ResourceAccessedByMe!.Image!
-    };
+    public override string Image => "img/lib/azure2/networking/Private_Link.svg";
 
     public string[] CustomHostNames { get; private set; } = default!;
 

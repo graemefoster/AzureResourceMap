@@ -7,11 +7,7 @@ namespace AzureDiagrams.Resources;
 
 public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaAHostName
 {
-    public override string Image => ConnectedPrivateEndpoint switch
-    {
-        not null => ConnectedPrivateEndpoint!.Image,
-        _ => "img/lib/azure2/networking/Network_Interfaces.svg"
-    };
+    public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";
 
     private IpConfigurations _ipConfigurations = default!;
     public PrivateEndpoint? ConnectedPrivateEndpoint { get; private set; }
