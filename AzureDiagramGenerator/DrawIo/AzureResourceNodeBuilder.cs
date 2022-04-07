@@ -1,4 +1,5 @@
-﻿using AzureDiagrams.Resources;
+﻿using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
+using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Layout;
 
 namespace AzureDiagramGenerator.DrawIo;
@@ -13,24 +14,26 @@ public class AzureResourceNodeBuilder
     }
 
     public IEnumerable<(AzureResource, Node)> CreateNodes(
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders,
+        IDiagramAdjustor diagramAdjustor)
     {
         if (_resource.ContainedByAnotherResource) yield break;
-        foreach (var node in CreateNodesInternal(resourceNodeBuilders)) yield return node;
+        if (!diagramAdjustor.DrawNode(_resource)) yield break;
+        foreach (var node in CreateNodesInternal(resourceNodeBuilders, diagramAdjustor)) yield return node;
     }
 
-    public IEnumerable<Edge> CreateEdges(
+    public virtual IEnumerable<Edge> CreateEdges(
         IDictionary<AzureResource, Node[]> nodes,
-        Dictionary<AzureResource, AzureResource> replacements)
+        IDiagramAdjustor diagramAdjustor)
     {
         foreach (var link in _resource.Links)
         {
-            var fromResource = replacements.ContainsKey(link.From) ? replacements[link.From] : link.From;
-            var toResource = replacements.ContainsKey(link.To) ? replacements[link.To] : link.To;
+            var fromResource = diagramAdjustor.ReplacementFor(link.From) ?? link.From;
+            var toResource = diagramAdjustor.ReplacementFor(link.To) ?? link.To;
 
             if (fromResource == toResource)
             {
-                break;
+                continue;
             }
 
             if (!(nodes.ContainsKey(toResource) && nodes.ContainsKey(fromResource)))
@@ -47,14 +50,18 @@ public class AzureResourceNodeBuilder
         }
     }
 
-    protected IEnumerable<(AzureResource, Node)> CreateOtherResourceNodes(AzureResourceNodeBuilder otherResource,
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+    protected IEnumerable<(AzureResource, Node)> CreateOtherResourceNodes(
+        AzureResourceNodeBuilder otherResource,
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders,
+        IDiagramAdjustor diagramAdjustor)
     {
-        foreach (var node in otherResource.CreateNodesInternal(resourceNodeBuilders)) yield return node;
+        foreach (var node in otherResource.CreateNodesInternal(resourceNodeBuilders, diagramAdjustor))
+            yield return node;
     }
 
     protected virtual IEnumerable<(AzureResource, Node)> CreateNodesInternal(
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders,
+        IDiagramAdjustor diagramAdjustor)
     {
         Cluster? container = null;
 
@@ -67,7 +74,7 @@ public class AzureResourceNodeBuilder
             foreach (var contained in _resource.ContainedResources)
             {
                 var nodeBuilder = resourceNodeBuilders[contained];
-                foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders))
+                foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders, diagramAdjustor))
                 {
                     if (containedNode.Item2.ClusterParent == null) container.AddChild(containedNode.Item2);
                     yield return containedNode;
@@ -87,16 +94,20 @@ public class AzureResourceNodeBuilder
             }
             else
             {
-                var resourceNode =
-                    AzureResourceDrawer.CreateSimpleImageNode(_resource.Image, _resource.Name, _resource.InternalId);
+                var resourceNode = AzureResourceDrawer.CreateSimpleImageNode(diagramAdjustor.ImageFor(_resource),
+                    _resource.Name,
+                    _resource.InternalId);
                 if (container != null) container.AddChild(resourceNode);
                 yield return (_resource, resourceNode);
             }
         }
     }
 
-    public static AzureResourceNodeBuilder CreateNodeBuilder(AzureResource resource)
+    public static AzureResourceNodeBuilder CreateNodeBuilder(AzureResource resource, IDiagramAdjustor diagramAdjustor)
     {
+        var special = diagramAdjustor.CreateNodeBuilder(resource);
+        if (special != null) return special;
+
         return resource.GetType() switch
         {
             _ when resource is DnsZoneVirtualNetworkLink => new IgnoreNodeBuilder(resource),

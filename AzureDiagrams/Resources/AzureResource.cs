@@ -39,7 +39,7 @@ public class AzureResource
     public string InternalId { get; private init; } = default!;
 
     public string Name { get; set; } = default!;
-    public virtual string? Image { get; }
+    public virtual string Image { get; } = default!;
     public virtual string? Fill { get; }
 
     public string Location

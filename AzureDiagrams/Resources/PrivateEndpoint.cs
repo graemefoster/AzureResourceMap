@@ -8,8 +8,15 @@ namespace AzureDiagrams.Resources;
 
 public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoASubnet
 {
-    public override string Image => "img/lib/azure2/networking/Private_Link.svg";
+    public override string Image => ResourceAccessedByMe switch
+    {
+        null => "img/lib/azure2/networking/Private_Link.svg",
+        _ => ResourceAccessedByMe!.Image!
+    };
+
     public string[] CustomHostNames { get; private set; } = default!;
+
+    public AzureResource? ResourceAccessedByMe { get; set; }
 
     public string[] Nics { get; private set; } = default!;
 
@@ -17,11 +24,23 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources
-            .Select(x => new { Resource = x, PrivateEndpointInformation = x.Extensions.OfType<PrivateEndpointExtensions>().SingleOrDefault()})
+        var accessedByThisPrivateEndpoint = allResources
+            .Select(x => new
+            {
+                Resource = x,
+                PrivateEndpointInformation = x.Extensions.OfType<PrivateEndpointExtensions>().SingleOrDefault()
+            })
             .Where(x => x.PrivateEndpointInformation != null)
-            .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this))
+            .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this));
+
+        accessedByThisPrivateEndpoint
             .ForEach(x => CreateFlowTo(x.Resource));
+
+        //Grab hold of the resource accessed by this (if it's only a single one).
+        ResourceAccessedByMe = accessedByThisPrivateEndpoint.Count() == 1
+            ? accessedByThisPrivateEndpoint.Single().Resource
+            : null;
+
         base.BuildRelationships(allResources);
     }
 

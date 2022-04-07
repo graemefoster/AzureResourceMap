@@ -1,4 +1,5 @@
-﻿using AzureDiagrams.Resources;
+﻿using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
+using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Layout;
 
 namespace AzureDiagramGenerator.DrawIo;
@@ -10,7 +11,7 @@ internal class IgnoreNodeBuilder : AzureResourceNodeBuilder
     }
 
     protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders, IDiagramAdjustor diagramAdjustor)
     {
         yield break;
     }

@@ -2,10 +2,10 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Net.NetworkInformation;
 using System.Text;
 using Azure.Identity;
 using AzureDiagramGenerator.DrawIo;
+using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 using AzureDiagrams;
 using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Layout;
@@ -81,16 +81,14 @@ public static class Program
     private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
     {
         var graph = new GeometryGraph();
+        var adjustor = new CondensedDiagramAdjustor(resources);
 
-        var nodeBuilders = resources.ToDictionary(x => x, AzureResourceNodeBuilder.CreateNodeBuilder);
-        var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders)).ToArray();
+        var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
+        var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());
-        var replacements = resources.OfType<Nic>().Where(x => x.ConnectedPrivateEndpoint != null)
-            .Select(x => (remove: (AzureResource)x.ConnectedPrivateEndpoint!, replaceWith: (AzureResource)x))
-            .ToDictionary(x => x.remove, x => x.replaceWith);
 
-        var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary, replacements)).ToArray();
+        var edges = nodeBuilders.Values.SelectMany(x => x.CreateEdges(nodesDictionary, adjustor)).ToArray();
 
         nodesDictionary.SelectMany(x => x.Value).ForEach(n =>
         {

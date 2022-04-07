@@ -9,7 +9,7 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
 {
     public override string Image => ConnectedPrivateEndpoint switch
     {
-        not null => "img/lib/azure2/networking/Private_Link.svg",
+        not null => ConnectedPrivateEndpoint!.Image,
         _ => "img/lib/azure2/networking/Network_Interfaces.svg"
     };
 

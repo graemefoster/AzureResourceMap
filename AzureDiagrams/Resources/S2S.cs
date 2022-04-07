@@ -6,7 +6,7 @@ namespace AzureDiagrams.Resources;
 
 public class S2S : AzureResource
 {
-    public override string? Image => "img/lib/mscae/VPN_Gateway.svg";
+    public override string Image => "img/lib/mscae/VPN_Gateway.svg";
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         VHubId = full["properties"]!["virtualHub"]?.Value<string>("id");

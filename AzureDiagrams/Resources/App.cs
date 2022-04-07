@@ -130,7 +130,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
         base.BuildRelationships(allResources);
     }
 
-    private VNetIntegration? VNetIntegration { get; set; }
+    public VNetIntegration? VNetIntegration { get; private set; }
 
     public AzureResource EgressResource()
     {

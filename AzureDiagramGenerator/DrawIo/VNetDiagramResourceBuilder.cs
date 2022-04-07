@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
+using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Layout;
 
@@ -16,7 +17,8 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
     }
 
     protected override IEnumerable<(AzureResource, Node)> CreateNodesInternal(
-        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders)
+        IDictionary<AzureResource, AzureResourceNodeBuilder> resourceNodeBuilders,
+        IDiagramAdjustor diagramAdjustor)
     {
         var vnetNode =
             AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, "#FFE6CC",
@@ -46,7 +48,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         foreach (var contained in _resource.ContainedResources)
         {
             var nodeBuilder = resourceNodeBuilders[contained];
-            foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders))
+            foreach (var containedNode in CreateOtherResourceNodes(nodeBuilder, resourceNodeBuilders, diagramAdjustor))
             {
                 if (containedNode.Item2.ClusterParent == null) vnetNode.AddChild(containedNode.Item2);
                 yield return containedNode;
@@ -71,7 +73,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                 foreach (var nsg in subnet.NSGs)
                 {
                     var node = resourceNodeBuilders[nsg];
-                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders))
+                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders, diagramAdjustor))
                     {
                         if (contained.Item2.ClusterParent == null) nsgCluster.AddChild(contained.Item2);
                         yield return contained;
@@ -91,7 +93,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
                 foreach (var resource in subnet.ContainedResources)
                 {
                     var node = resourceNodeBuilders[resource];
-                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders))
+                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders, diagramAdjustor))
                     {
                         if (contained.Item2.ClusterParent == null) subnetNode.AddChild(contained.Item2);
 
