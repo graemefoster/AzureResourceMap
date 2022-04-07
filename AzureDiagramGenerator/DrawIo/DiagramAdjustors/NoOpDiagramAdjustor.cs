@@ -2,7 +2,7 @@ using AzureDiagrams.Resources;
 
 namespace AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 
-public class RawDiagramAdjustor : IDiagramAdjustor
+public class NoOpDiagramAdjustor : IDiagramAdjustor
 {
     public string ImageFor(AzureResource resource)
     {

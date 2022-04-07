@@ -24,18 +24,21 @@ public static class Program
         var resourceGroupsOption = new Option<string[]>("--resource-group")
             { IsRequired = true, AllowMultipleArgumentsPerToken = true };
         var outputOption = new Option<string>("--output") { IsRequired = true };
+        var condensedOption = new Option<bool>("--condensed") { IsRequired = false };
         var rootCommand = new RootCommand("AzureDiagrams")
         {
             subscriptionIdOption,
             tenantIdOption,
             resourceGroupsOption,
-            outputOption
+            outputOption,
+            condensedOption
         };
         rootCommand.Handler =
-            CommandHandler.Create((string subscriptionId, string? tenantId, string[] resourceGroup, string output) =>
-            {
-                DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output).Wait();
-            });
+            CommandHandler.Create(
+                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed) =>
+                {
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed).Wait();
+                });
 
         var parser =
             new CommandLineBuilder(rootCommand)
@@ -52,13 +55,15 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder)
+        string outputFolder, bool condensed)
     {
         try
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
+            Console.WriteLine($"Output Folder: {outputFolder}");
+            Console.WriteLine($"Condensed: {condensed}");
             Console.ResetColor();
 
             var tokenCredential = new AzureCliCredential();
@@ -69,7 +74,7 @@ public static class Program
                 cancellationTokenSource.Token,
                 subscriptionId, tenantId, resourceGroups);
 
-            await DrawDiagram(azureResources, outputFolder, resourceGroups[0].Replace("*", ""));
+            await DrawDiagram(azureResources, outputFolder, resourceGroups[0].Replace("*", ""), condensed);
         }
         finally
         {
@@ -78,10 +83,11 @@ public static class Program
     }
 
 
-    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName)
+    private static async Task DrawDiagram(AzureResource[] resources, string directoryName, string outputName,
+        bool condensed)
     {
         var graph = new GeometryGraph();
-        var adjustor = new CondensedDiagramAdjustor(resources);
+        IDiagramAdjustor adjustor = condensed ? new CondensedDiagramAdjustor(resources) : new NoOpDiagramAdjustor();
 
         var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();
