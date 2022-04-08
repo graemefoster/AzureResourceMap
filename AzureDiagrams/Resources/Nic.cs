@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
+[DebuggerDisplay("{Type}/{Name}")]
 public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddresses, ICanBeAccessedViaAHostName
 {
     public override string Image => "img/lib/azure2/networking/Network_Interfaces.svg";

@@ -21,18 +21,13 @@ public class NoOpDiagramAdjustor : IDiagramAdjustor
         return null;
     }
 
-    public bool DrawNode(AzureResource resource)
-    {
-        return true;
-    }
-
     public bool DisplayLink(ResourceLink link)
     {
         return !_noInfer || link.FlowEmphasis != FlowEmphasis.Inferred;
     }
     
-    public AzureResource? ReplacementFor(AzureResource resource)
+    public AzureResource ReplacementFor(AzureResource resource)
     {
-        return null;
+        return resource;
     }
 }

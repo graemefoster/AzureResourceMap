@@ -6,30 +6,12 @@ namespace AzureDiagrams.Resources;
 
 public static class FlowEx
 {
-    // public static void CreateFlowToHostName(
-    //     this AzureResource connectFrom, 
-    //     IEnumerable<AzureResource> allResources, 
-    //     string hostName,
-    //     string flowName)
-    // {
-    //     var directNicConnections = allResources.OfType<Nic>().Where(x => x.CanIAccessYouOnThisHostName(hostName));
-    //     if (directNicConnections.Any())
-    //     {
-    //         directNicConnections.ForEach(nic => connectFrom.CreateFlowTo(nic, flowName));
-    //         return;
-    //     }
-    //     
-    //     var resourcesListeningOnThisHostName = allResources.OfType<ICanBeAccessedViaAHostName>().Where(r => r.CanIAccessYouOnThisHostName(hostName)).ToArray();
-    //     resourcesListeningOnThisHostName.ForEach(r => connectFrom.CreateFlowTo((AzureResource)r, flowName));
-    //     
-    // }
-    //
-
     public static void CreateFlowToHostName(
         this AzureResource fromResource,
         IEnumerable<AzureResource> allResources,
         string hostName,
-        string flowName)
+        string flowName,
+        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
     {
         var possibleHosts = allResources.OfType<ICanBeAccessedViaAHostName>()
             .Where(x => x.CanIAccessYouOnThisHostName(hostName));
@@ -40,7 +22,8 @@ public static class FlowEx
                 allResources,
                 (AzureResource)host,
                 flowName,
-                hn => hn.Contains(hostName, StringComparer.InvariantCultureIgnoreCase));
+                hn => hn.Contains(hostName, StringComparer.InvariantCultureIgnoreCase),
+                flowEmphasis);
         }
     }
 
@@ -59,17 +42,17 @@ public static class FlowEx
             var egress = vnetEgress.EgressResource();
             if (egress != fromResource)
             {
-                fromResource.CreateFlowTo(egress);
+                fromResource.CreateFlowTo(egress, flowEmphasis);
             }
 
             if (nics.Any())
             {
-                nics.ForEach(nic => egress.CreateFlowTo(nic, flowName));
+                nics.ForEach(nic => egress.CreateFlowTo(nic, flowName, flowEmphasis));
             }
             else
             {
                 //Assume all traffic going via vnet for simplicity. We can get clever if we want later around public / private IP addresses / introspecting routes, etc.
-                egress.CreateFlowTo(connectTo, flowName);
+                egress.CreateFlowTo(connectTo, flowName, flowEmphasis);
             }
         }
         else
@@ -78,11 +61,11 @@ public static class FlowEx
             //If we found a nic that listened on the hostname then flow to that.
             if (nics.Any())
             {
-                nics.ForEach(nic => fromResource.CreateFlowTo(nic, flowName));
+                nics.ForEach(nic => fromResource.CreateFlowTo(nic, flowName, flowEmphasis));
             }
             else
             {
-                fromResource.CreateFlowTo(connectTo, flowName);
+                fromResource.CreateFlowTo(connectTo, flowName, flowEmphasis);
             }
         }
     }

@@ -18,7 +18,6 @@ public class AzureResourceNodeBuilder
         IDiagramAdjustor diagramAdjustor)
     {
         if (_resource.ContainedByAnotherResource) yield break;
-        if (!diagramAdjustor.DrawNode(_resource)) yield break;
         foreach (var node in CreateNodesInternal(resourceNodeBuilders, diagramAdjustor)) yield return node;
     }
 
@@ -29,9 +28,9 @@ public class AzureResourceNodeBuilder
         foreach (var link in _resource.Links)
         {
             if (!diagramAdjustor.DisplayLink(link)) continue;
-            
-            var fromResource = diagramAdjustor.ReplacementFor(link.From) ?? link.From;
-            var toResource = diagramAdjustor.ReplacementFor(link.To) ?? link.To;
+
+            var fromResource = diagramAdjustor.ReplacementFor(link.From);
+            var toResource = diagramAdjustor.ReplacementFor(link.To);
 
             if (fromResource == toResource)
             {

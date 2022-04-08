@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureDiagrams.Resources.Retrievers.Extensions;
@@ -6,6 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
+[DebuggerDisplay("{Type}/{Name}")]
 public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoASubnet
 {
     public override string Image => "img/lib/azure2/networking/Private_Link.svg";
@@ -27,15 +30,15 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
                 PrivateEndpointInformation = x.Extensions.OfType<PrivateEndpointExtensions>().SingleOrDefault()
             })
             .Where(x => x.PrivateEndpointInformation != null)
-            .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this));
+            .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this))
+            .ToArray();
 
-        accessedByThisPrivateEndpoint
-            .ForEach(x => CreateFlowTo(x.Resource));
+        accessedByThisPrivateEndpoint.ForEach(x => CreateFlowTo(x.Resource));
 
-        //Grab hold of the resource accessed by this (if it's only a single one).
-        ResourceAccessedByMe = accessedByThisPrivateEndpoint.Count() == 1
-            ? accessedByThisPrivateEndpoint.Single().Resource
-            : null;
+        //Grab hold of the resource accessed by this. Should never be more than 1. Write a warning out if we see more though
+        ResourceAccessedByMe = accessedByThisPrivateEndpoint.First().Resource;
+        if (!accessedByThisPrivateEndpoint.Any()) Console.WriteLine($"WARNING: Private endpoint {Id} has no backing resource. Be sure to include its resource group.");
+        if (accessedByThisPrivateEndpoint.Length > 1) Console.WriteLine($"WARNING: Private endpoint {Id} has no backing resource.");
 
         base.BuildRelationships(allResources);
     }

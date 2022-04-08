@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,6 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
+[DebuggerDisplay("{Type}/{Name}")]
 public class AzureResource
 {
     private readonly string _id = default!;
@@ -126,4 +128,5 @@ public class AzureResource
         ContainedResources.Add(contained);
         contained.ContainedByAnotherResource = true;
     }
+    
 }

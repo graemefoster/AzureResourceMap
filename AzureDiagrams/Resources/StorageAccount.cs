@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-internal class StorageAccount : AzureResource, ICanBeAccessedViaAHostName
+[DebuggerDisplay("{Type}/{Name}")]
+public class StorageAccount : AzureResource, ICanBeAccessedViaAHostName
 {
     public string[] HostNames { get; private set; } = default!;
     public override string Image => "img/lib/azure2/storage/Storage_Accounts.svg";

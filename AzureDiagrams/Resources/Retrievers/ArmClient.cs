@@ -97,8 +97,9 @@ internal class ArmClient
                 "2020-11-01",
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new ManagedIdentityExtension() }),
             "microsoft.containerregistry/registries" =>
-                new ResourceRetriever<ACR>(basicAzureResourceInfo, "2021-09-01",
-                    extensions: new IResourceExtension[]
+                new ResourceRetriever<ACR>(basicAzureResourceInfo, "2021-12-01-preview",
+                    true,
+                    new IResourceExtension[]
                     {
                         new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension()
                     }),

@@ -13,7 +13,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     private string? _dockerRepo;
     private string? _searchService;
     private RelationshipHelper _hostNameDiscoverer = default!;
-    public string? ServerFarmId { get; set; }
+    public string ServerFarmId { get; set; } = default!;
     public string? VirtualNetworkSubnetId { get; set; }
     public string Kind { get; set; } = default!;
 
@@ -42,7 +42,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     {
         await base.Enrich(full, additionalResources);
         VirtualNetworkSubnetId = full["properties"]!["virtualNetworkSubnetId"]?.Value<string>();
-        ServerFarmId = full["properties"]!["serverFarmId"]?.Value<string>();
+        ServerFarmId = full["properties"]!.Value<string>("serverFarmId")!;
 
         var config = additionalResources[AppResourceRetriever.ConfigAppSettingsList];
 
@@ -117,7 +117,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         if (_searchService != null)
         {
-            this.CreateFlowToHostName(allResources, _searchService, "uses");
+            this.CreateFlowToHostName(allResources, _searchService, "uses", FlowEmphasis.Inferred);
         }
 
         _hostNameDiscoverer.BuildRelationships(this, allResources);
