@@ -47,4 +47,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/graemefoster/azurediagrams:latest
+            ghcr.io/graemefoster/azurediagrams:${{ steps.gitversion.outputs.SemVer }}
   
