@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test-app:
+  build-and-package-app:
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -24,6 +24,7 @@ jobs:
         with:
           versionSpec: '5.x'
       - name: Determine Version
+        id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.7
 
       - name: Set up QEMU
@@ -47,5 +48,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/graemefoster/azurediagrams:latest
-            ghcr.io/graemefoster/azurediagrams:$AssemblySemVer
+            ghcr.io/graemefoster/azurediagrams:${{ steps.gitversion.outputs.SemVer }}
   
