@@ -37,4 +37,4 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroup: "graemefosterdns"
-          accessToken: steps.token.outputs.token
+          accessToken: ${{ steps.token.outputs.token }}
