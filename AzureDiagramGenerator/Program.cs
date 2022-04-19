@@ -27,7 +27,7 @@ public static class Program
         var outputOption = new Option<string>("--output") { IsRequired = false, Description = "Output folder for generated diagram" };
         var condensedOption = new Option<bool>("--condensed") { IsRequired = false, Description = "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram." };
         var noInferOption = new Option<bool>("--no-infer") { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
-        var tokenOption = new Option<bool>("--token") { IsRequired = false, Description = "Access token that can read the resources" };
+        var tokenOption = new Option<string>("--token") { IsRequired = false, Description = "Access token that can read the resources" };
 
         var rootCommand = new RootCommand("AzureDiagrams")
         {
@@ -70,6 +70,7 @@ public static class Program
                 throw new ArgumentException("To run in a Github action you must provide an access token");
             
             Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Is Github Action: {isGithubAction}");
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
             
