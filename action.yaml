@@ -1,0 +1,14 @@
+name: 'graemefoster-azurediagrams-action'
+description: 'Runs AzureDiagramGenerator'
+branding:
+  icon: 'command'
+  color: 'green'
+inputs:
+  command:
+    description: '--subscription-id <subscription-id> --resource-group <resource-group> --resource-group <resource-group> --output c:/temp/'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.command }}

@@ -23,7 +23,7 @@ public static class Program
         var tenantIdOption = new Option<string>("--tenant-id") { IsRequired = false };
         var resourceGroupsOption = new Option<string[]>("--resource-group")
             { IsRequired = true, AllowMultipleArgumentsPerToken = true, Description = "Resource group(s) containing resources. You can pass multiple, and used the wildcard * character."};
-        var outputOption = new Option<string>("--output") { IsRequired = true, Description = "Output folder for generated diagram" };
+        var outputOption = new Option<string>("--output") { IsRequired = false, Description = "Output folder for generated diagram" };
         var condensedOption = new Option<bool>("--condensed") { IsRequired = false, Description = "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram." };
         var noInferOption = new Option<bool>("--no-infer") { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
         var rootCommand = new RootCommand("AzureDiagrams")
@@ -33,13 +33,14 @@ public static class Program
             resourceGroupsOption,
             outputOption,
             condensedOption,
-            noInferOption
+            noInferOption,
         };
         rootCommand.Handler =
             CommandHandler.Create(
                 (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed, bool noInfer) =>
                 {
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer).Wait();
+                    var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, isGithubAction).Wait();
                 });
 
         var parser =
@@ -57,14 +58,19 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer)
+        string outputFolder, bool condensed, bool noInfer, bool isGithubAction)
     {
         try
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
-            Console.WriteLine($"Output Folder: {outputFolder}");
+            
+            if (!string.IsNullOrEmpty(outputFolder))
+            {
+                Console.WriteLine($"Output Folder: {outputFolder}");
+            }
+
             Console.WriteLine($"Condensed: {condensed}");
             Console.WriteLine($"NoInfer: {noInfer}");
             Console.ResetColor();
@@ -79,12 +85,24 @@ public static class Program
                 tenantId, 
                 resourceGroups);
 
-            await DrawDiagram(
+            var graph = await DrawDiagram(
                 azureResources, 
-                outputFolder, 
-                resourceGroups[0].Replace("*", ""), 
                 condensed,
                 noInfer);
+
+            if (!isGithubAction && !string.IsNullOrEmpty(outputFolder))
+            {
+                var outputName = resourceGroups[0].Replace("*", "");
+                var path = Path.Combine(outputFolder, $"{outputName}.drawio");
+                await File.WriteAllTextAsync(path, graph);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.WriteLine($"::set-output azurediagram={graph.ReplaceLineEndings(string.Empty)}");
+            }
         }
         finally
         {
@@ -93,10 +111,8 @@ public static class Program
     }
 
 
-    private static async Task DrawDiagram(
+    private static async Task<string> DrawDiagram(
         AzureResource[] resources, 
-        string directoryName, 
-        string outputName,
         bool condensed, 
         bool noInfer)
     {
@@ -156,11 +172,6 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        var path = Path.Combine(directoryName, $"{outputName}.drawio");
-        await File.WriteAllTextAsync(path, msGraph);
-
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
-        Console.ResetColor();
+        return msGraph;
     }
 }
