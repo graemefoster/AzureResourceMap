@@ -13,7 +13,26 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         _noInfer = noInfer;
 
         CollapsePrivateEndpoints(allResources);
+        CollapseVirtualMachines(allResources);
         _removals.AddRange(_replacements.Keys);
+    }
+
+    private void CollapseVirtualMachines(AzureResource[] allResources)
+    {
+        foreach (var vm in allResources.OfType<VM>())
+        {
+            var nics = allResources.OfType<Nic>()
+                .Where(x => vm.Nics.Contains(x.Id, StringComparer.InvariantCultureIgnoreCase));
+            foreach (var nic in nics)
+            {
+                _replacements.Add(nic, vm);
+            }
+            var disk = allResources.OfType<Disk>().SingleOrDefault(x => vm.SystemDiskId.Equals(x.Id, StringComparison.InvariantCultureIgnoreCase));
+            if (disk != null)
+            {
+                _replacements.Add(disk, vm);
+            }
+        }
     }
 
     private void CollapsePrivateEndpoints(AzureResource[] allResources)
@@ -71,9 +90,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
     public AzureResourceNodeBuilder? CreateNodeBuilder(AzureResource resource)
     {
         if (_removals.Contains(resource)) return new IgnoreNodeBuilder(resource);
-        if (resource is ASP asp && _removals.OfType<App>()
-                .Any(x => x.ServerFarmId!.Equals(asp.Id, StringComparison.InvariantCultureIgnoreCase)))
-
+        if (resource is ASP asp && _removals.OfType<App>().Any(x => x.ServerFarmId.Equals(asp.Id, StringComparison.InvariantCultureIgnoreCase)))
         {
             return new IgnoreNodeBuilder(resource);
         }
