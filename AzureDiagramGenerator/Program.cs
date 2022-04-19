@@ -20,14 +20,26 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        var subscriptionIdOption = new Option<string>("--subscription-id") { IsRequired = true};
+        var subscriptionIdOption = new Option<string>("--subscription-id") { IsRequired = true };
         var tenantIdOption = new Option<string>("--tenant-id") { IsRequired = false };
         var resourceGroupsOption = new Option<string[]>("--resource-group")
-            { IsRequired = true, AllowMultipleArgumentsPerToken = true, Description = "Resource group(s) containing resources. You can pass multiple, and used the wildcard * character."};
-        var outputOption = new Option<string>("--output") { IsRequired = false, Description = "Output folder for generated diagram" };
-        var condensedOption = new Option<bool>("--condensed") { IsRequired = false, Description = "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram." };
-        var noInferOption = new Option<bool>("--no-infer") { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
-        var tokenOption = new Option<string>("--token") { IsRequired = false, Description = "Access token that can read the resources" };
+        {
+            IsRequired = true, AllowMultipleArgumentsPerToken = true,
+            Description =
+                "Resource group(s) containing resources. You can pass multiple, and used the wildcard * character."
+        };
+        var outputOption = new Option<string>("--output")
+            { IsRequired = false, Description = "Output folder for generated diagram" };
+        var condensedOption = new Option<bool>("--condensed")
+        {
+            IsRequired = false,
+            Description =
+                "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram."
+        };
+        var noInferOption = new Option<bool>("--no-infer")
+            { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
+        var tokenOption = new Option<string>("--token")
+            { IsRequired = false, Description = "Access token that can read the resources" };
 
         var rootCommand = new RootCommand("AzureDiagrams")
         {
@@ -41,10 +53,16 @@ public static class Program
         };
         rootCommand.Handler =
             CommandHandler.Create(
-                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed, bool noInfer, string? token) =>
+                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed,
+                    bool noInfer, string? token) =>
                 {
                     var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, isGithubAction, token).Wait();
+                    if (isGithubAction && token == null)
+                        throw new ArgumentException("To run in a Github action you must provide an access token");
+
+                    output = isGithubAction ? "/github/workspace" : output;
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, token)
+                        .Wait();
                 });
 
         var parser =
@@ -62,18 +80,14 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer, bool isGithubAction, string? token)
+        string outputFolder, bool condensed, bool noInfer, string? token)
     {
         try
         {
-            if (isGithubAction && token == null)
-                throw new ArgumentException("To run in a Github action you must provide an access token");
-            
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Is Github Action: {isGithubAction}");
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
-            
+
             if (!string.IsNullOrEmpty(outputFolder))
             {
                 Console.WriteLine($"Output Folder: {outputFolder}");
@@ -83,34 +97,28 @@ public static class Program
             Console.WriteLine($"NoInfer: {noInfer}");
             Console.ResetColor();
 
-            var tokenCredential = token == null ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
+            var tokenCredential =
+                token == null ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
                 tokenCredential,
                 cancellationTokenSource.Token,
-                subscriptionId, 
-                tenantId, 
+                subscriptionId,
+                tenantId,
                 resourceGroups);
 
             var graph = await DrawDiagram(
-                azureResources, 
+                azureResources,
                 condensed,
                 noInfer);
 
-            if (!isGithubAction && !string.IsNullOrEmpty(outputFolder))
-            {
-                var outputName = resourceGroups[0].Replace("*", "");
-                var path = Path.Combine(outputFolder, $"{outputName}.drawio");
-                await File.WriteAllTextAsync(path, graph);
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.WriteLine($"::set-output azurediagram={graph.ReplaceLineEndings(string.Empty)}");
-            }
+            var outputName = resourceGroups[0].Replace("*", "");
+            var path = Path.Combine(outputFolder, $"{outputName}.drawio");
+            await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
+            Console.ResetColor();
         }
         finally
         {
@@ -120,13 +128,14 @@ public static class Program
 
 
     private static Task<string> DrawDiagram(
-        AzureResource[] resources, 
-        bool condensed, 
+        AzureResource[] resources,
+        bool condensed,
         bool noInfer)
     {
         var graph = new GeometryGraph();
-        
-        IDiagramAdjustor adjustor = condensed ? new CondensedDiagramAdjustor(resources, noInfer) : new NoOpDiagramAdjustor(noInfer);
+
+        IDiagramAdjustor adjustor =
+            condensed ? new CondensedDiagramAdjustor(resources, noInfer) : new NoOpDiagramAdjustor(noInfer);
 
         var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();
@@ -193,7 +202,8 @@ internal class KnownTokenCredential : TokenCredential
         _token = ValueTask.FromResult(new AccessToken(token, DateTimeOffset.MaxValue));
     }
 
-    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext,
+        CancellationToken cancellationToken)
     {
         return _token;
     }
