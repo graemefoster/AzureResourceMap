@@ -29,7 +29,6 @@ jobs:
         id: token
         run: |
           token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
-          echo "::add-mask::$token" 
           echo "::set-output name=token::$token"
 
       - name: graemefoster-azurediagrams-action
