@@ -38,3 +38,9 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroup: "graemefosterdns"
           accessToken: ${{ steps.token.outputs.token }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: diagram
+          path: ./graemefosterdns.drawio
+        
