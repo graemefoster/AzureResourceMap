@@ -4,11 +4,14 @@ branding:
   icon: 'command'
   color: 'green'
 inputs:
-  command:
-    description: '--subscription-id <subscription-id> --resource-group <resource-group> --resource-group <resource-group> --output c:/temp/'
+  subscriptionId:
+    description: 'Azure Subscription Id'
+    required: true
+  resourceGroup:
+    description: 'Azure Resource group'
     required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.command }}
+    - --subscription-id ${{ inputs.subscriptionId }} --resource-group ${{ inputs.resourceGroup }}
