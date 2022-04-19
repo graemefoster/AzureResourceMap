@@ -38,8 +38,12 @@ public static class Program
         };
         var noInferOption = new Option<bool>("--no-infer")
             { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
+
         var tokenOption = new Option<string>("--token")
             { IsRequired = false, Description = "Access token that can read the resources" };
+
+        var outputFileNameOption = new Option<string>("--output-file-name")
+            { IsRequired = false, Description = "File name to write to (will use convention to determine based on a resource-group name if not provided)" };
 
         var rootCommand = new RootCommand("AzureDiagrams")
         {
@@ -49,19 +53,20 @@ public static class Program
             outputOption,
             condensedOption,
             noInferOption,
-            tokenOption
+            tokenOption,
+            outputFileNameOption
         };
         rootCommand.Handler =
             CommandHandler.Create(
                 (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed,
-                    bool noInfer, string? token) =>
+                    bool noInfer, string? token, string? outputFileName) =>
                 {
                     var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
                     if (isGithubAction && token == null)
                         throw new ArgumentException("To run in a Github action you must provide an access token");
 
                     output = isGithubAction ? "/github/workspace" : output;
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, token)
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, token, outputFileName)
                         .Wait();
                 });
 
@@ -80,7 +85,7 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer, string? token)
+        string outputFolder, bool condensed, bool noInfer, string? token, string? outputFileName)
     {
         try
         {
@@ -91,6 +96,10 @@ public static class Program
             if (!string.IsNullOrEmpty(outputFolder))
             {
                 Console.WriteLine($"Output Folder: {outputFolder}");
+            }
+            if (!string.IsNullOrEmpty(outputFileName))
+            {
+                Console.WriteLine($"Output File: {outputFileName}");
             }
 
             Console.WriteLine($"Condensed: {condensed}");
@@ -113,8 +122,8 @@ public static class Program
                 condensed,
                 noInfer);
 
-            var outputName = resourceGroups[0].Replace("*", "");
-            var path = Path.Combine(outputFolder, $"{outputName}.drawio");
+            var outputName = outputFileName ?? $"{resourceGroups[0].Replace("*", "")}.drawio";
+            var path = Path.Combine(outputFolder, outputName);
             await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Written output to {Path.GetFullPath(path)}");

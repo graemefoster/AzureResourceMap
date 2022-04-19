@@ -13,6 +13,9 @@ inputs:
   accessToken:
     description: 'Access Token that can read the resources'
     required: true
+  outputFileName:
+    description: 'Output file name to write to (will write to the working directory)'
+    required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -23,3 +26,5 @@ runs:
     - "${{ inputs.resourceGroup }}"
     - "--token"
     - "${{ inputs.accessToken }}"
+    - "--output-file-name"
+    - "${{ inputs.outputFileName }}"
