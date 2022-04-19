@@ -25,9 +25,8 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           
-#      - name: graemefoster-azurediagrams-action
-#        uses: graemefoster/AzureResourceMap@v0.5.1
-#        with:
-#          subscriptionId: ${{ secrets.SUSCRIPTION_ID }}
-#          resourceGroup: graemefosterdns
-#        
+      - name: graemefoster-azurediagrams-action
+        uses: graemefoster/AzureResourceMap@v0.5.1
+        with:
+          subscriptionId: ${{ secrets.SUSCRIPTION_ID }}
+          resourceGroup: graemefosterdns
