@@ -118,7 +118,7 @@ public static class Program
     }
 
 
-    private static async Task<string> DrawDiagram(
+    private static Task<string> DrawDiagram(
         AzureResource[] resources, 
         bool condensed, 
         bool noInfer)
@@ -179,7 +179,7 @@ public static class Program
 	</root>
 </mxGraphModel>";
 
-        return msGraph;
+        return Task.FromResult(msGraph);
     }
 }
 
