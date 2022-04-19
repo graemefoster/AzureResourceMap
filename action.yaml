@@ -13,3 +13,8 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - "--subscription-id" 
+    - "${{ inputs.subscriptionId }}"
+    - "--resource-group" 
+    - "${{ inputs.resourceGroup }}"
