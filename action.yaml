@@ -10,11 +10,16 @@ inputs:
   resourceGroup:
     description: 'Azure Resource group'
     required: true
+  accessToken:
+    description: 'Access Token that can read the resources'
+    required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
     - "--subscription-id" 
     - "${{ inputs.subscriptionId }}"
-    - "--resource-group" 
+    - "--resource-group"
     - "${{ inputs.resourceGroup }}"
+    - "--token"
+    - "${{ inputs.accessToken }}"

@@ -3,6 +3,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Text;
+using Azure.Core;
 using Azure.Identity;
 using AzureDiagramGenerator.DrawIo;
 using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
@@ -26,6 +27,8 @@ public static class Program
         var outputOption = new Option<string>("--output") { IsRequired = false, Description = "Output folder for generated diagram" };
         var condensedOption = new Option<bool>("--condensed") { IsRequired = false, Description = "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram." };
         var noInferOption = new Option<bool>("--no-infer") { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
+        var tokenOption = new Option<bool>("--token") { IsRequired = false, Description = "Access token that can read the resources" };
+
         var rootCommand = new RootCommand("AzureDiagrams")
         {
             subscriptionIdOption,
@@ -34,13 +37,14 @@ public static class Program
             outputOption,
             condensedOption,
             noInferOption,
+            tokenOption
         };
         rootCommand.Handler =
             CommandHandler.Create(
-                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed, bool noInfer) =>
+                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed, bool noInfer, string? token) =>
                 {
                     var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, isGithubAction).Wait();
+                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, isGithubAction, token).Wait();
                 });
 
         var parser =
@@ -58,10 +62,13 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer, bool isGithubAction)
+        string outputFolder, bool condensed, bool noInfer, bool isGithubAction, string? token)
     {
         try
         {
+            if (isGithubAction && token == null)
+                throw new ArgumentException("To run in a Github action you must provide an access token");
+            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
@@ -75,7 +82,7 @@ public static class Program
             Console.WriteLine($"NoInfer: {noInfer}");
             Console.ResetColor();
 
-            var tokenCredential = new AzureCliCredential();
+            var tokenCredential = token == null ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
@@ -173,5 +180,25 @@ public static class Program
 </mxGraphModel>";
 
         return msGraph;
+    }
+}
+
+internal class KnownTokenCredential : TokenCredential
+{
+    private readonly ValueTask<AccessToken> _token;
+
+    public KnownTokenCredential(string token)
+    {
+        _token = ValueTask.FromResult(new AccessToken(token, DateTimeOffset.MaxValue));
+    }
+
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    {
+        return _token;
+    }
+
+    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    {
+        return _token.Result;
     }
 }
