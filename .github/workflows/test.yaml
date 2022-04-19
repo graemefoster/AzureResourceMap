@@ -28,9 +28,9 @@ jobs:
       - name: "Get access token"
         id: token
         run: |
-        token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
-        echo "::add-mask::$token" 
-        echo "::set-output name=token::$token"
+          token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
+          echo "::add-mask::$token" 
+          echo "::set-output name=token::$token"
 
       - name: graemefoster-azurediagrams-action
         uses: graemefoster/AzureResourceMap@v0.5.10
