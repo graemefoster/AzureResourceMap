@@ -18,3 +18,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: graemefoster-azurediagrams-action
+        uses: graemefoster/AzureResourceMap@v0.5.1
+        with:
+          subscriptionId: ${{ secrets.SUSCRIPTION_ID }}
+          resourceGroup: graemefosterdns
+        
