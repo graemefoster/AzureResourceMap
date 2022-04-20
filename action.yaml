@@ -13,6 +13,14 @@ inputs:
   accessToken:
     description: 'Access Token that can read the resources'
     required: true
+  condensed:
+    description: 'Collapse private endpoints / vm disks to produce a simple view. Useful for large architectures'
+    required: true
+    default: 'true'
+  inferConnections:
+    description: 'Look into configuration settings to infer more links between resources. Can clutter large architectures'
+    required: true
+    default: 'true'
   outputFileName:
     description: 'Output file name to write to (will write to the working directory)'
     required: true
@@ -28,3 +36,7 @@ runs:
     - "${{ inputs.accessToken }}"
     - "--output-file-name"
     - "${{ inputs.outputFileName }}"
+    - "--condensed"
+    - "${{  inputs.condensed}}"
+    - "--no-infer"
+    - "${{  !inputs.inferConnections }}"
