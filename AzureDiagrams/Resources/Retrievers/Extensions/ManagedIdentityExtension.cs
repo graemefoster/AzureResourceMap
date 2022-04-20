@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -21,7 +22,7 @@ public class ManagedIdentityExtension : IResourceExtension
     public void BuildRelationships(AzureResource resource, IEnumerable<AzureResource> allResources)
     {
         Identity?.UserAssignedIdentities?.Keys.ForEach(i =>
-            allResources.OfType<UserAssignedManagedIdentity>().Where(uami => uami.Id.Equals(i))
+            allResources.OfType<UserAssignedManagedIdentity>().Where(uami => uami.Id.Equals(i, StringComparison.InvariantCultureIgnoreCase))
                 .ForEach(uami => resource.CreateFlowTo(uami, "AAD Identity", FlowEmphasis.LessImportant)));
     }
 }
