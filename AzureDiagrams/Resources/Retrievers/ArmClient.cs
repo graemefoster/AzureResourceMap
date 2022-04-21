@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Azure.Core;
 using AzureDiagrams.Resources.Retrievers.Custom;
 using AzureDiagrams.Resources.Retrievers.Extensions;
@@ -40,11 +41,12 @@ internal class ArmClient
         var response = await _httpClient.GetAzResourceAsync<AzureList<JObject>>(
             $"/subscriptions/{subscriptionId}/resourceGroups", "2020-10-01");
 
+        var patternRegexes = resourceGroupPatterns.Select(x => new Regex(x.Replace("*", "(.*?)"))).ToArray();
+
         foreach (var rg in response.Value)
         {
             var resourceGroupName = rg.Value<string>("name")!;
-            if (resourceGroupPatterns.Any(x =>
-                    resourceGroupName.Contains(x, StringComparison.InvariantCultureIgnoreCase)))
+            if (patternRegexes.Any(x => x.IsMatch(resourceGroupName)))
             {
                 Console.WriteLine($"Found resource group '{resourceGroupName}'");
                 yield return resourceGroupName;

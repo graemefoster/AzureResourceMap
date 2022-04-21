@@ -26,7 +26,7 @@ public class AzureModelRetriever
         var armClient = new ArmClient(httpClient, tokenCredential);
 
         var expandedResourceGroups = new List<string>();
-        await foreach(var rg in ExpandWildcardResourceGroups(armClient, subscriptionId, resourceGroups).WithCancellation(cancellationToken))
+        await foreach(var rg in armClient.FindResourceGroups(subscriptionId, resourceGroups).WithCancellation(cancellationToken))
         {
             expandedResourceGroups.Add(rg);
         }
@@ -49,8 +49,4 @@ public class AzureModelRetriever
         return allNodes;
     }
 
-    private IAsyncEnumerable<string> ExpandWildcardResourceGroups(ArmClient armClient, Guid subscriptionId, string[] resourceGroups)
-    {
-        return armClient.FindResourceGroups(subscriptionId, resourceGroups.Select(rg => rg.Replace("*", "")));
-    }
 }
