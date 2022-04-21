@@ -107,7 +107,7 @@ public static class Program
             Console.ResetColor();
 
             var tokenCredential =
-                token == null ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
+                string.IsNullOrWhiteSpace(token) ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
@@ -122,7 +122,7 @@ public static class Program
                 condensed,
                 noInfer);
 
-            var outputName = outputFileName ?? $"{resourceGroups[0].Replace("*", "")}.drawio";
+            var outputName = string.IsNullOrWhiteSpace(outputFileName) ? $"{resourceGroups[0].Replace("*", "")}.drawio" : outputFileName;
             var path = Path.Combine(outputFolder, outputName);
             await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
             Console.ForegroundColor = ConsoleColor.Cyan;
