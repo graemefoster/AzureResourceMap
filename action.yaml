@@ -8,7 +8,7 @@ inputs:
     description: 'Azure Subscription Id'
     required: true
   resourceGroup:
-    description: 'Azure Resource group'
+    description: 'Azure Resource Group to match on. Regexes supported. Also * can be used as a simple non greedy wildcard (he*o) will match a resource group called hello'
     required: true
   accessToken:
     description: 'Access Token that can read the resources'
