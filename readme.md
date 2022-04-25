@@ -34,14 +34,14 @@ Here's an example that:
 ```
 ## Yaml properties
 
-| Property         | Required | Description                                                                 |
-|------------------|----------|-----------------------------------------------------------------------------|
-| subscriptionId   | Yes      | Subscription Id to run against                                              |
-| resourceGroup    | Yes      | Wildcard enabled resource group name (supports multiple)                    |
-| accessToken      | Yes      | Optional JWT to avoid using CLI credential                                  |
-| condensed        | Yes      | True collapses private endpoints into subnets (can simplify large diagrams) |
-| inferConnections | Yes      | True to infer connections by introspecting AppSettings                      |
-| outputFileName   | Yes      | Name of generated file. Gets written to working directory                   |
+| Property          | Required  | Description                                                                  |
+|:------------------|:----------|:-----------------------------------------------------------------------------|
+| subscriptionId    | Yes       | Subscription Id to run against                                               |
+| resourceGroup     | Yes       | Wildcard enabled resource group name (supports multiple)                     |
+| accessToken       | Yes       | Optional JWT to avoid using CLI credential                                   |
+| condensed         | Yes       | True collapses private endpoints into subnets (can simplify large diagrams)  |
+| inferConnections  | Yes       | True to infer connections by introspecting AppSettings                       |
+| outputFileName    | Yes       | Name of generated file. Gets written to working directory                    |
 
 ### CLI
 
@@ -53,16 +53,16 @@ dotnet AzureDiagrams.dll --subscription-id <subscription-id> --resource-group <r
 
 ## CLI flags
 
-| Flag               | Required | Description                                                                 |
-|--------------------|----------|-----------------------------------------------------------------------------|
-| --tenant-id        | No       | Tenant Id (defaults to current Azure CLI)                                   |
-| --subscription     | Yes      | Subscription Id to run against                                              |
-| --resource-group   | Yes      | Wildcard enabled resource group name (supports multiple)                    |
-| --output           | Yes      | Folder to output diagram to                                                 |
-| --condensed        | No       | True collapses private endpoints into subnets (can simplify large diagrams) |
-| --no-infer         | No       | True to infer connections by introspecting AppSettings                      |
-| --token            | No       | Optional JWT to avoid using CLI credential                                  |
-| --output-file-name | No       | Name of generated file. Defaults to resource-group name                     |
+| Flag                | Required  | Description                                                                  |
+|:--------------------|:----------|:-----------------------------------------------------------------------------|
+| --tenant-id         | No        | Tenant Id (defaults to current Azure CLI)                                    |
+| --subscription      | Yes       | Subscription Id to run against                                               |
+| --resource-group    | Yes       | Wildcard enabled resource group name (supports multiple)                     |
+| --output            | Yes       | Folder to output diagram to                                                  |
+| --condensed         | No        | True collapses private endpoints into subnets (can simplify large diagrams)  |
+| --no-infer          | No        | True to infer connections by introspecting AppSettings                       |
+| --token             | No        | Optional JWT to avoid using CLI credential                                   |
+| --output-file-name  | No        | Name of generated file. Defaults to resource-group name                      |
 
 
 ## Example outputs
