@@ -1,6 +1,6 @@
 # AzureDiagrams
 
-## Generate a diagram from your Azure Resources
+## Generate a Draw.IO diagram from your Azure Resources
 
 ### Github Action
 
@@ -82,7 +82,7 @@ To layout the components I use the amazing [AutomaticGraphLayout](https://github
 ## Todo
 There are many, many Azure services not yet covered. I'll try and put a table here of what is covered, and how comprehensive it is covered.
 
-## Visulations
+## Output Formats
 The initial version supports Draw.IO diagrams. 
 
 
