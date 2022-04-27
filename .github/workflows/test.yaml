@@ -22,14 +22,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: azure/login@v1
+      - name: Azure login
+        uses: azure/login@v1.4.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          subscription-id: ${{ env.DEV_SUBSCRIPTION_ID }}
 
       - name: "Get access token"
         id: token
-        run: |
+        uses: azure/CLI@v1
+        with:
+          inlinescript: |
           token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
           echo "::add-mask::$token" 
           echo "::set-output name=token::$token"
