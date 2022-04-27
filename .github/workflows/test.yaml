@@ -32,9 +32,9 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlinescript: |
-          token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
-          echo "::add-mask::$token" 
-          echo "::set-output name=token::$token"
+            token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
+            echo "::add-mask::$token" 
+            echo "::set-output name=token::$token"
 
       - name: x15stack-azure-diagrams-generator
         uses: x15stack/AzureResourceMap@v0.5.17
