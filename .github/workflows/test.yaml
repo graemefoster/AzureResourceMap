@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: azure/login@v1
         with:
-          credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
           subscription-id: ${{ env.DEV_SUBSCRIPTION_ID }}
 
       - name: "Get access token"
