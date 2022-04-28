@@ -36,8 +36,8 @@ jobs:
             echo "::add-mask::$token" 
             echo "::set-output name=token::$token"
 
-      - name: x15stack-azure-diagrams-generator
-        uses: x15stack/AzureResourceMap@v0.5.17
+      - name: graemefoster-azurediagrams-action
+        uses: graemefoster/AzureResourceMap@v0.5.19
         with:
           subscriptionId: ${{ env.DEV_SUBSCRIPTION_ID }}
           resourceGroup: "secr-*-dev"
