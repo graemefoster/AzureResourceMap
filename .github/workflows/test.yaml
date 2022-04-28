@@ -37,7 +37,7 @@ jobs:
             echo "::set-output name=token::$token"
 
       - name: graemefoster-azurediagrams-action
-        uses: graemefoster/AzureResourceMap@v0.6.1
+        uses: graemefoster/AzureResourceMap@v0.6.2
         with:
           subscriptionId: ${{ env.DEV_SUBSCRIPTION_ID }}
           resourceGroup: "secr-*-dev"
