@@ -1,15 +1,25 @@
-﻿namespace AzureDiagramGenerator.DrawIo;
+﻿using Microsoft.Msagl.Core.Layout;
+
+namespace AzureDiagramGenerator.DrawIo;
 
 public class CustomUserData
 {
-    public CustomUserData(Func<string> draw, string name, string id)
+    public CustomUserData(Func<string> drawNode, string name, string id)
     {
-        Draw = draw;
+        DrawNode = drawNode;
         Name = name;
         Id = id;
     }
 
-    public Func<string> Draw { get; init; }
+    public CustomUserData(Func<Edge, string> drawEdge, string name, string id)
+    {
+        DrawEdge = drawEdge;
+        Name = name;
+        Id = id;
+    }
+
+    public Func<string> DrawNode { get; init; }
+    public Func<Edge, string> DrawEdge { get; init; }
     public string Name { get; init; }
     public string Id { get; init; }
 }

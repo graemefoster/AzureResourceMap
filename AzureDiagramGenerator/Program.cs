@@ -171,9 +171,8 @@ public static class Program
 
         var routingSettings = new EdgeRoutingSettings
         {
-            UseObstacleRectangles = true,
-            BendPenalty = 10,
-            EdgeRoutingMode = EdgeRoutingMode.StraightLine
+            EdgeRoutingMode = EdgeRoutingMode.SugiyamaSplines,
+            Padding = 10
         };
 
         var settings = new SugiyamaLayoutSettings
@@ -182,6 +181,7 @@ public static class Program
             PackingMethod = PackingMethod.Compact,
             LayerSeparation = 25,
             EdgeRoutingSettings = routingSettings,
+            LiftCrossEdges = true,
             NodeSeparation = 25,
             ClusterMargin = 50,
         };
@@ -192,8 +192,8 @@ public static class Program
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
-{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).Draw()))}
-{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).Draw()))}
+{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).DrawNode()))}
+{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).DrawEdge(v)))}
 {sb}
 	</root>
 </mxGraphModel>";
