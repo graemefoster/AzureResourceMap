@@ -51,7 +51,7 @@ internal static class AzureResourceDrawer
         var boundingBoxHeight = node.BoundingBox.Height;
         var boundingBoxLeft = node.BoundingBox.Left;
         var boundingBoxTop = node.BoundingBox.Bottom;
-        if (node.ClusterParent != null)
+        if (node.ClusterParent != null && node.ClusterParent.ClusterParent != null)
         {
             boundingBoxLeft -= node.ClusterParent.BoundingBox.Left;
             boundingBoxTop -= node.ClusterParent.BoundingBox.Bottom;
@@ -62,6 +62,8 @@ internal static class AzureResourceDrawer
         if (node.ClusterParent != null)
             if (!IsRootCluster(node.ClusterParent))
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
+
+        ((CustomUserData)node.UserData).DrawnAt(boundingBoxLeft, boundingBoxTop);
 
         var text = name;
         if (string.IsNullOrEmpty(image) && !string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
@@ -89,7 +91,7 @@ internal static class AzureResourceDrawer
         var boundingBoxHeight = node.BoundingBox.Height;
         var boundingBoxLeft = node.BoundingBox.Left;
         var boundingBoxTop = node.BoundingBox.Bottom;
-        if (node.ClusterParent != null)
+        if (node.ClusterParent != null && node.ClusterParent.ClusterParent != null)
         {
             boundingBoxLeft -= node.ClusterParent.BoundingBox.Left;
             boundingBoxTop -= node.ClusterParent.BoundingBox.Bottom;
@@ -101,6 +103,8 @@ internal static class AzureResourceDrawer
             if (!IsRootCluster(node.ClusterParent))
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
 
+        ((CustomUserData)node.UserData).DrawnAt(boundingBoxLeft, boundingBoxTop);
+        
         return
             @$"<mxCell id=""{id}"" value=""{name}"" style=""html=1;image;image={image};fontSize=12;labelPosition=bottom"" vertex=""1"" parent=""{parent}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
@@ -114,7 +118,7 @@ internal static class AzureResourceDrawer
         var boundingBoxHeight = node.BoundingBox.Height;
         var boundingBoxLeft = node.BoundingBox.Left;
         var boundingBoxTop = node.BoundingBox.Bottom;
-        if (node.ClusterParent != null)
+        if (node.ClusterParent != null && node.ClusterParent.ClusterParent != null)
         {
             boundingBoxLeft -= node.ClusterParent.BoundingBox.Left;
             boundingBoxTop -= node.ClusterParent.BoundingBox.Bottom;
@@ -125,6 +129,8 @@ internal static class AzureResourceDrawer
         if (node.ClusterParent != null)
             if (!IsRootCluster(node.ClusterParent))
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
+        
+        ((CustomUserData)node.UserData).DrawnAt(boundingBoxLeft, boundingBoxTop);
 
         return
             @$"<mxCell id=""{id}"" value=""{text}"" style=""text;align=left;fontSize=12;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;"" vertex=""1"" parent=""{parent}"">
@@ -172,7 +178,13 @@ internal static class AzureResourceDrawer
         var points = string.Empty;
         if (edge.EdgeGeometry.Curve is Curve curve)
         {
-            points = $"<Array as=\"points\">{string.Join(Environment.NewLine, curve.Segments.Select(x => $"<mxPoint x=\"{x.Start.X}\" y=\"{x.Start.Y}\" />"))}</Array>";
+            points = @$"<mxPoint x=""{curve.Start.X}"" y=""{curve.Start.Y}"" as=""sourcePoint"" />
+<mxPoint x=""{curve.End.X}"" y=""{curve.End.Y}"" as=""targetPoint"" />
+<Array as=""points"">
+    {string.Join(Environment.NewLine, curve.Segments.Select(x => $"<mxPoint x=\"{x.Start.X}\" y=\"{x.Start.Y}\" />"))}
+</Array>";
+
+            patternStyle += "rounded=1;orthogonalLoop=1;";
         }
         else if (edge.EdgeGeometry.Curve is LineSegment line)
         {
