@@ -86,7 +86,5 @@ public class VNet : AzureResource
         public List<AzureResource> ContainedResources { get; } = new();
 
         public List<NSG> NSGs { get; } = new();
-
-        public UDR? UDR { get; set; }
     }
 }

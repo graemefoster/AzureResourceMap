@@ -235,8 +235,8 @@ public static class Program
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
-{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).DrawNode()))}
-{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).DrawEdge(v)))}
+{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).DrawNode!()))}
+{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).DrawEdge!(v)))}
 {sb}
 	</root>
 </mxGraphModel>";

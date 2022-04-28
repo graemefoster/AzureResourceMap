@@ -15,4 +15,10 @@ public static class EnumerableEx
     {
         foreach (var item in items) action(item);
     }
+    public static void ForEach<T>(this IEnumerable<T> items, Action<int, T> action)
+    {
+        var idx = 0;
+        foreach (var item in items) action(idx++, item);
+    }
+
 }
