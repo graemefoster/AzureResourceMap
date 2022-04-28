@@ -40,3 +40,5 @@ runs:
     - "${{  inputs.condensed}}"
     - "--no-infer"
     - "${{  !inputs.inferConnections }}"
+    - "--output-png"
+    - "true"
