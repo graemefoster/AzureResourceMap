@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 using AzureDiagrams.Resources;
@@ -57,29 +56,16 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
 
         foreach (var subnet in _resource.Subnets)
         {
+            var images = new List<string>();
+            if (subnet.NSGs.Any()) images.Add("img/lib/azure2/networking/Network_Security_Groups.svg");
+            if (subnet.UdrId != null) images.Add("img/lib/azure2/networking/Route_Tables.svg");
+            
             var subnetNode =
                 AzureResourceDrawer.CreateContainerRectangleNode(subnet.AddressPrefix, subnet.Name,
-                    _resource.InternalId + $".{subnet.Name}", "white", TextAlignment.Top);
+                    _resource.InternalId + $".{subnet.Name}", "white", TextAlignment.Top,
+                    images.ToArray());
 
             vnetNode.AddChild(subnetNode);
-
-            if (subnet.NSGs.Count > 0)
-            {
-                var nsgCluster =
-                    AzureResourceDrawer.CreateContainerRectangleNode("", "NSGs",
-                        _resource.InternalId + $".{subnet.Name}.nsgs", "#E1D5E7", TextAlignment.Bottom);
-
-                subnetNode.AddChild(nsgCluster);
-                foreach (var nsg in subnet.NSGs)
-                {
-                    var node = resourceNodeBuilders[nsg];
-                    foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders, diagramAdjustor))
-                    {
-                        if (contained.Item2.ClusterParent == null) nsgCluster.AddChild(contained.Item2);
-                        yield return contained;
-                    }
-                }
-            }
 
             if (subnet.ContainedResources.Count == 0)
             {

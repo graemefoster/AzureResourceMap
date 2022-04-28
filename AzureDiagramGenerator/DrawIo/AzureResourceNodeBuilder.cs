@@ -140,6 +140,8 @@ public class AzureResourceNodeBuilder
             "microsoft.resources/deploymentscripts" => new IgnoreNodeBuilder(resource),
             "microsoft.insights/datacollectionendpoints" => new IgnoreNodeBuilder(resource),
             "microsoft.insights/datacollectionrules" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/networksecuritygroups" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/routetables" => new IgnoreNodeBuilder(resource),
             _ => new AzureResourceNodeBuilder(resource)
         };
     }
