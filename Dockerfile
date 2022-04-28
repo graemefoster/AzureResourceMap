@@ -6,6 +6,9 @@ RUN chmod 777 /drawio/drawio-x86_64-17.4.2.AppImage
 
 # Copy everything
 COPY . ./
+
+RUN chmod 777 /scripts/entrypoint.sh
+
 # Restore as distinct layers
 RUN dotnet restore
 # Build and publish a release
