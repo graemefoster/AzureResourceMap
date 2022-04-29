@@ -38,6 +38,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroup: "grf-*"
           outputFileName: "azurediagram.drawio"
+          inferConnections: true
           accessToken: ${{ steps.token.outputs.token }}
 
       - uses: actions/upload-artifact@v3
