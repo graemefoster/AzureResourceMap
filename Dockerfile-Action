@@ -1,5 +1,2 @@
-FROM TODO
-
-ENTRYPOINT ["/entrypoint.sh"]
-
+FROM ghcr.io/graemefoster/azurediagrams:0.6.5
 
