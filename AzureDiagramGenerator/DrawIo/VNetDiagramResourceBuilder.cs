@@ -20,7 +20,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
         IDiagramAdjustor diagramAdjustor)
     {
         var vnetNode =
-            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, "#FFE6CC",
+            AzureResourceDrawer.CreateContainerRectangleNode("VNet", _resource.Name, _resource.InternalId, "#F8CECC",
                 TextAlignment.Top, _resource.Image);
         
         yield return (_resource, vnetNode);
@@ -70,7 +70,7 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
             if (subnet.ContainedResources.Count == 0)
             {
                 var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("Subnet", "Empty",
-                    _resource.InternalId + $".{subnet.Name}.empty");
+                    _resource.InternalId + $".{subnet.Name}.empty", backgroundColour:"#ffffff");
                 subnetNode.AddChild(emptyContents);
                 yield return (_resource, emptyContents);
             }

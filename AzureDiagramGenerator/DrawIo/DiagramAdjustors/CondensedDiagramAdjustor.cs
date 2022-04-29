@@ -83,6 +83,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
 
     private void CollapseVNetIntegrations(AzureResource[] allResources)
     {
+
         var publicAppWithVNetIntegration = allResources.OfType<App>()
                 .Where(x => x.VNetIntegration != null)
                 .Where(app => allResources.OfType<PrivateEndpoint>().All(pe => pe.ResourceAccessedByMe != app));
@@ -112,7 +113,9 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
     public AzureResourceNodeBuilder? CreateNodeBuilder(AzureResource resource)
     {
         if (_removals.Contains(resource)) return new IgnoreNodeBuilder(resource);
-        if (resource is ASP asp && _removals.OfType<App>().Any(x => x.ServerFarmId.Equals(asp.Id, StringComparison.InvariantCultureIgnoreCase)))
+        
+        //Don't draw the ASP if all of its apps are being routed via private endpoint / vnet-integration subnets
+        if (resource is ASP asp && asp.ContainedResources.OfType<App>().All(app => _replacements.ContainsKey(app)))
         {
             return new IgnoreNodeBuilder(resource);
         }

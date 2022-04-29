@@ -149,6 +149,7 @@ public class AzureResourceNodeBuilder
             "microsoft.insights/datacollectionrules" => new IgnoreNodeBuilder(resource),
             "microsoft.network/networksecuritygroups" => new IgnoreNodeBuilder(resource),
             "microsoft.network/routetables" => new IgnoreNodeBuilder(resource),
+            "microsoft.portal/dashboards" => new IgnoreNodeBuilder(resource),
             _ => new AzureResourceNodeBuilder(resource)
         };
     }
