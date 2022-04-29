@@ -13,6 +13,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         _noInfer = noInfer;
 
         CollapsePrivateEndpoints(allResources);
+        CollapseVNetIntegrations(allResources);
         CollapseVirtualMachines(allResources);
         _removals.AddRange(_replacements.Keys);
     }
@@ -44,7 +45,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
             .GroupBy(x => x.res,
                 e => (pe: e.pe, nic: allResources.OfType<Nic>().Single(nic => nic.ConnectedPrivateEndpoint == e.pe)))
             .ToArray();
-
+        
         foreach (var grouping in replacements)
         {
             var distinctSubnets = grouping.SelectMany(x => x.pe.SubnetIdsIAmInjectedInto).Distinct();
@@ -67,6 +68,9 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
                     _replacements.Add(currentPe.nic, secondaryPe.nic);
                     currentPe = secondaryPe;
                 }
+                
+                //the current Nic is the one that will stay on the diagram. Name it to reflect the resource that is accessed
+                currentPe.nic.Name = currentPe.pe.ResourceAccessedByMe?.Name ?? currentPe.nic.Name;
 
                 //finally target vnet integration
                 if (grouping.Key is App { VNetIntegration: { } } app)
@@ -77,8 +81,26 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         }
     }
 
+    private void CollapseVNetIntegrations(AzureResource[] allResources)
+    {
+        var publicAppWithVNetIntegration = allResources.OfType<App>()
+                .Where(x => x.VNetIntegration != null)
+                .Where(app => allResources.OfType<PrivateEndpoint>().All(pe => pe.ResourceAccessedByMe != app));
+
+        foreach (var app in publicAppWithVNetIntegration)
+        {
+            _replacements.Add(app, app.VNetIntegration!);
+        }
+
+    }
+
     public string ImageFor(AzureResource resource)
     {
+        if (resource is VNetIntegration vNetIntegration && _replacements.ContainsKey(vNetIntegration.LinkedApp))
+        {
+            return vNetIntegration.LinkedApp.Image;
+        }
+        
         return resource switch
         {
             Nic { ConnectedPrivateEndpoint: not null } res =>

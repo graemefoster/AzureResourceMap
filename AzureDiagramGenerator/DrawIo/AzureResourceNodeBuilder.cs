@@ -37,6 +37,13 @@ public class AzureResourceNodeBuilder
                 continue;
             }
 
+            //We switched a resource. Don't double up the links 
+            if (fromResource != link.From || toResource != link.To)
+            {
+                //check the replaced node doesn't already contain a link to this target. If it does we will show multiple links between 2 resources.
+                if (fromResource.Links.Any(x => x.To == toResource)) continue;
+            }
+
             if (!(nodes.ContainsKey(toResource) && nodes.ContainsKey(fromResource)))
             {
                 Console.WriteLine(
