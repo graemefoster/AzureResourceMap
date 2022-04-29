@@ -138,6 +138,10 @@ public class AzureResourceNodeBuilder
             "microsoft.network/privatednszones" => new IgnoreNodeBuilder(resource),
             "microsoft.network/networkprofiles" => new IgnoreNodeBuilder(resource),
             "microsoft.resources/deploymentscripts" => new IgnoreNodeBuilder(resource),
+            "microsoft.insights/datacollectionendpoints" => new IgnoreNodeBuilder(resource),
+            "microsoft.insights/datacollectionrules" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/networksecuritygroups" => new IgnoreNodeBuilder(resource),
+            "microsoft.network/routetables" => new IgnoreNodeBuilder(resource),
             _ => new AzureResourceNodeBuilder(resource)
         };
     }

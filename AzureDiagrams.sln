@@ -26,6 +26,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{7A36B0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDiagramGenerator", "AzureDiagramGenerator\AzureDiagramGenerator.csproj", "{899DE1FB-F964-4325-B52E-44565B7AA1E0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{0E844E37-F819-4A15-A568-F8E692D08A9B}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\entrypoint.sh = scripts\entrypoint.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +49,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7D9F0244-632E-4566-B45F-5DE92AB6C31D} = {0E6366E5-D9A9-40CE-A7E1-99AF5CD267CB}
 		{7A36B0C1-6505-4F1D-B064-207290E084DE} = {A17DDC52-23FE-42E3-A75B-ADF38FB362BA}
+		{0E844E37-F819-4A15-A568-F8E692D08A9B} = {A17DDC52-23FE-42E3-A75B-ADF38FB362BA}
 	EndGlobalSection
 EndGlobal

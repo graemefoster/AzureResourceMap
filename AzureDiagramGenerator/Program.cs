@@ -1,7 +1,9 @@
-﻿using System.CommandLine;
+﻿using System.Collections.ObjectModel;
+using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Text;
 using Azure.Core;
 using Azure.Identity;
@@ -43,7 +45,14 @@ public static class Program
             { IsRequired = false, Description = "Access token that can read the resources" };
 
         var outputFileNameOption = new Option<string>("--output-file-name")
-            { IsRequired = false, Description = "File name to write to (will use convention to determine based on a resource-group name if not provided)" };
+        {
+            IsRequired = false,
+            Description =
+                "File name to write to (will use convention to determine based on a resource-group name if not provided)"
+        };
+
+        var outputPngOption = new Option<bool>("--output-png")
+            { IsRequired = false, Description = "Output png file with draw.io diagram embedded" };
 
         var rootCommand = new RootCommand("AzureDiagrams")
         {
@@ -54,19 +63,29 @@ public static class Program
             condensedOption,
             noInferOption,
             tokenOption,
-            outputFileNameOption
+            outputFileNameOption,
+            outputPngOption
         };
         rootCommand.Handler =
             CommandHandler.Create(
                 (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed,
-                    bool noInfer, string? token, string? outputFileName) =>
+                    bool noInfer, string? token, string? outputFileName, bool outputPng) =>
                 {
                     var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
                     if (isGithubAction && token == null)
                         throw new ArgumentException("To run in a Github action you must provide an access token");
 
                     output = isGithubAction ? "/github/workspace" : output;
-                    DrawDiagram(Guid.Parse(subscriptionId), tenantId, resourceGroup, output, condensed, noInfer, token, outputFileName)
+                    DrawDiagram(
+                            Guid.Parse(subscriptionId),
+                            tenantId,
+                            resourceGroup,
+                            output,
+                            condensed,
+                            noInfer,
+                            token,
+                            outputFileName,
+                            outputPng)
                         .Wait();
                 });
 
@@ -85,7 +104,7 @@ public static class Program
     }
 
     private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer, string? token, string? outputFileName)
+        string outputFolder, bool condensed, bool noInfer, string? token, string? outputFileName, bool outputPng)
     {
         try
         {
@@ -97,6 +116,7 @@ public static class Program
             {
                 Console.WriteLine($"Output Folder: {outputFolder}");
             }
+
             if (!string.IsNullOrEmpty(outputFileName))
             {
                 Console.WriteLine($"Output File: {outputFileName}");
@@ -107,7 +127,9 @@ public static class Program
             Console.ResetColor();
 
             var tokenCredential =
-                string.IsNullOrWhiteSpace(token) ? (TokenCredential)new AzureCliCredential() : new KnownTokenCredential(token);
+                string.IsNullOrWhiteSpace(token)
+                    ? (TokenCredential)new AzureCliCredential()
+                    : new KnownTokenCredential(token);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var azureResources = await new AzureModelRetriever().Retrieve(
@@ -122,9 +144,28 @@ public static class Program
                 condensed,
                 noInfer);
 
-            var outputName = string.IsNullOrWhiteSpace(outputFileName) ? $"{resourceGroups[0].Replace("*", "")}.drawio" : outputFileName;
+            var outputName = string.IsNullOrWhiteSpace(outputFileName)
+                ? $"{resourceGroups[0].Replace("*", "")}.drawio"
+                : outputFileName;
             var path = Path.Combine(outputFolder, outputName);
-            await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
+
+            if (outputPng)
+            {
+                await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
+                var psi = new ProcessStartInfo("/drawio/drawio-x86_64-17.4.2.AppImage")
+                {
+                    Arguments = $"--appimage-extract-and-run --export --format png --embed-diagram \"{path}\" --no-sandbox",
+                    UseShellExecute = false
+                };
+                Console.WriteLine($"/drawio/drawio-x86_64-17.4.2.AppImage {psi.Arguments}" );
+                var process = Process.Start(psi)!;
+                await process.WaitForExitAsync(cancellationTokenSource.Token);
+                Console.WriteLine($"Written output to {Path.GetFullPath(path)}.png");
+            }
+            else
+            {
+                await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
+            }
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
             Console.ResetColor();
@@ -171,9 +212,10 @@ public static class Program
 
         var routingSettings = new EdgeRoutingSettings
         {
-            UseObstacleRectangles = true,
+            Padding = 10,
             BendPenalty = 10,
-            EdgeRoutingMode = EdgeRoutingMode.StraightLine
+            UseObstacleRectangles = true,
+            EdgeRoutingMode = EdgeRoutingMode.Rectilinear
         };
 
         var settings = new SugiyamaLayoutSettings
@@ -182,6 +224,7 @@ public static class Program
             PackingMethod = PackingMethod.Compact,
             LayerSeparation = 25,
             EdgeRoutingSettings = routingSettings,
+            LiftCrossEdges = true,
             NodeSeparation = 25,
             ClusterMargin = 50,
         };
@@ -192,8 +235,8 @@ public static class Program
 	<root>
 		<mxCell id=""0"" />
 		<mxCell id=""1"" parent=""0"" />
-{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).Draw()))}
-{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).Draw()))}
+{string.Join(Environment.NewLine, graph.GetFlattenedNodesAndClusters().Select(v => ((CustomUserData)v.UserData).DrawNode!()))}
+{string.Join(Environment.NewLine, graph.Edges.Select(v => ((CustomUserData)v.UserData).DrawEdge!(v)))}
 {sb}
 	</root>
 </mxGraphModel>";
