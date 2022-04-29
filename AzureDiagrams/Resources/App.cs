@@ -96,7 +96,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     {
         if (VirtualNetworkSubnetId != null)
         {
-            VNetIntegration = new VNetIntegration($"{Id}.vnetintegration", VirtualNetworkSubnetId)
+            VNetIntegration = new VNetIntegration($"{Id}.vnetintegration", VirtualNetworkSubnetId, this)
             {
                 Name = Name
             };
