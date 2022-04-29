@@ -20,7 +20,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     public override string Image => Kind switch
     {
         { } str when str.Contains("workflowapp") =>"img/lib/azure2/integration/Logic_Apps.svg",
-        { } str when str.Contains("functionapp") =>"img/lib/azure2/integration/Function_Apps.svg", 
+        { } str when str.Contains("functionapp") =>"img/lib/azure2/compute/Function_Apps.svg", 
         _ => "img/lib/azure2/app_services/App_Services.svg"
     };
 
