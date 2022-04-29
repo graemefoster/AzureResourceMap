@@ -212,7 +212,7 @@ public static class Program
 
         var routingSettings = new EdgeRoutingSettings
         {
-            Padding = 10,
+            Padding = 5,
             BendPenalty = 10,
             UseObstacleRectangles = true,
             EdgeRoutingMode = EdgeRoutingMode.Rectilinear

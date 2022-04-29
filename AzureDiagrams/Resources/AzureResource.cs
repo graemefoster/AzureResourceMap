@@ -14,7 +14,7 @@ namespace AzureDiagrams.Resources;
 public class AzureResource
 {
     private readonly string _id = default!;
-    private readonly string _location = default!;
+    private readonly string? _location = default!;
 
     /// <summary>
     ///     TODO make this a diagram construct. It is used to mark a resource that is rendered as a container of other resource, with no icon for itself.
@@ -44,7 +44,7 @@ public class AzureResource
     public virtual string Image { get; } = default!;
     public virtual string? Fill { get; }
 
-    public string Location
+    public string? Location
     {
         get => _location;
         init => _location = value.Replace(" ", "").ToLowerInvariant();

@@ -9,6 +9,7 @@ namespace AzureDiagrams.Resources;
 public class VM : AzureResource, IAssociateWithNic
 {
     public override string Image => "img/lib/azure2/compute/Virtual_Machine.svg";
+    public override string? Fill => "#D5E8D4";
     public string SystemDiskId { get; protected set; } = default!;
     public string BootDiagnosticsStorageHost { get; protected set; } = default!;
     public string[] Nics { get; protected set; } = default!;

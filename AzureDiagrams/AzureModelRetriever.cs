@@ -38,9 +38,17 @@ public class AzureModelRetriever
         //create some common nodes to represent common platform groupings (AAD, Diagnostics)
         var aad = new AzureActiveDirectory { Id = CommonResources.AAD, Name = "Azure Active Directory" };
         var distinctRegions = resources.Select(x => x.Location).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+        var regions = distinctRegions.Select(x => new Region(x)).ToArray();
         var core = distinctRegions.Select(x => new CoreServices { Id = $"{CommonResources.CoreServices}-{x}", Name = $"Core Services - {x}", Location = x}).ToArray();
+        var pips = distinctRegions.Select(x => new PublicIpAddresses { Id = $"{CommonResources.PublicIpAddresses}-{x}", Name = $"Public IP Addresses - {x}", Location = x}).ToArray();
         var diagnostics = distinctRegions.Select(x => new CommonDiagnostics { Id = $"{CommonResources.Diagnostics}-{x}", Name = $"Diagnostics - {x}", Location = x }).ToArray();
-        var allNodes = resources.Concat(additionalNodes).Concat(new AzureResource[] { aad }).Concat(core).Concat(diagnostics).ToArray();
+        var allNodes = resources.Concat(additionalNodes).Concat(
+            new AzureResource[] { aad })
+            .Concat(core)
+            .Concat(diagnostics)
+            .Concat(pips)
+            .Concat(regions) //needs to come last to make sure we don't assign owenership of things multiple times.
+            .ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet

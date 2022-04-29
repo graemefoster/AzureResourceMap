@@ -45,6 +45,9 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
                                                         StatusCode: HttpStatusCode.Forbidden
                                                     })
                 {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine($"Forbidden retrieving {x.key} for {basicResource.Id}/{x.suffix}");
+                    Console.ResetColor();
                     return null;
                 }
             });

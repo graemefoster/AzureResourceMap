@@ -9,7 +9,7 @@ namespace AzureDiagrams.Resources;
 public class ASP : AzureResource
 {
     public override string Image => "img/lib/azure2/app_services/App_Service_Plans.svg";
-
+    public override string? Fill => "#F5F5F5";
     public string? ASE { get; private set; }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
