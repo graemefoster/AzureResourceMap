@@ -38,7 +38,7 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/x15stack/azure-diagram-generator:0.7.1-graemefoster-2022-05-03-main.23'
+  image: 'docker://ghcr.io/x15stack/azure-diagram-generator:0.7.4-PullRequest0005.25'
   args:
     - "--subscription-id" 
     - "${{ inputs.subscriptionId }}"
