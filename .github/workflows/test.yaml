@@ -43,10 +43,10 @@ jobs:
           resourceGroup: "secr-*-dev"
           outputFileName: "azurediagram.drawio"
           accessToken: ${{ steps.token.outputs.token }}
-          showDiagnostics: false
-          showIdentity: false
-          showRuntime: true
-          showInferred: true
+          showDiagnostics: 'false'
+          showIdentity: 'false'
+          showRuntime: 'true'
+          showInferred: 'true'
 
       - uses: actions/upload-artifact@v3
         with:
