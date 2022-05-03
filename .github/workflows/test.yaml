@@ -37,7 +37,7 @@ jobs:
             echo "::set-output name=token::$token"
 
       - name: x15stack-azure-diagrams-generator
-        uses: x15stack/AzureResourceMap@v0.7.3
+        uses: x15stack/AzureResourceMap@v0.7.4
         with:
           subscriptionId: ${{ env.DEV_SUBSCRIPTION_ID }}
           resourceGroup: "secr-*-dev"
