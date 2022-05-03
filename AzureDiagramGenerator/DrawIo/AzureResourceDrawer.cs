@@ -148,8 +148,14 @@ internal static class AzureResourceDrawer
         return node.UserData == null;
     }
 
-    public static Edge CreateSimpleEdge(Node source, Node target, string? details, Plane plane, bool isLinkVisible)
+    public static Edge CreateSimpleEdge(AzureResource originalFrom, AzureResource originalTo, Node source, Node target,
+        string? details, Plane plane, bool isLinkVisible)
     {
+        //Use the original resources as condensing a diagram may cause multiple links to share the same from / to / details.
+        var edgeId = new Guid(
+            SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes($"{originalFrom.Id}-{originalTo.Id}-{details}"))[..16]);
+
+
         var pattern = plane switch
         {
             Plane.Diagnostics => Pattern.Dashed,
@@ -162,6 +168,7 @@ internal static class AzureResourceDrawer
             UserData = new CustomUserData(
                 e => DrawSimpleEdge(
                     e,
+                    edgeId,
                     ((CustomUserData)source.UserData).Id,
                     ((CustomUserData)target.UserData).Id,
                     details,
@@ -173,13 +180,11 @@ internal static class AzureResourceDrawer
         return edge;
     }
 
-    private static string DrawSimpleEdge(Edge edge, string fromId, string toId, string? details, Pattern pattern,
+    private static string DrawSimpleEdge(Edge edge, Guid edgeId, string fromId, string toId, string? details,
+        Pattern pattern,
         bool isLinkVisible)
     {
         if (!isLinkVisible) return string.Empty;
-
-        var edgeId = new Guid(
-            SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes($"{fromId}-{toId}-{details}"))[..16]);
 
         var colour = pattern switch
         {
