@@ -155,7 +155,6 @@ internal static class AzureResourceDrawer
         var edgeId = new Guid(
             SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes($"{originalFrom.Id}-{originalTo.Id}-{details}"))[..16]);
 
-
         var pattern = plane switch
         {
             Plane.Diagnostics => Pattern.Dashed,

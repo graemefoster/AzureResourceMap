@@ -53,7 +53,7 @@ public class AzureResourceNodeBuilder
             {
                 var from = nodes[fromResource].Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
                 var to = nodes[toResource].Single(x => ((CustomUserData)x.UserData).Id == toResource.InternalId);
-                yield return AzureResourceDrawer.CreateSimpleEdge(fromResource, toResource, from, to, link.Details,
+                yield return AzureResourceDrawer.CreateSimpleEdge(link.From, link.To, from, to, link.Details,
                     link.Plane, isLinkVisible);
             }
         }
