@@ -1,4 +1,6 @@
-﻿using AzureDiagrams.Resources;
+﻿using System.Security.Cryptography;
+using System.Text;
+using AzureDiagrams.Resources;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
@@ -72,7 +74,7 @@ internal static class AzureResourceDrawer
         var text = name;
         if (images.Length == 0 && !string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
 
-        var container = 
+        var container =
             @$"<mxCell id=""{id}"" value=""{text}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor={backgroundColour};verticalAlign={textAlignment.ToString().ToLowerInvariant()}"" vertex=""1"" parent=""{parent}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" 
     as=""geometry"" />
@@ -83,7 +85,7 @@ internal static class AzureResourceDrawer
             {
                 container += Environment.NewLine +
                              @$"<mxCell id=""{id}.image.{idx}"" style=""html=1;image;image={image};fontSize=12;labelPosition=bottom"" vertex=""1"" parent=""{id}"">
-    <mxGeometry x=""{boundingBoxWidth - ((idx + 1) * (imageSize + 10))}"" y=""{ boundingBoxHeight - imageSize - 10}"" width=""{imageSize}"" height=""{imageSize}"" 
+    <mxGeometry x=""{boundingBoxWidth - ((idx + 1) * (imageSize + 10))}"" y=""{boundingBoxHeight - imageSize - 10}"" width=""{imageSize}"" height=""{imageSize}"" 
     as=""geometry"" />
 </mxCell>";
             }
@@ -134,7 +136,7 @@ internal static class AzureResourceDrawer
         if (node.ClusterParent != null)
             if (!IsRootCluster(node.ClusterParent))
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
-        
+
         return
             @$"<mxCell id=""{id}"" value=""{text}"" style=""text;align=left;fontSize=12;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;"" vertex=""1"" parent=""{parent}"">
     <mxGeometry x=""{boundingBoxLeft}"" y=""{boundingBoxTop}"" width=""{boundingBoxWidth}"" height=""{boundingBoxHeight}"" as=""geometry"" />
@@ -146,11 +148,12 @@ internal static class AzureResourceDrawer
         return node.UserData == null;
     }
 
-    public static Edge CreateSimpleEdge(Node source, Node target, string? details, FlowEmphasis flowEmphasis)
+    public static Edge CreateSimpleEdge(Node source, Node target, string? details, Plane plane, bool isLinkVisible)
     {
-        var pattern = flowEmphasis switch
+        var pattern = plane switch
         {
-            FlowEmphasis.LessImportant => Pattern.Dashed,
+            Plane.Diagnostics => Pattern.Dashed,
+            Plane.Identity => Pattern.Dashed,
             _ => Pattern.Solid
         };
 
@@ -162,19 +165,31 @@ internal static class AzureResourceDrawer
                     ((CustomUserData)source.UserData).Id,
                     ((CustomUserData)target.UserData).Id,
                     details,
-                    pattern),
+                    pattern,
+                    isLinkVisible),
                 "Unused",
                 Guid.NewGuid().ToString())
         };
         return edge;
     }
 
-    private static string DrawSimpleEdge(Edge edge, string fromId, string toId, string? details, Pattern pattern)
+    private static string DrawSimpleEdge(Edge edge, string fromId, string toId, string? details, Pattern pattern,
+        bool isLinkVisible)
     {
-        var edgeId = Guid.NewGuid().ToString().Replace("-", "");
+        if (!isLinkVisible) return string.Empty;
+
+        var edgeId = new Guid(
+            SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes($"{fromId}-{toId}-{details}"))[..16]);
+
+        var colour = pattern switch
+        {
+            Pattern.Dashed => "#4D9900",
+            _ => "#000000"
+        };
+
         var patternStyle = pattern switch
         {
-            Pattern.Dashed => ";dashed=1;dashPattern=1 1;strokeColor=#4D9900;strokeWidth=2;",
+            Pattern.Dashed => $";dashed=1;dashPattern=1 1;strokeColor={colour};strokeWidth=2;",
             _ => ""
         };
 
@@ -201,7 +216,7 @@ internal static class AzureResourceDrawer
         {
             patternStyle += "edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=1";
         }
-        
+
         var drawIoEdge = @$"<mxCell id=""{edgeId}"" 
         style=""jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle};"" edge=""1"" parent=""1"" 
         source=""{fromId}"" target=""{toId}"">

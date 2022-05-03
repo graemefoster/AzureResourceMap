@@ -32,14 +32,33 @@ public static class Program
         };
         var outputOption = new Option<string>("--output")
             { IsRequired = false, Description = "Output folder for generated diagram" };
+
         var condensedOption = new Option<bool>("--condensed")
         {
             IsRequired = false,
             Description =
                 "Condenses Private Endpoints / VNet Integration. For large deployments this can greatly simplify the diagram."
         };
-        var noInferOption = new Option<bool>("--no-infer")
-            { IsRequired = false, Description = "Do not attempt to infer relationships based on config settings" };
+
+        var showDiagnosticsOption = new Option<bool>("--show-diagnostics")
+        {
+            IsRequired = false, Description = "Show diagnostics flows"
+        };
+
+        var showInferredOption = new Option<bool>("--show-inferred")
+        {
+            IsRequired = false, Description = "Show runtime flows inferred from app-settings"
+        };
+
+        var showRuntimeOption = new Option<bool>("--show-runtime")
+        {
+            IsRequired = false, Description = "Show runtime flows defined on the management plane"
+        };
+
+        var showIdentityOption = new Option<bool>("--show-identity")
+        {
+            IsRequired = false, Description = "Show runtime flows to managed identities"
+        };
 
         var tokenOption = new Option<string>("--token")
             { IsRequired = false, Description = "Access token that can read the resources" };
@@ -61,7 +80,10 @@ public static class Program
             resourceGroupsOption,
             outputOption,
             condensedOption,
-            noInferOption,
+            showDiagnosticsOption,
+            showInferredOption,
+            showRuntimeOption,
+            showIdentityOption,
             tokenOption,
             outputFileNameOption,
             outputPngOption
@@ -69,7 +91,8 @@ public static class Program
         rootCommand.Handler =
             CommandHandler.Create(
                 (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed,
-                    bool noInfer, string? token, string? outputFileName, bool outputPng) =>
+                    bool showDiagnostics, bool showInferred, bool showRuntime, bool showIdentity, string? token,
+                    string? outputFileName, bool outputPng) =>
                 {
                     var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
                     if (isGithubAction && token == null)
@@ -82,7 +105,10 @@ public static class Program
                             resourceGroup,
                             output,
                             condensed,
-                            noInfer,
+                            showDiagnostics,
+                            showInferred,
+                            showRuntime,
+                            showIdentity,
                             token,
                             outputFileName,
                             outputPng)
@@ -103,8 +129,19 @@ public static class Program
         return await parser.InvokeAsync(args);
     }
 
-    private static async Task DrawDiagram(Guid subscriptionId, string? tenantId, string[] resourceGroups,
-        string outputFolder, bool condensed, bool noInfer, string? token, string? outputFileName, bool outputPng)
+    private static async Task DrawDiagram(
+        Guid subscriptionId,
+        string? tenantId,
+        string[] resourceGroups,
+        string outputFolder,
+        bool condensed,
+        bool showDiagnosticsFlows,
+        bool showInferredFlows,
+        bool showRuntimeFlows,
+        bool showIdentityFlows,
+        string? token,
+        string? outputFileName,
+        bool outputPng)
     {
         try
         {
@@ -123,7 +160,10 @@ public static class Program
             }
 
             Console.WriteLine($"Condensed: {condensed}");
-            Console.WriteLine($"NoInfer: {noInfer}");
+            Console.WriteLine($"Show Identity Flows: {showIdentityFlows}");
+            Console.WriteLine($"Show Diagnostics Flows: {showDiagnosticsFlows}");
+            Console.WriteLine($"Show Inferred Flows: {showInferredFlows}");
+            Console.WriteLine($"Show Runtime Flows: {showRuntimeFlows}");
             Console.ResetColor();
 
             var tokenCredential =
@@ -142,7 +182,10 @@ public static class Program
             var graph = await DrawDiagram(
                 azureResources,
                 condensed,
-                noInfer);
+                showDiagnosticsFlows,
+                showInferredFlows,
+                showRuntimeFlows,
+                showIdentityFlows);
 
             var outputName = string.IsNullOrWhiteSpace(outputFileName)
                 ? $"{resourceGroups[0].Replace("*", "")}.drawio"
@@ -154,10 +197,11 @@ public static class Program
                 await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
                 var psi = new ProcessStartInfo("/drawio/drawio-x86_64-17.4.2.AppImage")
                 {
-                    Arguments = $"--appimage-extract-and-run --export --format png --embed-diagram \"{path}\" --no-sandbox",
+                    Arguments =
+                        $"--appimage-extract-and-run --export --format png --embed-diagram \"{path}\" --no-sandbox",
                     UseShellExecute = false
                 };
-                Console.WriteLine($"/drawio/drawio-x86_64-17.4.2.AppImage {psi.Arguments}" );
+                Console.WriteLine($"/drawio/drawio-x86_64-17.4.2.AppImage {psi.Arguments}");
                 var process = Process.Start(psi)!;
                 await process.WaitForExitAsync(cancellationTokenSource.Token);
                 Console.WriteLine($"Written output to {Path.GetFullPath(path)}.png");
@@ -166,6 +210,7 @@ public static class Program
             {
                 await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
             }
+
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
             Console.ResetColor();
@@ -180,12 +225,20 @@ public static class Program
     private static Task<string> DrawDiagram(
         AzureResource[] resources,
         bool condensed,
-        bool noInfer)
+        bool showDiagnosticsFlows,
+        bool showInferredFlows,
+        bool showRuntimeFlows,
+        bool showIdentityFlows
+    )
     {
         var graph = new GeometryGraph();
 
-        IDiagramAdjustor adjustor =
-            condensed ? new CondensedDiagramAdjustor(resources, noInfer) : new NoOpDiagramAdjustor(noInfer);
+        var planes = showDiagnosticsFlows ? Plane.Diagnostics : Plane.None;
+        planes |= showInferredFlows ? Plane.Inferred : Plane.None;
+        planes |= showRuntimeFlows ? Plane.Runtime : Plane.None;
+        planes |= showIdentityFlows ? Plane.Identity : Plane.None;
+        var adjustor = (IDiagramAdjustor)new VisiblePlanesDiagramAdjustor(planes);
+        adjustor = condensed ? new CondensedDiagramAdjustor(adjustor, resources) : adjustor;
 
         var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();

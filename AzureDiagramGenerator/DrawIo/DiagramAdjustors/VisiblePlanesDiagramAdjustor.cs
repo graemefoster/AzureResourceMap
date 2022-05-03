@@ -2,13 +2,13 @@ using AzureDiagrams.Resources;
 
 namespace AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 
-public class NoOpDiagramAdjustor : IDiagramAdjustor
+public class VisiblePlanesDiagramAdjustor : IDiagramAdjustor
 {
-    private readonly bool _noInfer;
+    private readonly Plane _visiblePlanes;
 
-    public NoOpDiagramAdjustor(bool noInfer)
+    public VisiblePlanesDiagramAdjustor(Plane visiblePlanes)
     {
-        _noInfer = noInfer;
+        _visiblePlanes = visiblePlanes;
     }
 
     public string ImageFor(AzureResource resource)
@@ -23,7 +23,7 @@ public class NoOpDiagramAdjustor : IDiagramAdjustor
 
     public bool DisplayLink(ResourceLink link)
     {
-        return !_noInfer || link.FlowEmphasis != FlowEmphasis.Inferred;
+        return (link.Plane & _visiblePlanes) == link.Plane;
     }
     
     public AzureResource ReplacementFor(AzureResource resource)

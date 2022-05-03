@@ -58,7 +58,7 @@ public class AppGateway : AzureResource, ICanBeAccessedViaAHostName, ICanInjectI
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        HostnamesITryToContact.ForEach(x => this.CreateFlowToHostName(allResources, x, "calls"));
+        HostnamesITryToContact.ForEach(x => this.CreateFlowToHostName(allResources, x, "Backend", Plane.Runtime));
         base.BuildRelationships(allResources);
     }
 }

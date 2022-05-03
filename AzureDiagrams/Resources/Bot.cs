@@ -23,7 +23,7 @@ public class Bot : AzureResource
         {
             if (Uri.TryCreate(BotEndpoint, UriKind.Absolute, out var uri))
             {
-                this.CreateFlowToHostName(allResources, uri.Host, "communicates");
+                this.CreateFlowToHostName(allResources, uri.Host, "communicates", Plane.Runtime);
             }
         }
         base.BuildRelationships(allResources);

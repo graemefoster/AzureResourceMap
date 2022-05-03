@@ -28,8 +28,8 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         ConnectedPrivateEndpoint = allResources.OfType<PrivateEndpoint>().SingleOrDefault(x => x.Nics.Contains(Id));
-        ConnectedPrivateEndpoint?.CreateFlowTo(this);
-        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm));
+        ConnectedPrivateEndpoint?.CreateFlowTo(this, Plane.All);
+        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm, Plane.All));
         base.BuildRelationships(allResources);
     }
 

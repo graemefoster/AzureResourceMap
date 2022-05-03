@@ -27,7 +27,7 @@ public class AzureResourceNodeBuilder
     {
         foreach (var link in _resource.Links)
         {
-            if (!diagramAdjustor.DisplayLink(link)) continue;
+            var isLinkVisible = diagramAdjustor.DisplayLink(link);
 
             var fromResource = diagramAdjustor.ReplacementFor(link.From);
             var toResource = diagramAdjustor.ReplacementFor(link.To);
@@ -53,7 +53,7 @@ public class AzureResourceNodeBuilder
             {
                 var from = nodes[fromResource].Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
                 var to = nodes[toResource].Single(x => ((CustomUserData)x.UserData).Id == toResource.InternalId);
-                yield return AzureResourceDrawer.CreateSimpleEdge(from, to, link.Details, link.FlowEmphasis);
+                yield return AzureResourceDrawer.CreateSimpleEdge(from, to, link.Details, link.Plane, isLinkVisible);
             }
         }
     }

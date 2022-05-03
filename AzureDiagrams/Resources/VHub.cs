@@ -51,7 +51,7 @@ public class VHub : AzureResource
 
         ConnectedVirtualNetworkIds.ForEach(x =>
             allResources.SingleOrDefault(r => r.Id.Equals(x, StringComparison.InvariantCultureIgnoreCase))
-                ?.CreateFlowTo(this));
+                ?.CreateFlowTo(this, Plane.All));
         base.BuildRelationships(allResources);
     }
 }

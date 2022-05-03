@@ -11,7 +11,7 @@ public static class FlowEx
         IEnumerable<AzureResource> allResources,
         string hostName,
         string flowName,
-        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
+        Plane plane)
     {
         var possibleHosts = allResources.OfType<ICanBeAccessedViaAHostName>()
             .Where(x => x.CanIAccessYouOnThisHostName(hostName));
@@ -23,7 +23,7 @@ public static class FlowEx
                 (AzureResource)host,
                 flowName,
                 hn => hn.Contains(hostName, StringComparer.InvariantCultureIgnoreCase),
-                flowEmphasis);
+                plane);
         }
     }
 
@@ -33,7 +33,7 @@ public static class FlowEx
         AzureResource connectTo,
         string flowName,
         Func<string[], bool> nicHostNameCheck,
-        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
+        Plane plane)
     {
         var nics = allResources.OfType<Nic>().Where(nic => nicHostNameCheck(nic.HostNames)).ToArray();
 
@@ -42,17 +42,17 @@ public static class FlowEx
             var egress = vnetEgress.EgressResource();
             if (egress != fromResource)
             {
-                fromResource.CreateFlowTo(egress, flowEmphasis);
+                fromResource.CreateFlowTo(egress, plane);
             }
 
             if (nics.Any())
             {
-                nics.ForEach(nic => egress.CreateFlowTo(nic, flowName, flowEmphasis));
+                nics.ForEach(nic => egress.CreateFlowTo(nic, flowName, plane));
             }
             else
             {
                 //Assume all traffic going via vnet for simplicity. We can get clever if we want later around public / private IP addresses / introspecting routes, etc.
-                egress.CreateFlowTo(connectTo, flowName, flowEmphasis);
+                egress.CreateFlowTo(connectTo, flowName, plane);
             }
         }
         else
@@ -61,11 +61,11 @@ public static class FlowEx
             //If we found a nic that listened on the hostname then flow to that.
             if (nics.Any())
             {
-                nics.ForEach(nic => fromResource.CreateFlowTo(nic, flowName, flowEmphasis));
+                nics.ForEach(nic => fromResource.CreateFlowTo(nic, flowName, plane));
             }
             else
             {
-                fromResource.CreateFlowTo(connectTo, flowName, flowEmphasis);
+                fromResource.CreateFlowTo(connectTo, flowName, plane);
             }
         }
     }

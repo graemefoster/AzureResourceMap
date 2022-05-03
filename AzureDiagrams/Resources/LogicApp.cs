@@ -35,7 +35,7 @@ public class LogicApp : AzureResource, ICanBeAccessedViaAHostName
         Connections.Select(c =>
                 allResources.OfType<LogicAppConnector>()
                     .Single(x => x.Id.Equals(c, StringComparison.InvariantCultureIgnoreCase)))
-            .ForEach(c => CreateFlowTo(c, "uses"));
+            .ForEach(c => CreateFlowTo(c, "uses", Plane.Runtime));
         base.BuildRelationships(allResources);
     }
 }

@@ -23,6 +23,6 @@ public class ManagedIdentityExtension : IResourceExtension
     {
         Identity?.UserAssignedIdentities?.Keys.ForEach(i =>
             allResources.OfType<UserAssignedManagedIdentity>().Where(uami => uami.Id.Equals(i, StringComparison.InvariantCultureIgnoreCase))
-                .ForEach(uami => resource.CreateFlowTo(uami, "AAD Identity", FlowEmphasis.LessImportant)));
+                .ForEach(uami => resource.CreateFlowTo(uami, "AAD Identity", Plane.Identity)));
     }
 }

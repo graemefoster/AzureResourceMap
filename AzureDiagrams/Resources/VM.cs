@@ -31,7 +31,7 @@ public class VM : AzureResource, IAssociateWithNic
     {
         var disk = allResources.OfType<Disk>()
             .Single(x => string.Equals(x.Id, SystemDiskId, StringComparison.InvariantCultureIgnoreCase));
-        CreateFlowTo(disk);
+        CreateFlowTo(disk, Plane.Runtime);
         OwnsResource(disk);
 
         var allNics = Nics.Select(nic =>
@@ -64,7 +64,7 @@ public class VM : AzureResource, IAssociateWithNic
             if (storage != null)
             {
                 this.CreateLayer7Flow(allResources, (AzureResource)storage, "boot-diagnostics",
-                    hns => hns.Any(hn => hn.Contains(hostname)), FlowEmphasis.LessImportant);
+                    hns => hns.Any(hn => hn.Contains(hostname)), Plane.Diagnostics);
             }
         }
 

@@ -47,7 +47,7 @@ public class AzureResource
     public string? Location
     {
         get => _location;
-        init => _location = value.Replace(" ", "").ToLowerInvariant();
+        init => _location = value?.Replace(" ", "").ToLowerInvariant();
     }
 
     public string ManagedBy { get; set; } = default!;
@@ -91,10 +91,10 @@ public class AzureResource
     ///     Creates a flow between two resources. Commonly visualised as a line on a graph between boxes
     /// </summary>
     /// <param name="to"></param>
-    /// <param name="flowEmphasis"></param>
-    protected internal void CreateFlowTo(AzureResource to, FlowEmphasis flowEmphasis = FlowEmphasis.Important)
+    /// <param name="plane"></param>
+    protected internal void CreateFlowTo(AzureResource to, Plane plane)
     {
-        CreateFlowTo(to, string.Empty, flowEmphasis);
+        CreateFlowTo(to, string.Empty, plane);
     }
 
     /// <summary>
@@ -102,9 +102,9 @@ public class AzureResource
     /// </summary>
     /// <param name="to"></param>
     /// <param name="details"></param>
-    /// <param name="flowEmphasis"></param>
+    /// <param name="plane"></param>
     protected internal void CreateFlowTo(AzureResource to, string details,
-        FlowEmphasis flowEmphasis = FlowEmphasis.Important)
+        Plane plane)
     {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
 
@@ -113,7 +113,7 @@ public class AzureResource
             return;
         }
 
-        var link = new ResourceLink(this, to, details, flowEmphasis);
+        var link = new ResourceLink(this, to, details, plane);
         Links.Add(link);
     }
 

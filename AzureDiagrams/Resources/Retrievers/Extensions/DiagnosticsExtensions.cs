@@ -27,7 +27,7 @@ public class DiagnosticsExtensions : IResourceExtension
         {
             var workspace = allResources.OfType<LogAnalyticsWorkspace>().SingleOrDefault(x =>
                 x.Id.Equals(_diagnosticsWorkspaceId, StringComparison.InvariantCultureIgnoreCase));
-            if (workspace != null) resource.CreateFlowTo(workspace, "diagnostics", FlowEmphasis.LessImportant);
+            if (workspace != null) resource.CreateFlowTo(workspace, "diagnostics", Plane.Diagnostics);
         }
     }
 }

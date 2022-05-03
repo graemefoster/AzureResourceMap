@@ -107,24 +107,24 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
         {
             var appInsights = allResources.OfType<AppInsights>()
                 .SingleOrDefault(x => x.InstrumentationKey == AppInsightsKey);
-            if (appInsights != null) CreateFlowTo(appInsights, "apm", FlowEmphasis.LessImportant);
+            if (appInsights != null) CreateFlowTo(appInsights, "apm", Plane.Diagnostics);
         }
 
         if (_dockerRepo != null)
         {
-            this.CreateFlowToHostName(allResources, _dockerRepo, "pulls");
+            this.CreateFlowToHostName(allResources, _dockerRepo, "container pull", Plane.Runtime);
         }
 
         if (_searchService != null)
         {
-            this.CreateFlowToHostName(allResources, _searchService, "uses", FlowEmphasis.Inferred);
+            this.CreateFlowToHostName(allResources, _searchService, "search api", Plane.Runtime);
         }
 
         _hostNameDiscoverer.BuildRelationships(this, allResources);
 
         if (VNetIntegration != null)
         {
-            CreateFlowTo(VNetIntegration);
+            CreateFlowTo(VNetIntegration, Plane.All);
         }
 
         base.BuildRelationships(allResources);

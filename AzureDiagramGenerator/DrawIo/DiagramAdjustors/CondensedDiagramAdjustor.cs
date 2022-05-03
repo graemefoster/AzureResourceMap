@@ -4,14 +4,13 @@ namespace AzureDiagramGenerator.DrawIo.DiagramAdjustors;
 
 public class CondensedDiagramAdjustor : IDiagramAdjustor
 {
-    private readonly bool _noInfer;
+    private readonly IDiagramAdjustor _inner;
     private readonly Dictionary<AzureResource, AzureResource> _replacements = new();
     private readonly List<AzureResource> _removals = new();
 
-    public CondensedDiagramAdjustor(AzureResource[] allResources, bool noInfer)
+    public CondensedDiagramAdjustor(IDiagramAdjustor inner, AzureResource[] allResources)
     {
-        _noInfer = noInfer;
-
+        _inner = inner;
         CollapsePrivateEndpoints(allResources);
         CollapseVNetIntegrations(allResources);
         CollapseVirtualMachines(allResources);
@@ -106,7 +105,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         {
             Nic { ConnectedPrivateEndpoint: not null } res =>
                 res.ConnectedPrivateEndpoint!.ResourceAccessedByMe?.Image ?? res.Image,
-            _ => resource.Image
+            _ => _inner.ImageFor(resource)
         };
     }
 
@@ -120,7 +119,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
             return new IgnoreNodeBuilder(resource);
         }
 
-        return null;
+        return _inner.CreateNodeBuilder(resource);
     }
 
     public AzureResource ReplacementFor(AzureResource resource)
@@ -136,6 +135,6 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
 
     public bool DisplayLink(ResourceLink link)
     {
-        return !_noInfer || link.FlowEmphasis != FlowEmphasis.Inferred;
+        return _inner.DisplayLink(link);
     }
 }

@@ -45,7 +45,7 @@ public class APIm : AzureResource, ICanBeAccessedViaAHostName, ICanInjectIntoASu
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        Backends.ForEach(x => this.CreateFlowToHostName(allResources, x, "calls"));
+        Backends.ForEach(x => this.CreateFlowToHostName(allResources, x, "calls", Plane.Runtime));
         base.BuildRelationships(allResources);
     }
 }

@@ -17,10 +17,22 @@ inputs:
     description: 'Collapse private endpoints / vm disks to produce a simple view. Useful for large architectures'
     required: true
     default: 'true'
-  inferConnections:
-    description: 'Look into configuration settings to infer more links between resources. Can clutter large architectures'
+  showDiagnostics:
+    description: 'Show flows from services to diagnostics like App Insights / Azure Monitor'
+    required: true
+    default: 'false'
+  showIdentity:
+    description: 'Show connection from services to AAD for Managed Identities'
+    required: true
+    default: 'false'
+  showRuntime:
+    description: 'Show runtime flows defined on the management plane (e.g. container pulls)'
     required: true
     default: 'true'
+  showInferred:
+    description: 'Look into configuration settings to infer more links between resources'
+    required: true
+    default: 'false'
   outputFileName:
     description: 'Output file name to write to (will write to the working directory)'
     required: true
@@ -38,7 +50,13 @@ runs:
     - "${{ inputs.outputFileName }}"
     - "--condensed"
     - "${{  inputs.condensed}}"
-    - "--no-infer"
-    - "${{  !inputs.inferConnections }}"
+    - "--show-diagnostics"
+    - "${{  !inputs.showDiagnostics }}"
+    - "--show-identity"
+    - "${{  !inputs.showIdentity }}"
+    - "--show-runtime"
+    - "${{  !inputs.showRuntime }}"
+    - "--show-inferred"
+    - "${{  !inputs.showInferred }}"
     - "--output-png"
     - "true"

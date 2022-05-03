@@ -25,7 +25,7 @@ internal class AppInsights : AzureResource
         {
             var workspace = allResources.OfType<LogAnalyticsWorkspace>().SingleOrDefault(x =>
                 string.Compare(WorkspaceResourceId, x.Id, StringComparison.InvariantCultureIgnoreCase) == 0);
-            if (workspace != null) CreateFlowTo(workspace, "logs", FlowEmphasis.LessImportant);
+            if (workspace != null) CreateFlowTo(workspace, "logs", Plane.Diagnostics);
         }
         base.BuildRelationships(allResources);
     }

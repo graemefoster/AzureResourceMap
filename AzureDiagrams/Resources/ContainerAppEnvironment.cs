@@ -16,7 +16,7 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
 
     public void CreateFlowBackToMe(LogAnalyticsWorkspace workspace)
     {
-        CreateFlowTo(workspace, "logs", FlowEmphasis.LessImportant);
+        CreateFlowTo(workspace, "logs", Plane.Diagnostics);
     }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)

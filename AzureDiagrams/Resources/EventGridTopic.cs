@@ -49,7 +49,7 @@ public class EventGridTopic : AzureResource
             .SingleOrDefault(x => x.CanIAccessYouOnThisHostName(hostName));
         if (resource != null)
         {
-            CreateFlowTo((AzureResource)resource, "subscription");
+            CreateFlowTo((AzureResource)resource, "subscription", Plane.Runtime);
         }
     }
 
@@ -60,7 +60,7 @@ public class EventGridTopic : AzureResource
             allResources.SingleOrDefault(x => resourceId.StartsWith(x.Id, StringComparison.InvariantCultureIgnoreCase));
         if (resource != null)
         {
-            CreateFlowTo(resource, "subscription");
+            CreateFlowTo(resource, "subscription", Plane.Runtime);
         }
     }
 }

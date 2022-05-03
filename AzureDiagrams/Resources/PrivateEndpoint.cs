@@ -33,7 +33,7 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
             .Where(x => x.PrivateEndpointInformation!.AccessedViaPrivateEndpoint(this))
             .ToArray();
 
-        accessedByThisPrivateEndpoint.ForEach(x => CreateFlowTo(x.Resource));
+        accessedByThisPrivateEndpoint.ForEach(x => CreateFlowTo(x.Resource, Plane.All));
 
         //Grab hold of the resource accessed by this. Should never be more than 1. Write a warning out if we see more though
         ResourceAccessedByMe = accessedByThisPrivateEndpoint.First().Resource;

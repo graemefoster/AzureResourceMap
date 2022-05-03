@@ -13,7 +13,7 @@ internal class PIP : AzureResource
         allResources.OfType<ICanExposePublicIPAddresses>()
             .Where(x => x.PublicIpAddresses.Any(x =>
                 string.Compare(Id, x, StringComparison.InvariantCultureIgnoreCase) == 0))
-            .ForEach(x => CreateFlowTo((AzureResource)x, "From Public Internet"));
+            .ForEach(x => CreateFlowTo((AzureResource)x, "From Public Internet", Plane.Runtime));
         base.BuildRelationships(allResources);
     }
 }

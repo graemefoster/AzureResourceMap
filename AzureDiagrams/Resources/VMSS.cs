@@ -18,8 +18,9 @@ public class VMSS : AzureResource, ICanInjectIntoASubnet
 
         LoadBalancerRelationships = nicConfigurations?.SelectMany(GetLoadBalancersFromIpConfiguration).Distinct() ??
                                     Array.Empty<string>();
-        SubnetIdsIAmInjectedInto = nicConfigurations?.Select(GetSubnetFromIpConfiguration).Where(x => x != null).Distinct().Select(x => x!)
-                .ToArray() ?? Array.Empty<string>();
+        SubnetIdsIAmInjectedInto = nicConfigurations?.Select(GetSubnetFromIpConfiguration).Where(x => x != null)
+            .Distinct().Select(x => x!)
+            .ToArray() ?? Array.Empty<string>();
 
         return Task.CompletedTask;
     }
@@ -50,7 +51,7 @@ public class VMSS : AzureResource, ICanInjectIntoASubnet
     {
         allResources.OfType<LoadBalancer>()
             .Where(x => LoadBalancerRelationships.Contains(x.Id, StringComparer.InvariantCultureIgnoreCase))
-            .ForEach(lb => lb.CreateFlowTo(this, "Connects"));
+            .ForEach(lb => lb.CreateFlowTo(this, "Connects", Plane.Runtime));
         base.BuildRelationships(allResources);
     }
 

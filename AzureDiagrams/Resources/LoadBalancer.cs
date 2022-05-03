@@ -35,7 +35,7 @@ public class LoadBalancer : AzureResource, ICanInjectIntoASubnet, ICanExposePubl
         _backendNics.ForEach(x =>
             CreateFlowTo(
                 allResources.OfType<Nic>().Single(nic => nic.Id.Equals(x, StringComparison.InvariantCultureIgnoreCase)),
-                "lb"));
+                "lb", Plane.All));
         base.BuildRelationships(allResources);
     }
 }
