@@ -12,34 +12,36 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  DEV_SUBSCRIPTION_ID: 8d50b8d0-350c-4adc-88a6-c6bec55e57d7
+
 jobs:
   generate-test-diagram:
-    environment: test
+    environment: dev
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: azure/login@v1
+      - name: Azure login
+        uses: azure/login@v1.4.0
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: "Get access token"
         id: token
-        run: |
-          token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
-          echo "::add-mask::$token" 
-          echo "::set-output name=token::$token"
-
-      - name: graemefoster-azurediagrams-action
-        uses: graemefoster/AzureResourceMap@v0.6.14
+        uses: azure/CLI@v1
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroup: "grf-*"
+          inlinescript: |
+            token=$(az account get-access-token --query accessToken -o tsv --query "accessToken")
+            echo "::add-mask::$token" 
+            echo "::set-output name=token::$token"
+
+      - name: x15stack-azure-diagrams-generator
+        uses: x15stack/AzureResourceMap@v0.6.3
+        with:
+          subscriptionId: ${{ env.DEV_SUBSCRIPTION_ID }}
+          resourceGroup: "secr-*-dev"
           outputFileName: "azurediagram.drawio"
-          showRuntime: true
-          showInferred: true
           accessToken: ${{ steps.token.outputs.token }}
 
       - uses: actions/upload-artifact@v3
