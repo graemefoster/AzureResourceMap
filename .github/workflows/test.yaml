@@ -33,12 +33,13 @@ jobs:
           echo "::set-output name=token::$token"
 
       - name: graemefoster-azurediagrams-action
-        uses: graemefoster/AzureResourceMap@v0.6.11
+        uses: graemefoster/AzureResourceMap@v0.6.12
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroup: "grf-*"
           outputFileName: "azurediagram.drawio"
-          inferConnections: true
+          showRuntime: true
+          showInferred: true
           accessToken: ${{ steps.token.outputs.token }}
 
       - uses: actions/upload-artifact@v3
