@@ -40,8 +40,11 @@ Here's an example that:
 | resourceGroup     | Yes       | Wildcard enabled resource group name (supports multiple)                     |
 | accessToken       | Yes       | Optional JWT to avoid using CLI credential                                   |
 | condensed         | Yes       | True collapses private endpoints into subnets (can simplify large diagrams)  |
-| inferConnections  | Yes       | True to infer connections by introspecting AppSettings                       |
-| outputFileName    | Yes       | Name of generated file. Gets written to working directory                    |
+| showRuntime       | Yes       | True to show runtime flows defined on the control plane                      |
+| showInferred      | Yes       | True to infer connections between resources by introspecting appSettings     |
+| showIdentity      | Yes       | True to show User Assigned Managed Identity connections                      |
+| showDiagnostics   | Yes       | True to show diagnostics flows                                               |
+| outputPng         | Yes       | True to export a png of the draw.io diagram                                  |
 
 ### CLI
 
@@ -60,7 +63,10 @@ dotnet AzureDiagrams.dll --subscription-id <subscription-id> --resource-group <r
 | --resource-group    | Yes       | Wildcard enabled resource group name (supports multiple)                     |
 | --output            | Yes       | Folder to output diagram to                                                  |
 | --condensed         | No        | True collapses private endpoints into subnets (can simplify large diagrams)  |
-| --no-infer          | No        | True to infer connections by introspecting AppSettings                       |
+| --show-runtime      | Yes       | True to show runtime flows defined on the control plane                      |
+| --show-inferred     | Yes       | True to infer connections between resources by introspecting appSettings     |
+| --show-identity     | Yes       | True to show User Assigned Managed Identity connections                      |
+| --show-diagnostics  | Yes       | True to show diagnostics flows                                               |
 | --token             | No        | Optional JWT to avoid using CLI credential                                   |
 | --output-file-name  | No        | Name of generated file. Defaults to resource-group name                      |
 
