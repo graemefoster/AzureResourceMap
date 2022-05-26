@@ -7,13 +7,18 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      resourceGroupPattern:
+        default: ${{ env.DEFAULT_RG_PATTERN }}
+        type: string
+
+env:
+  DEFAULT_RG_PATTERN: 'secr-*-dev'
+  DEV_SUBSCRIPTION_ID: 8d50b8d0-350c-4adc-88a6-c6bec55e57d7
 
 permissions:
   id-token: write
   contents: read
-
-env:
-  DEV_SUBSCRIPTION_ID: 8d50b8d0-350c-4adc-88a6-c6bec55e57d7
 
 jobs:
   generate-test-diagram:
@@ -40,7 +45,7 @@ jobs:
         uses: x15stack/AzureResourceMap@v0.7.5
         with:
           subscriptionId: ${{ env.DEV_SUBSCRIPTION_ID }}
-          resourceGroup: "secr-*-dev"
+          resourceGroup: "${{ github.event.inputs.resourceGroupPattern || env.DEFAULT_RG_PATTERN }}"
           outputFileName: "azurediagram.drawio"
           accessToken: ${{ steps.token.outputs.token }}
           showDiagnostics: false
