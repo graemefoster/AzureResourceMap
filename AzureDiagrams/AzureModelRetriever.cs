@@ -49,6 +49,7 @@ public class AzureModelRetriever
             { Id = $"{CommonResources.PublicIpAddresses}-{x}", Name = x, Location = x }).ToArray();
         var diagnostics = distinctRegions.Select(x => new CommonDiagnostics
             { Id = $"{CommonResources.Diagnostics}-{x}", Name = x, Location = x }).ToArray();
+
         var allNodes = resources.Concat(additionalNodes).Concat(
                 new AzureResource[] { aad })
             .Concat(core)

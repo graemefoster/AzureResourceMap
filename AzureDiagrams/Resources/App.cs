@@ -19,12 +19,12 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
     public override string Image => Kind switch
     {
-        { } str when str.Contains("workflowapp") =>"img/lib/azure2/integration/Logic_Apps.svg",
-        { } str when str.Contains("functionapp") =>"img/lib/azure2/compute/Function_Apps.svg", 
+        { } str when str.Contains("workflowapp") => "img/lib/azure2/integration/Logic_Apps.svg",
+        { } str when str.Contains("functionapp") => "img/lib/azure2/compute/Function_Apps.svg",
         _ => "img/lib/azure2/app_services/App_Services.svg"
     };
 
-    public string? AppInsightsKey { get; set; }
+    public string? AppInsightsKeyOrConnectionString { get; set; }
 
     public string[] EnabledHostNames { get; set; } = default!;
 
@@ -63,10 +63,12 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
         _hostNameDiscoverer.Discover();
 
         var potentialAppInsightsKey = appSettings.Keys.FirstOrDefault(x =>
-            x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) &&
-            x.Contains("key", StringComparison.InvariantCultureIgnoreCase));
+            x.Contains("appinsights", StringComparison.InvariantCultureIgnoreCase) ||
+            x.Contains("applicationinsights", StringComparison.InvariantCultureIgnoreCase));
 
-        if (potentialAppInsightsKey != null) AppInsightsKey = (string)appSettings[potentialAppInsightsKey];
+
+        if (potentialAppInsightsKey != null)
+            AppInsightsKeyOrConnectionString = (string)appSettings[potentialAppInsightsKey];
 
         EnabledHostNames = full["properties"]!["enabledHostNames"]!.Values<string>().Select(x => x!).ToArray();
 
@@ -103,10 +105,10 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        if (AppInsightsKey != null)
+        if (AppInsightsKeyOrConnectionString != null)
         {
             var appInsights = allResources.OfType<AppInsights>()
-                .SingleOrDefault(x => x.InstrumentationKey == AppInsightsKey);
+                .SingleOrDefault(x => AppInsightsKeyOrConnectionString.Contains(x.InstrumentationKey));
             if (appInsights != null) CreateFlowTo(appInsights, "apm", Plane.Diagnostics);
         }
 

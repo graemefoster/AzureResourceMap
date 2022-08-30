@@ -77,6 +77,12 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
                     _replacements.Add(app.VNetIntegration!, currentPe.nic);
                 }
             }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Resource {grouping.Key.Name} is injected into multiple subnets. Unable to correctly condense it to a single subnet. Diagram may look odd.");
+                Console.ResetColor();
+            }
         }
     }
 

@@ -84,7 +84,6 @@ public class AzureResource
     public virtual void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         Extensions.ForEach(x => x.BuildRelationships(this, allResources));
-        ;
     }
 
     /// <summary>

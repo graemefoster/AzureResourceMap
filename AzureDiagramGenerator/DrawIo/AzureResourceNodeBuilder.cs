@@ -51,7 +51,8 @@ public class AzureResourceNodeBuilder
             }
             else
             {
-                var from = nodes[fromResource].Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
+                var from = nodes[fromResource]
+                    .Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
                 var to = nodes[toResource].Single(x => ((CustomUserData)x.UserData).Id == toResource.InternalId);
                 yield return AzureResourceDrawer.CreateSimpleEdge(link.From, link.To, from, to, link.Details,
                     link.Plane, isLinkVisible);
@@ -79,7 +80,7 @@ public class AzureResourceNodeBuilder
             container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type ?? _resource.GetType().Name,
                 _resource.Name,
                 $"{_resource.InternalId}.container", _resource.Fill, TextAlignment.Top);
-            yield return (_resource, container);
+            var children = new List<(AzureResource, Node)>();
             foreach (var contained in _resource.ContainedResources)
             {
                 var nodeBuilder = resourceNodeBuilders[contained];
@@ -87,8 +88,19 @@ public class AzureResourceNodeBuilder
                              diagramAdjustor))
                 {
                     if (containedNode.Item2.ClusterParent == null) container.AddChild(containedNode.Item2);
-                    yield return containedNode;
+                    children.Add(containedNode);
                 }
+            }
+
+            //Only show if we had nodes
+            if (children.Any())
+            {
+                yield return (_resource, container);
+                foreach (var child in children)
+                {
+                    yield return child;
+                }
+                
             }
         }
 

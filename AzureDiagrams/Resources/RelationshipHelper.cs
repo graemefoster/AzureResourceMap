@@ -13,7 +13,7 @@ public class RelationshipHelper
     private static readonly Regex HostNameLikeRegex = new Regex(@"\/\/(([A-Za-z0-9-]{2,100}\.?)+)\b");
 
     private (string storageName, string storageSuffix)[] _connectedStorageAccounts = default!;
-    private (string name, string database)[] _databaseConnections = default!;
+    private (string serverName, string database)[] _databaseConnections = default!;
     private string[] _keyVaultReferences = default!;
     private string[] _hostNamesAccessedInAppSettings = default!;
 
@@ -42,7 +42,7 @@ public class RelationshipHelper
             .Distinct()
             .ToArray();
 
-        _databaseConnections = _potentialConnectionStrings
+        var databaseConnections = _potentialConnectionStrings
             .OfType<string>()
             .Where(appSetting => appSetting.Contains("Data Source=") &&
                                  appSetting.Contains("Initial Catalog="))
@@ -53,7 +53,20 @@ public class RelationshipHelper
                     ConnectionString = x
                 };
                 return ((string)csb["Data Source"], (string)csb["Initial Catalog"]);
-            })
+            });
+
+        _databaseConnections = databaseConnections.Union(_potentialConnectionStrings
+                .OfType<string>()
+                .Where(appSetting => appSetting.Contains("Server=") &&
+                                     appSetting.Contains("Database="))
+                .Select(x =>
+                {
+                    var csb = new DbConnectionStringBuilder
+                    {
+                        ConnectionString = x
+                    };
+                    return ((string)csb["Server"], (string)csb["Database"]);
+                }))
             .ToArray();
 
         _keyVaultReferences = _potentialConnectionStrings
@@ -103,20 +116,23 @@ public class RelationshipHelper
             {
                 from.CreateLayer7Flow(allResources, storage, "uses",
                     hns => hns.Any(hn =>
-                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)), Plane.Runtime);
+                        hn.StartsWith(storageAccount.storageName) && hn.EndsWith(storageAccount.storageSuffix)),
+                    Plane.Runtime);
             }
         }
 
         foreach (var databaseConnection in _databaseConnections)
         {
             //TODO check server name as-well
-            var database = allResources.OfType<ManagedSqlDatabase>().SingleOrDefault(x =>
-                string.Compare(x.Name, databaseConnection.database, StringComparison.InvariantCultureIgnoreCase) == 0);
+            var server = allResources.OfType<ManagedSqlServer>().SingleOrDefault(x =>
+                x.CanIAccessYouOnThisHostName(databaseConnection.serverName));
 
-            if (database != null)
+            // string.Compare(x.Name, databaseConnection.serverName, StringComparison.InvariantCultureIgnoreCase) == 0);
+
+            if (server != null)
             {
-                from.CreateLayer7Flow(allResources, database, "sql",
-                    hns => hns.Any(hn => hn.StartsWith(database.Name)), Plane.Runtime);
+                from.CreateLayer7Flow(allResources, server, "sql",
+                    hns => hns.Any(hn => hn.StartsWith(server.Name)), Plane.Runtime);
             }
         }
 

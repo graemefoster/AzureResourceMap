@@ -23,7 +23,7 @@ public class VisiblePlanesDiagramAdjustor : IDiagramAdjustor
 
     public bool DisplayLink(ResourceLink link)
     {
-        return (link.Plane & _visiblePlanes) == link.Plane;
+        return (link.Plane & _visiblePlanes) != Plane.None;
     }
     
     public AzureResource ReplacementFor(AzureResource resource)

@@ -130,7 +130,7 @@ internal class ArmClient
                 "2019-09-01", true,
                 new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.sql/servers" => new ResourceRetriever<ManagedSqlServer>(basicAzureResourceInfo,
-                apiVersion: "2021-02-01", fetchFullResource: false,
+                apiVersion: "2021-11-01", fetchFullResource: true,
                 new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.sql/servers/databases" => new ResourceRetriever<ManagedSqlDatabase>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-08-01-preview",

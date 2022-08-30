@@ -24,7 +24,7 @@ public class DnsZoneVirtualNetworkLink : AzureResource
         var vnet = allResources.OfType<VNet>().SingleOrDefault(x => x.Id == _virtualNetwork);
         if (vnet != null)
         {
-            vnet?.AssignPrivateDnsZone(dnsZone);
+            vnet.AssignPrivateDnsZone(dnsZone);
             dnsZone.ContainedByAnotherResource = true;
         }
         else
