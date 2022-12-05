@@ -18,7 +18,7 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/runtime:6.0
 WORKDIR /app
 
-RUN dotnet tool install --global AzureDiagramGenerator --version ${ VERSION }
+RUN dotnet tool install --global AzureDiagramGenerator --version $NUGET_VERSION
 
 RUN apt-get update && apt-get install libglib2.0-0 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgtk-3-0 libgbm-dev libasound2 xvfb -y
 
