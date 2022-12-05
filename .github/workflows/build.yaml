@@ -41,6 +41,7 @@ jobs:
       version: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
 
   build-docker-container:
+    needs: build-and-package-app
     runs-on: ubuntu-latest
 
     steps:
