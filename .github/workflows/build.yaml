@@ -40,11 +40,16 @@ jobs:
     outputs:
       version: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
 
-  build-docker-container:
+  build-and-publish-docker-container:
     needs: build-and-package-app
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
