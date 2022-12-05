@@ -17,9 +17,8 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:6.0
 WORKDIR /app
-COPY --from=build-env /scripts /
-COPY --from=build-env /out /
-COPY --from=build-env /drawio/ /drawio/
+
+RUN dotnet tool install --global AzureDiagramGenerator --version ${ VERSION }
 
 RUN apt-get update && apt-get install libglib2.0-0 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgtk-3-0 libgbm-dev libasound2 xvfb -y
 

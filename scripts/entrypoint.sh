@@ -7,4 +7,4 @@ export DISPLAY="${XVFB_DISPLAY}"
 Xvfb "${XVFB_DISPLAY}" ${XVFB_OPTIONS} &
 
 # shellcheck disable=SC2068
-dotnet /AzureDiagramGenerator.dll "$@"
+AzureDiagramGenerator "$@"
