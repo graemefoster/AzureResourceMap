@@ -25,7 +25,11 @@ public class VisiblePlanesDiagramAdjustor : IDiagramAdjustor
     {
         return (link.Plane & _visiblePlanes) != Plane.None;
     }
-    
+
+    public void PostProcess(Dictionary<AzureResource, AzureResourceNodeBuilder> all)
+    {
+    }
+
     public AzureResource ReplacementFor(AzureResource resource)
     {
         return resource;

@@ -16,4 +16,11 @@ public class ResourceLink
     public string? Details { get; }
     
     public Plane Plane { get; }
+
+    public void MakeTwoWay()
+    {
+        IsTwoWay = true;
+    }
+
+    public bool IsTwoWay { get; private set; }
 }

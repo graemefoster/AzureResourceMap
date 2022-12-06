@@ -102,8 +102,7 @@ public class AzureResource
     /// <param name="to"></param>
     /// <param name="details"></param>
     /// <param name="plane"></param>
-    protected internal void CreateFlowTo(AzureResource to, string details,
-        Plane plane)
+    protected internal void CreateFlowTo(AzureResource to, string details, Plane plane)
     {
         if (IsPureContainer) throw new InvalidOperationException("You cannot create a flow to a pure container");
 
@@ -112,8 +111,16 @@ public class AzureResource
             return;
         }
 
-        var link = new ResourceLink(this, to, details, plane);
-        Links.Add(link);
+        var opposite = to.Links.SingleOrDefault(x => x.To == this && x.Plane == plane);
+        if (opposite != null)
+        {
+            opposite.MakeTwoWay();
+        }
+        else
+        {
+            var link = new ResourceLink(this, to, details, plane);
+            Links.Add(link);
+        }
     }
 
     /// <summary>
@@ -127,5 +134,4 @@ public class AzureResource
         ContainedResources.Add(contained);
         contained.ContainedByAnotherResource = true;
     }
-    
 }

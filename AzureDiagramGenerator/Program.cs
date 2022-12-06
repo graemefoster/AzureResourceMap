@@ -241,6 +241,7 @@ public static class Program
         adjustor = condensed ? new CondensedDiagramAdjustor(adjustor, resources) : adjustor;
 
         var nodeBuilders = resources.ToDictionary(x => x, x => AzureResourceNodeBuilder.CreateNodeBuilder(x, adjustor));
+        adjustor.PostProcess(nodeBuilders);
         var nodes = nodeBuilders.SelectMany(x => x.Value.CreateNodes(nodeBuilders, adjustor)).ToArray();
         var nodesGroupedByResource = nodes.GroupBy(x => x.Item1, x => x.Item2);
         var nodesDictionary = nodesGroupedByResource.ToDictionary(x => x.Key, x => x.ToArray());

@@ -149,7 +149,7 @@ internal static class AzureResourceDrawer
     }
 
     public static Edge CreateSimpleEdge(AzureResource originalFrom, AzureResource originalTo, Node source, Node target,
-        string? details, Plane plane, bool isLinkVisible)
+        string? details, Plane plane, bool isLinkVisible, bool isTwoWay)
     {
         //Use the original resources as condensing a diagram may cause multiple links to share the same from / to / details.
         var edgeId = new Guid(
@@ -172,7 +172,8 @@ internal static class AzureResourceDrawer
                     ((CustomUserData)target.UserData).Id,
                     details,
                     pattern,
-                    isLinkVisible),
+                    isLinkVisible,
+                    isTwoWay),
                 "Unused",
                 Guid.NewGuid().ToString())
         };
@@ -181,7 +182,8 @@ internal static class AzureResourceDrawer
 
     private static string DrawSimpleEdge(Edge edge, Guid edgeId, string fromId, string toId, string? details,
         Pattern pattern,
-        bool isLinkVisible)
+        bool isLinkVisible, 
+        bool isTwoWay)
     {
         if (!isLinkVisible) return string.Empty;
 
@@ -222,7 +224,7 @@ internal static class AzureResourceDrawer
         }
 
         var drawIoEdge = @$"<mxCell id=""{edgeId}"" 
-        style=""jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle};"" edge=""1"" parent=""1"" 
+        style=""jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle};{(isTwoWay ? "startArrow=classic" : "")}"" edge=""1"" parent=""1"" 
         source=""{fromId}"" target=""{toId}"">
             <mxGeometry relative=""1"" as=""geometry"">{points}</mxGeometry>
             </mxCell>

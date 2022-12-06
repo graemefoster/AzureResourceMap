@@ -9,6 +9,12 @@ public interface IDiagramAdjustor
     bool DisplayLink(ResourceLink link);
 
     /// <summary>
+    /// Opportunity to do any post-processing after all nodes have been processed
+    /// </summary>
+    /// <param name="all"></param>
+    void PostProcess(Dictionary<AzureResource, AzureResourceNodeBuilder> all);
+
+    /// <summary>
     /// Either return the original resource, or a replacement if you want to reroute this nodes links via somewhere else.
     /// </summary>
     /// <param name="resource"></param>

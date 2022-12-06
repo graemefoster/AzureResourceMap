@@ -7,6 +7,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
     private readonly IDiagramAdjustor _inner;
     private readonly Dictionary<AzureResource, AzureResource> _replacements = new();
     private readonly List<AzureResource> _removals = new();
+    private readonly List<ResourceLink> _ignoreLinks = new();
 
     public CondensedDiagramAdjustor(IDiagramAdjustor inner, AzureResource[] allResources)
     {
@@ -128,6 +129,40 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         return _inner.CreateNodeBuilder(resource);
     }
 
+    /// <summary>
+    /// look for any new 2-way links. These clutter the diagram and we prefer double arrow-heads.
+    /// </summary>
+    /// <param name="all"></param>
+    public void PostProcess(Dictionary<AzureResource, AzureResourceNodeBuilder> all)
+    {
+        var realLinks = new HashSet<(AzureResource, AzureResource, Plane)>();
+        var originalLinks = new Dictionary<(AzureResource, AzureResource, Plane), ResourceLink>();
+        foreach (var resource in all.Keys)
+        {
+            var from = ReplacementFor(resource);
+            foreach (var link in resource.Links)
+            {
+                if (_inner.DisplayLink(link))
+                {
+                    var to = ReplacementFor(link.To);
+                    if (realLinks.Contains((to, from, link.Plane)))
+                    {
+                        _ignoreLinks.Add(link);
+                        originalLinks[(to, from, link.Plane)].MakeTwoWay();
+                    }
+                    else
+                    {
+                        var key = (from, to, link.Plane);
+                        realLinks.Add(key);
+                        originalLinks[key] = link;
+                    }
+                }
+            }
+        }
+        
+        _inner.PostProcess(all);
+    }
+
     public AzureResource ReplacementFor(AzureResource resource)
     {
         var replacement = resource;
@@ -141,6 +176,6 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
 
     public bool DisplayLink(ResourceLink link)
     {
-        return _inner.DisplayLink(link);
+        return !_ignoreLinks.Contains(link) && _inner.DisplayLink(link);
     }
 }
