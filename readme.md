@@ -33,8 +33,8 @@ AzureDiagramGenerator --subscription-id <subscription-id> --resource-group <reso
 
 We have two different actions. The first runs as a Docker action, and produces a jpeg output. The second doesn't use docker, and produces a .drawio file.
 
- - [graemefoster/azurediagramsgithubactionsdocker@v0.1.2](https://github.com/graemefoster/AzureDiagramsGithubActionsDocker)
- - [graemefoster/azurediagramsgithubactions@v0.1.1](https://github.com/graemefoster/AzureDiagramsGithubActions)
+ - [graemefoster/azurediagramsgithubactionsdocker@v0.1.2](https://github.com/marketplace/actions/azurediagramsgithubactionsdocker)
+ - [graemefoster/azurediagramsgithubactions@v0.1.1](https://github.com/marketplace/actions/azurediagramsgithubactions)
 
 
 
