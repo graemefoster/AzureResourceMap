@@ -14,20 +14,20 @@ AzureDiagramGenerator --subscription-id <subscription-id> --resource-group <reso
 
 ## CLI flags
 
-| Flag                | Required  | Description                                                                  |
-|:--------------------|:----------|:-----------------------------------------------------------------------------|
-| --tenant-id         | No        | Tenant Id (defaults to current Azure CLI)                                    |
-| --subscription      | Yes       | Subscription Id to run against                                               |
-| --resource-group    | Yes       | Wildcard enabled resource group name (supports multiple)                     |
-| --output            | Yes       | Folder to output diagram to                                                  |
-| --condensed         | No        | True collapses private endpoints into subnets (can simplify large diagrams)  |
-| --show-runtime      | Yes       | True to show runtime flows defined on the control plane                      |
-| --show-inferred     | Yes       | True to infer connections between resources by introspecting appSettings     |
-| --show-identity     | Yes       | True to show User Assigned Managed Identity connections                      |
-| --show-diagnostics  | Yes       | True to show diagnostics flows                                               |
-| --token             | No        | Optional JWT to avoid using CLI credential                                   |
-| --output-file-name  | No        | Name of generated file. Defaults to resource-group name                      |
-
+| Flag                 | Required  | Description                                                                  |
+|:---------------------|:----------|:-----------------------------------------------------------------------------|
+| --tenant-id          | No        | Tenant Id (defaults to current Azure CLI)                                    |
+| --subscription       | Yes       | Subscription Id to run against                                               |
+| --resource-group     | Yes       | Wildcard enabled resource group name (supports multiple)                     |
+| --output             | Yes       | Folder to output diagram to                                                  |
+| --condensed          | No        | True collapses private endpoints into subnets (can simplify large diagrams)  |
+| --show-runtime       | Yes       | True to show runtime flows defined on the control plane                      |
+| --show-inferred      | Yes       | True to infer connections between resources by introspecting appSettings     |
+| --show-identity      | Yes       | True to show User Assigned Managed Identity connections                      |
+| --show-diagnostics   | Yes       | True to show diagnostics flows                                               |
+| --token              | No        | Optional JWT to avoid using CLI credential                                   |
+| --output-file-name   | No        | Name of generated file. Defaults to resource-group name                      |
+| --output-png         | No        | Outputs a png file (requires draw.io to be installed)                        |
 
 # Github Actions
 
