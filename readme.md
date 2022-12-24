@@ -1,5 +1,7 @@
 # AzureDiagrams
 
+[![NuGet version (AzureDiagramGenerator)](https://img.shields.io/nuget/v/AzureDiagramGenerator.svg?style=flat-square)](https://www.nuget.org/packages/AzureDiagramGenerator/)
+
 ## Generate a Draw.IO diagram from your Azure Resources
 
 TLDR;
