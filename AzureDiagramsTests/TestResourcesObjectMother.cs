@@ -33,7 +33,7 @@ public class TestResourcesObjectMother
             Type = "microsoft.storage/storageaccounts",
             Extensions = new[] { new PrivateEndpointExtensions() }
         };
-        var peId = Guid.NewGuid();
+        var peId = new Guid("A1621A82-22D1-495D-8B9F-AF87F31D21C2");
 
         var privateEndpointResourceId = AzResourceHelper.GetResourceId(
             peId,
