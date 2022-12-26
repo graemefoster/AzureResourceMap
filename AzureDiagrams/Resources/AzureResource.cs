@@ -23,7 +23,7 @@ public class AzureResource
 
     public List<ResourceLink> Links { get; } = new();
     public List<AzureResource> ContainedResources { get; } = new();
-    public IEnumerable<IResourceExtension> Extensions { get; internal set; } = Array.Empty<IResourceExtension>();
+    public IEnumerable<IResourceExtension> Extensions { get; set; } = Array.Empty<IResourceExtension>();
 
     public string Id
     {

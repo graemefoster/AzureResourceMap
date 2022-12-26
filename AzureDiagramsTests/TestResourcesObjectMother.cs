@@ -1,11 +1,12 @@
 using AzureDiagrams.Resources;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagramsTests;
 
 public class TestResourcesObjectMother
 {
-    public static IEnumerable<AzureResource> WithPublicAccessibleStorageAccount()
+    public static IEnumerable<AzureResource> StorageAccount()
     {
         yield return new StorageAccount()
         {
@@ -16,6 +17,116 @@ public class TestResourcesObjectMother
             Name = "storage123",
             Type = "microsoft.storage/storageaccounts"
         };
+    }
+
+    public static async Task<IEnumerable<AzureResource>> StorageAccountWithPrivateEndpoint()
+    {
+        var vnet = (VNet)(await VirtualNetwork("test-subnet")).Single();
+
+        var storage = new StorageAccount()
+        {
+            Id = AzResourceHelper.GetResourceId(
+                new Guid("9D7D2DC9-DFFA-4120-B896-0754D5D76486"),
+                "test-rg",
+                "storage123"),
+            Name = "storage123",
+            Type = "microsoft.storage/storageaccounts",
+            Extensions = new[] { new PrivateEndpointExtensions() }
+        };
+        var peId = Guid.NewGuid();
+
+        var privateEndpointResourceId = AzResourceHelper.GetResourceId(
+            peId,
+            "test-rg",
+            $"pe-{peId}");
+
+        var rawStorageJson = JObject.FromObject(new
+        {
+            properties = new
+            {
+                privateEndpointConnections = new[]
+                {
+                    new
+                    {
+                        properties = new
+                        {
+                            privateEndpoint = new
+                            {
+                                id = privateEndpointResourceId
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        await storage.Enrich(rawStorageJson, new Dictionary<string, JObject?>());
+        storage.Extensions.ForEach(x => x.Enrich(storage, rawStorageJson, new Dictionary<string, JObject?>()));
+
+        var nicId = new Guid("BD4F785D-6E10-40C5-9BF1-D04B20ECA9BF");
+
+        var nic = new Nic()
+        {
+            Id = AzResourceHelper.GetResourceId(nicId,
+                "test-rg",
+                $"pe-nic-{nicId}"),
+        };
+
+        await nic.Enrich(JObject.FromObject(new
+        {
+            properties = new
+            {
+                ipConfigurations = new[]
+                {
+                    new
+                    {
+                        properties = new
+                        {
+                            subnet = new
+                            {
+                                id = $"{vnet.Id}/subnets/{vnet.Subnets[0].Name}"
+                            }
+                        }
+                    }
+                }
+            }
+        }), new Dictionary<string, JObject?>());
+
+        var pe = new PrivateEndpoint()
+        {
+            Id = privateEndpointResourceId,
+        };
+
+        await pe.Enrich(JObject.FromObject(new
+        {
+            properties = new
+            {
+                networkInterfaces = new[]
+                {
+                    new
+                    {
+                        id = nic.Id
+                    }
+                },
+                customDnsConfigs = new[]
+                {
+                    new
+                    {
+                        fqdn = "test-pe.localtest.me"
+                    }
+                },
+                subnet = new
+                {
+                    id = $"{vnet.Id}/subnets/{vnet.Subnets[0].Name}"
+                }
+            }
+        }), new Dictionary<string, JObject?>());
+
+        var allResources = new AzureResource[] { vnet, storage, pe, nic };
+        pe.BuildRelationships(allResources);
+        nic.BuildRelationships(allResources);
+        vnet.BuildRelationships(allResources);
+        storage.BuildRelationships(allResources);
+        return allResources;
     }
 
     public static async Task<IEnumerable<AzureResource>> VirtualNetwork(string subnet)

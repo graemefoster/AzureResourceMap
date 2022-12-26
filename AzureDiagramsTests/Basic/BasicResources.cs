@@ -8,7 +8,7 @@ public class BasicResources
     public async Task SingleStorageAccount()
     {
         var resources = TestResourcesObjectMother
-            .WithPublicAccessibleStorageAccount();
+            .StorageAccount();
 
         var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
             resources.ToArray(),
@@ -32,6 +32,23 @@ public class BasicResources
             false, 
             false, 
             false,
+            false);
+        
+        diagram.ShouldMatchApproved();
+    }
+
+    [Fact]
+    public async Task VNetWithAttachedStoragetAccountInSubNet()
+    {
+        var resources = (await TestResourcesObjectMother.StorageAccountWithPrivateEndpoint())
+            .ToArray();
+
+        var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
+            resources.ToArray(),
+            false, 
+            false, 
+            false, 
+            true,
             false);
         
         diagram.ShouldMatchApproved();
