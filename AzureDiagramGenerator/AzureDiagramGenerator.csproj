@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Azure.Identity" Version="1.6.0" />
+      <PackageReference Include="Azure.Identity" Version="1.8.0" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
     </ItemGroup>
 
@@ -20,7 +20,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

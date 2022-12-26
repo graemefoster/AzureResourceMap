@@ -7,7 +7,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D9F0244-632E-4566-B45F-5DE92AB6C31D}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yaml = .github\workflows\build.yaml
-		.github\workflows\test.yaml = .github\workflows\test.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{A17DDC52-23FE-42E3-A75B-ADF38FB362BA}"
@@ -29,6 +28,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{0E84
 		scripts\entrypoint.sh = scripts\entrypoint.sh
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDiagramsTests", "AzureDiagramsTests\AzureDiagramsTests.csproj", "{4E92A880-3F88-41B9-9DF3-DB20FEEB80ED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{ABB93C54-79E9-4642-903D-FF1D889300BB}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		entrypoint.sh = entrypoint.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +50,15 @@ Global
 		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{899DE1FB-F964-4325-B52E-44565B7AA1E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E92A880-3F88-41B9-9DF3-DB20FEEB80ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E92A880-3F88-41B9-9DF3-DB20FEEB80ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E92A880-3F88-41B9-9DF3-DB20FEEB80ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E92A880-3F88-41B9-9DF3-DB20FEEB80ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7D9F0244-632E-4566-B45F-5DE92AB6C31D} = {0E6366E5-D9A9-40CE-A7E1-99AF5CD267CB}
 		{7A36B0C1-6505-4F1D-B064-207290E084DE} = {A17DDC52-23FE-42E3-A75B-ADF38FB362BA}
 		{0E844E37-F819-4A15-A568-F8E692D08A9B} = {A17DDC52-23FE-42E3-A75B-ADF38FB362BA}
+		{ABB93C54-79E9-4642-903D-FF1D889300BB} = {A17DDC52-23FE-42E3-A75B-ADF38FB362BA}
 	EndGlobalSection
 EndGlobal
