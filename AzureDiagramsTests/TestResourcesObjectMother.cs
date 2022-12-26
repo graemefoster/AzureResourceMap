@@ -1,4 +1,5 @@
 using AzureDiagrams.Resources;
+using Newtonsoft.Json.Linq;
 
 namespace AzureDiagramsTests;
 
@@ -15,5 +16,34 @@ public class TestResourcesObjectMother
             Name = "storage123",
             Type = "microsoft.storage/storageaccounts"
         };
+    }
+
+    public static async Task<IEnumerable<AzureResource>> VirtualNetwork(string subnet)
+    {
+        var vnet = new VNet()
+        {
+            Id = AzResourceHelper.GetResourceId(
+                new Guid("266A0682-2A8F-4DBE-815A-D36956882FA3"),
+                "test-rg",
+                "vnet123"),
+        };
+        await vnet.Enrich(JObject.FromObject(new
+        {
+            properties = new
+            {
+                subnets = new[]
+                {
+                    new
+                    {
+                        name = subnet,
+                        properties = new
+                        {
+                            addressPrefix = "10.0.0.0/24"
+                        }
+                    }
+                }
+            }
+        }), new Dictionary<string, JObject?>());
+        return new[] { vnet };
     }
 }

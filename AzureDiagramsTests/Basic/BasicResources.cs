@@ -20,4 +20,21 @@ public class BasicResources
         
         diagram.ShouldMatchApproved();
     }
+    [Fact]
+    public async Task VNetWithSubNet()
+    {
+        var resources = await TestResourcesObjectMother
+            .VirtualNetwork("subnet1");
+
+        var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
+            resources.ToArray(),
+            false, 
+            false, 
+            false, 
+            false,
+            false);
+        
+        diagram.ShouldMatchApproved();
+    }
+
 }
