@@ -29,7 +29,7 @@ jobs:
         uses: gittools/actions/gitversion/execute@v0.9.15
 
       - name: Test
-        run: dotnet test AzureDiagramTests/AzureDiagramsTests.csproj
+        run: dotnet test AzureDiagramsTests/AzureDiagramsTests.csproj
 
       - name: Pack Nuget
         run: dotnet pack AzureDiagramGenerator/AzureDiagramGenerator.csproj -p:Version=${{ steps.gitversion.outputs.NuGetVersionV2 }} --output ./publish/
