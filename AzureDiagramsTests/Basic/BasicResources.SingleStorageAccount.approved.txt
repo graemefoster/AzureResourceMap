@@ -1,0 +1,12 @@
+﻿<mxGraphModel>
+	<root>
+		<mxCell id="0" />
+		<mxCell id="1" parent="0" />
+<mxCell id="469266b2-b714-ab6b-0de0-6c2c5d9d6328" value="storage123" style="html=1;image;image=img/lib/azure2/storage/Storage_Accounts.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="1">
+    <mxGeometry x="-25" y="500" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+
+
+	</root>
+</mxGraphModel>

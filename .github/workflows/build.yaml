@@ -28,15 +28,15 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.15
 
+      - name: Test
+        run: dotnet test AzureDiagramTests/AzureDiagramsTests.csproj
+
       - name: Pack Nuget
         run: dotnet pack AzureDiagramGenerator/AzureDiagramGenerator.csproj -p:Version=${{ steps.gitversion.outputs.NuGetVersionV2 }} --output ./publish/
- 
+      
       - name: Publish to Nuget ${{ steps.gitversion.outputs.NuGetVersionV2 }}
         run: dotnet nuget push ./publish/AzureDiagramGenerator.${{ steps.gitversion.outputs.NuGetVersionV2 }}.nupkg  --api-key ${{ secrets.NUGET_PUBLISH_KEY }} --source https://api.nuget.org/v3/index.json
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-    
     outputs:
       version: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
 
@@ -50,6 +50,9 @@ jobs:
         with:
           fetch-depth: 0
 
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v1
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
