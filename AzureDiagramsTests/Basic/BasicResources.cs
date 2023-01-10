@@ -1,3 +1,4 @@
+using AzureDiagrams.Resources;
 using Shouldly;
 
 namespace AzureDiagramsTests.Basic;
@@ -20,6 +21,24 @@ public class BasicResources
         
         diagram.ShouldMatchApproved();
     }
+
+    [Fact]
+    public async Task SingleStorageAccountSimpleConstructor()
+    {
+        var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
+            new []
+            {
+                new StorageAccount("6e89f6aa-1b83-42f1-ad92-786b47d9fdf7", "test-storage", Array.Empty<string>())
+            },
+            false, 
+            false, 
+            false, 
+            false,
+            false);
+        
+        diagram.ShouldMatchApproved();
+    }
+    
     [Fact]
     public async Task VNetWithSubNet()
     {
