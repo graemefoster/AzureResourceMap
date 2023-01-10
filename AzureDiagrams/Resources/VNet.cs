@@ -2,12 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
 public class VNet : AzureResource
 {
+    public VNet(string id, string name, Subnet[] subnets)
+    {
+        Id = id;
+        Name = name;
+        Subnets = subnets;
+    }
+
+    /// <summary>
+    /// Used for json deserialization
+    /// </summary>
+    [JsonConstructor]
+    public VNet()
+    {
+    }
+    
     public Subnet[] Subnets { get; private set; } = default!;
     public List<PrivateDnsZone> PrivateDnsZones { get; } = new();
 
@@ -16,11 +32,11 @@ public class VNet : AzureResource
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         Subnets = full["properties"]!["subnets"]!.Select(x => new Subnet
-        {
-            Name = x.Value<string>("name")!,
-            AddressPrefix = x["properties"]!.Value<string>("addressPrefix")!,
-            UdrId = x["properties"]!["routeTable"]?.Value<string>("id")
-        }).ToArray();
+        (
+            x.Value<string>("name")!,
+            x["properties"]!.Value<string>("addressPrefix")!,
+            x["properties"]!["routeTable"]?.Value<string>("id")
+        )).ToArray();
 
         return Task.CompletedTask;
     }
@@ -79,9 +95,16 @@ public class VNet : AzureResource
 
     public class Subnet
     {
-        public string Name { get; init; } = default!;
+        public Subnet(string name, string addressPrefix, string? udrId = null)
+        {
+            Name = name;
+            UdrId = udrId;
+            AddressPrefix = addressPrefix;
+        }
+
+        public string Name { get; init; }
         public string? UdrId { get; init; }
-        public string AddressPrefix { get; init; } = default!;
+        public string AddressPrefix { get; init; }
 
         public List<AzureResource> ContainedResources { get; } = new();
 

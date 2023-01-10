@@ -54,6 +54,27 @@ public class BasicResources
             false);
         
         diagram.ShouldMatchApproved();
+    }    
+    
+    [Fact]
+    public async Task VNetWithSubNetSimpleConstructor()
+    {
+        var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
+            new AzureResource []
+            {
+                new VNet("6e89f6aa-1b83-42f1-ad92-786b47d9fdf7", "vnet", new []
+                {
+                    new VNet.Subnet("subnet1", "10.1.0.0/26"),
+                    new VNet.Subnet("subnet2", "10.1.1.0/26"),
+                })
+            },
+            false, 
+            false, 
+            false, 
+            false,
+            false);
+        
+        diagram.ShouldMatchApproved();
     }
 
     [Fact]
