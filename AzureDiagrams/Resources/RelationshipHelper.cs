@@ -42,32 +42,20 @@ public class RelationshipHelper
             .Distinct()
             .ToArray();
 
-        var databaseConnections = _potentialConnectionStrings
+        _databaseConnections = _potentialConnectionStrings
             .OfType<string>()
-            .Where(appSetting => appSetting.Contains("Data Source=") &&
-                                 appSetting.Contains("Initial Catalog="))
+            .Where(appSetting => (appSetting.Contains("Data Source=") || appSetting.Contains("Server")) &&
+                                 (appSetting.Contains("Initial Catalog=") || appSetting.Contains("Database=")))
             .Select(x =>
             {
                 var csb = new DbConnectionStringBuilder
                 {
                     ConnectionString = x
                 };
-                return ((string)csb["Data Source"], (string)csb["Initial Catalog"]);
-            });
-
-        _databaseConnections = databaseConnections.Union(_potentialConnectionStrings
-                .OfType<string>()
-                .Where(appSetting => appSetting.Contains("Server=") &&
-                                     appSetting.Contains("Database="))
-                .Select(x =>
-                {
-                    var csb = new DbConnectionStringBuilder
-                    {
-                        ConnectionString = x
-                    };
-                    return ((string)csb["Server"], (string)csb["Database"]);
-                }))
-            .ToArray();
+                return
+                    ((string)(csb.ContainsKey("Data Source") ? csb["Data Source"] : csb["Server"]),
+                        (string)(csb.ContainsKey("Initial Catalog") ? csb["Initial Catalog"] : csb["Database"]));
+            }).ToArray();
 
         _keyVaultReferences = _potentialConnectionStrings
             .OfType<string>()
