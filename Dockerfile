@@ -10,7 +10,7 @@ COPY ./entrypoint.sh ./
 
 RUN chmod 777 /entrypoint.sh
 
-RUN dotnet tool install --global AzureDiagramGenerator --version 0.6.31
+RUN dotnet tool install --global AzureDiagramGenerator
 
 ENV ELECTRON_DISABLE_SECURITY_WARNINGS "true"
 ENV DRAWIO_DISABLE_UPDATE "true"
