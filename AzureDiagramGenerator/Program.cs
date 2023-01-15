@@ -181,30 +181,26 @@ public static class Program
             var outputName = string.IsNullOrWhiteSpace(outputFileName)
                 ? $"{resourceGroups[0].Replace("*", "")}.drawio"
                 : outputFileName;
-            var path = Path.Combine(outputFolder, outputName);
+            var fullOutputPath = Path.GetFullPath(Path.Combine(outputFolder, outputName));
 
+            await File.WriteAllTextAsync(fullOutputPath, graph, cancellationTokenSource.Token);
             if (outputPng)
             {
-                await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
-                var pngOutput = $"{Path.GetFullPath(path)}.png";
+                var pngOutput = $"{fullOutputPath}.png";
                 var psi = new ProcessStartInfo("/drawio/drawio-x86_64-17.4.2.AppImage")
                 {
                     Arguments =
-                        $"--appimage-extract-and-run --export --format png --embed-diagram \"{pngOutput}\" --no-sandbox",
+                        $"--appimage-extract-and-run --export --format png --embed-diagram --output \"{pngOutput}\" --no-sandbox \"{fullOutputPath}\"",
                     UseShellExecute = false
                 };
                 Console.WriteLine($"/drawio/drawio-x86_64-17.4.2.AppImage {psi.Arguments}");
                 var process = Process.Start(psi)!;
                 await process.WaitForExitAsync(cancellationTokenSource.Token);
-                Console.WriteLine($"Written output to {pngOutput}");
-            }
-            else
-            {
-                await File.WriteAllTextAsync(path, graph, cancellationTokenSource.Token);
+                Console.WriteLine($"Written PNG output to {pngOutput}");
             }
 
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Written output to {Path.GetFullPath(path)}");
+            Console.WriteLine($"Written Draw.IO output to {fullOutputPath}");
             Console.ResetColor();
         }
         finally
