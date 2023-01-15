@@ -17,7 +17,7 @@
 | --show-diagnostics | No       | True to show diagnostics flows                                               |
 | --token            | No        | Optional JWT to avoid using CLI credential                                   |
 | --output-file-name | No        | Name of generated file. Defaults to resource-group name                      |
-| --output-png       | No        | Outputs a png file (requires draw.io to be installed)                        |
+| --output-png       | No        | Outputs a png file as-well as the drawio file (requires draw.io to be installed)                        |
 
 # Github Actions
 
