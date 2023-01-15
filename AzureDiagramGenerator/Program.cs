@@ -190,7 +190,7 @@ public static class Program
                 var psi = new ProcessStartInfo("/drawio/drawio-x86_64-17.4.2.AppImage")
                 {
                     Arguments =
-                        $"--appimage-extract-and-run --export --format png --embed-diagram --output \"{pngOutput}\" --no-sandbox \"{fullOutputPath}\"",
+                        $"--appimage-extract-and-run --export --format png --embed-diagram --output \"{pngOutput}\" \"{fullOutputPath}\" --no-sandbox",
                     UseShellExecute = false
                 };
                 Console.WriteLine($"/drawio/drawio-x86_64-17.4.2.AppImage {psi.Arguments}");
