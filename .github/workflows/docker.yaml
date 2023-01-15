@@ -1,4 +1,4 @@
-﻿name: BuildAndPackage
+﻿name: PublishDocker
 
 on:
   push:
@@ -10,7 +10,6 @@ on:
 
 jobs:
   build-and-publish-docker-container:
-    needs: build-and-package-app
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
