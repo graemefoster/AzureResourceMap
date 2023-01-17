@@ -8,7 +8,7 @@ namespace AzureDiagrams.Resources;
 
 public class RelationshipHelper
 {
-    private readonly object[] _potentialConnectionStrings;
+    private readonly string[] _potentialConnectionStrings;
     private static readonly Regex KvRegex = new Regex(@"^\@Microsoft\.KeyVault\(VaultName\=(.*?);");
     private static readonly Regex HostNameLikeRegex = new Regex(@"\/\/(([A-Za-z0-9-]{2,100}\.?)+)\b");
 
@@ -17,7 +17,7 @@ public class RelationshipHelper
     private string[] _keyVaultReferences = default!;
     private string[] _hostNamesAccessedInAppSettings = default!;
 
-    public RelationshipHelper(object[] potentialConnectionStrings)
+    public RelationshipHelper(string[] potentialConnectionStrings)
     {
         _potentialConnectionStrings = potentialConnectionStrings;
     }
@@ -43,7 +43,6 @@ public class RelationshipHelper
             .ToArray();
 
         _databaseConnections = _potentialConnectionStrings
-            .OfType<string>()
             .Where(appSetting => (appSetting.Contains("Data Source=") || appSetting.Contains("Server")) &&
                                  (appSetting.Contains("Initial Catalog=") || appSetting.Contains("Database=")))
             .Select(x =>
@@ -58,14 +57,12 @@ public class RelationshipHelper
             }).ToArray();
 
         _keyVaultReferences = _potentialConnectionStrings
-            .OfType<string>()
             .Select(x => KvRegex.Match(x))
             .Where(x => x.Success)
             .Select(x => x.Groups[1].Captures[0].Value)
             .ToArray();
 
         _hostNamesAccessedInAppSettings = _potentialConnectionStrings
-            .OfType<string>()
             .Select(x =>
                 {
                     if (Uri.TryCreate(x, UriKind.Absolute, out var uri)) return uri.Host;

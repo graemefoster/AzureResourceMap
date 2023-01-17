@@ -2,15 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-public class ASP : AzureResource
+public class AppServicePlan : AzureResource
 {
     public override string Image => "img/lib/azure2/app_services/App_Service_Plans.svg";
     public override string? Fill => "#F5F5F5";
     public string? ASE { get; private set; }
+    
+    public AppServicePlan(string id, string name)
+    {
+        Id = id;
+        Name = name;
+        Type = "microsoft.web/serverfarms";
+    }
+
+    /// <summary>
+    /// Used for json deserialization
+    /// </summary>
+    [JsonConstructor]
+    public AppServicePlan()
+    {
+    }
+
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
@@ -24,9 +41,16 @@ public class ASP : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var apps = allResources.OfType<App>().Where(x =>
-            string.Equals(Id, x.ServerFarmId, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        var apps = allResources.OfType<AppServiceApp>()
+            .Where(x => string.Equals(Id, x.ServerFarmId, StringComparison.InvariantCultureIgnoreCase))
+            .Where(x => IsNotSlotContainerByAnotherApp(x, allResources))
+            .ToArray();
         apps.ForEach(OwnsResource);
         base.BuildRelationships(allResources);
+    }
+
+    private bool IsNotSlotContainerByAnotherApp(AppServiceApp appServiceApp, IEnumerable<AzureResource> allResources)
+    {
+        return !appServiceApp.IsSlotContainerByAnotherApp(allResources, out _);
     }
 }

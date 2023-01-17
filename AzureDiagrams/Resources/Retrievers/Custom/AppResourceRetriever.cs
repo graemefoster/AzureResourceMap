@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources.Retrievers.Custom;
 
-public class AppResourceRetriever : ResourceRetriever<App>
+public class AppResourceRetriever : ResourceRetriever<AppServiceApp>
 {
     public const string ConfigAppSettingsList = "config/appSettings/list";
     public const string ConnectionStringSettingsList = "config/connectionStrings/list";

@@ -105,7 +105,7 @@ internal class ArmClient
                     {
                         new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension()
                     }),
-            "microsoft.web/serverfarms" => new ResourceRetriever<ASP>(basicAzureResourceInfo,
+            "microsoft.web/serverfarms" => new ResourceRetriever<AppServicePlan>(basicAzureResourceInfo,
                 apiVersion: "2021-03-01", fetchFullResource: true, new[] { new DiagnosticsExtensions() }),
             "microsoft.web/sites" => new AppResourceRetriever(basicAzureResourceInfo),
             "microsoft.web/sites/slots" => new AppResourceRetriever(basicAzureResourceInfo),
@@ -171,7 +171,7 @@ internal class ArmClient
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.network/loadbalancers" => new ResourceRetriever<LoadBalancer>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-03-01", extensions: new[] { new DiagnosticsExtensions() }),
-            "microsoft.web/hostingenvironments" => new ResourceRetriever<ASE>(basicAzureResourceInfo,
+            "microsoft.web/hostingenvironments" => new ResourceRetriever<AppServiceEnvironment>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-02-01", extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01-preview",

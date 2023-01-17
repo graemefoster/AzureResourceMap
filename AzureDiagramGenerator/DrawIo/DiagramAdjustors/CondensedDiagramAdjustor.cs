@@ -73,7 +73,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
                 currentPe.nic.Name = currentPe.pe.ResourceAccessedByMe?.Name ?? currentPe.nic.Name;
 
                 //finally target vnet integration
-                if (grouping.Key is App { VNetIntegration: { } } app)
+                if (grouping.Key is AppServiceApp { VNetIntegration: { } } app)
                 {
                     _replacements.Add(app.VNetIntegration!, currentPe.nic);
                 }
@@ -90,7 +90,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
     private void CollapseVNetIntegrations(AzureResource[] allResources)
     {
 
-        var publicAppWithVNetIntegration = allResources.OfType<App>()
+        var publicAppWithVNetIntegration = allResources.OfType<AppServiceApp>()
                 .Where(x => x.VNetIntegration != null)
                 .Where(app => allResources.OfType<PrivateEndpoint>().All(pe => pe.ResourceAccessedByMe != app));
 
@@ -121,7 +121,7 @@ public class CondensedDiagramAdjustor : IDiagramAdjustor
         if (_removals.Contains(resource)) return new IgnoreNodeBuilder(resource);
         
         //Don't draw the ASP if all of its apps are being routed via private endpoint / vnet-integration subnets
-        if (resource is ASP asp && asp.ContainedResources.OfType<App>().All(app => _replacements.ContainsKey(app)))
+        if (resource is AppServicePlan asp && asp.ContainedResources.OfType<AppServiceApp>().All(app => _replacements.ContainsKey(app)))
         {
             return new IgnoreNodeBuilder(resource);
         }

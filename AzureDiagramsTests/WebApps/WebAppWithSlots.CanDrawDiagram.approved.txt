@@ -1,0 +1,40 @@
+﻿<mxGraphModel>
+	<root>
+		<mxCell id="0" />
+		<mxCell id="1" parent="0" />
+<mxCell id="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd" value="TestAppServicePlan" style="html=1;image;image=img/lib/azure2/app_services/App_Service_Plans.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container">
+    <mxGeometry x="850" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="60c80ab3-baea-d6d4-b81c-54b7d72ac690" value="TestApp1" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="60c80ab3-baea-d6d4-b81c-54b7d72ac690.container">
+    <mxGeometry x="200" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="66c900b1-e52a-588f-830d-d3571a261c66" value="TestApp1-green" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="60c80ab3-baea-d6d4-b81c-54b7d72ac690.container">
+    <mxGeometry x="50" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="d18af89b-56f1-32d3-2249-8fc306f5363b" value="TestApp2" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="d18af89b-56f1-32d3-2249-8fc306f5363b.container">
+    <mxGeometry x="200" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="a1a9b65d-9292-04f9-5f4a-666e80f47aa9" value="TestApp2-green" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="d18af89b-56f1-32d3-2249-8fc306f5363b.container">
+    <mxGeometry x="50" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="60c80ab3-baea-d6d4-b81c-54b7d72ac690.container" value="TestApp1&lt;br/&gt;(microsoft.web/sites)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;verticalAlign=top" vertex="1" parent="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container">
+    <mxGeometry x="50" y="50" width="300" height="160" 
+    as="geometry" />
+</mxCell>
+<mxCell id="d18af89b-56f1-32d3-2249-8fc306f5363b.container" value="TestApp2&lt;br/&gt;(microsoft.web/sites)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;verticalAlign=top" vertex="1" parent="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container">
+    <mxGeometry x="450" y="50" width="300" height="160" 
+    as="geometry" />
+</mxCell>
+<mxCell id="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container" value="TestAppServicePlan&lt;br/&gt;(microsoft.web/serverfarms)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;verticalAlign=top" vertex="1" parent="1">
+    <mxGeometry x="0" y="0" width="950" height="270" 
+    as="geometry" />
+</mxCell>
+
+
+	</root>
+</mxGraphModel>

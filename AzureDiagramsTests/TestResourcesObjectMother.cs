@@ -10,9 +10,7 @@ public class TestResourcesObjectMother
     {
         yield return new StorageAccount()
         {
-            Id = AzResourceHelper.GetResourceId(
-                new Guid("9D7D2DC9-DFFA-4120-B896-0754D5D76486"),
-                "test-rg",
+            Id = AzResourceHelper.GetResourceId("test-rg",
                 "storage123"),
             Name = "storage123",
             Type = "microsoft.storage/storageaccounts"
@@ -25,9 +23,7 @@ public class TestResourcesObjectMother
 
         var storage = new StorageAccount()
         {
-            Id = AzResourceHelper.GetResourceId(
-                new Guid("9D7D2DC9-DFFA-4120-B896-0754D5D76486"),
-                "test-rg",
+            Id = AzResourceHelper.GetResourceId("test-rg",
                 "storage123"),
             Name = "storage123",
             Type = "microsoft.storage/storageaccounts",
@@ -35,9 +31,7 @@ public class TestResourcesObjectMother
         };
         var peId = new Guid("A1621A82-22D1-495D-8B9F-AF87F31D21C2");
 
-        var privateEndpointResourceId = AzResourceHelper.GetResourceId(
-            peId,
-            "test-rg",
+        var privateEndpointResourceId = AzResourceHelper.GetResourceId("test-rg",
             $"pe-{peId}");
 
         var rawStorageJson = JObject.FromObject(new
@@ -66,8 +60,7 @@ public class TestResourcesObjectMother
 
         var nic = new Nic()
         {
-            Id = AzResourceHelper.GetResourceId(nicId,
-                "test-rg",
+            Id = AzResourceHelper.GetResourceId("test-rg",
                 $"pe-nic-{nicId}"),
         };
 
@@ -122,10 +115,7 @@ public class TestResourcesObjectMother
         }), new Dictionary<string, JObject?>());
 
         var allResources = new AzureResource[] { vnet, storage, pe, nic };
-        pe.BuildRelationships(allResources);
-        nic.BuildRelationships(allResources);
-        vnet.BuildRelationships(allResources);
-        storage.BuildRelationships(allResources);
+        allResources.BuildRelationships();
         return allResources;
     }
 
@@ -133,9 +123,7 @@ public class TestResourcesObjectMother
     {
         var vnet = new VNet()
         {
-            Id = AzResourceHelper.GetResourceId(
-                new Guid("266A0682-2A8F-4DBE-815A-D36956882FA3"),
-                "test-rg",
+            Id = AzResourceHelper.GetResourceId("test-rg",
                 "vnet123"),
         };
         await vnet.Enrich(JObject.FromObject(new
