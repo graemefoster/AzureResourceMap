@@ -8,22 +8,20 @@ public class WebAppWithSlots
     [Fact]
     public async Task CanDrawDiagram()
     {
-        var asp = new AppServicePlan("ef49d009-8f26-4a51-9e5e-f486a17eb168", "TestAppServicePlan");
+        var appServicePlanId = "/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Web/serverFarms/TestAppServicePlan";
+        var asp = new AppServicePlan(appServicePlanId, "TestAppServicePlan");
 
-        var app1 = new AppServiceApp("00056f4d-e9cb-49a0-a918-a25071ac8f69", "ef49d009-8f26-4a51-9e5e-f486a17eb168",
-            "TestApp", false, Array.Empty<string>(), Array.Empty<string>())
-        {
-            Type = "microsoft.web/sites"
-        };
+        var app1 = new AppServiceApp("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Web/sites/TestApp1", appServicePlanId,
+            "TestApp1", false, Array.Empty<string>(), Array.Empty<string>());
 
-        var app1Slot = new AppServiceApp("00056f4d-e9cb-49a0-a918-a25071ac8f79", "ef49d009-8f26-4a51-9e5e-f486a17eb168",
-            "TestApp-green", true, Array.Empty<string>(), Array.Empty<string>());
+        var app1Slot = new AppServiceApp("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Web/sites/TestApp1/slots/green", appServicePlanId,
+            "TestApp1-green", true, Array.Empty<string>(), Array.Empty<string>());
 
-        var app2 = new AppServiceApp("00056f4d-e9cb-49a0-a918-a25071ac8f89", "ef49d009-8f26-4a51-9e5e-f486a17eb168",
-            "TestApp", false, Array.Empty<string>(), Array.Empty<string>());
+        var app2 = new AppServiceApp("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Web/sites/TestApp2", appServicePlanId,
+            "TestApp2", false, Array.Empty<string>(), Array.Empty<string>());
 
-        var app2Slot = new AppServiceApp("00056f4d-e9cb-49a0-a918-a25071ac8f99", "ef49d009-8f26-4a51-9e5e-f486a17eb168",
-            "TestApp", true, Array.Empty<string>(), Array.Empty<string>());
+        var app2Slot = new AppServiceApp("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Web/sites/TestApp2/slots/green", appServicePlanId,
+            "TestApp2-green", true, Array.Empty<string>(), Array.Empty<string>());
         
         var azureResources = new AzureResource[]
         {

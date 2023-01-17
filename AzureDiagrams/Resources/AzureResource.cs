@@ -134,4 +134,9 @@ public class AzureResource
         ContainedResources.Add(contained);
         contained.ContainedByAnotherResource = true;
     }
+
+    public void AddSlot(AppServiceApp appServiceApp)
+    {
+        OwnsResource(appServiceApp);
+    }
 }

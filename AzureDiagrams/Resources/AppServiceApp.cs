@@ -29,13 +29,14 @@ public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgre
 
     public string[] EnabledHostNames { get; set; } = default!;
 
-    public AppServiceApp(string id, string serverFarmId, string name, bool isSlot, string[] connectionStrings, string[] hostNames)
+    public AppServiceApp(string id, string serverFarmId, string name, bool isSlot, string[] connectionStrings,
+        string[] hostNames)
     {
         Id = id;
         ServerFarmId = serverFarmId;
         Name = name;
         EnabledHostNames = hostNames;
-        Type = isSlot ? "microsoft.web/sites" : "microsoft.web/sites/slots";
+        Type = isSlot ? "microsoft.web/sites/slots" : "microsoft.web/sites";
         _hostNameDiscoverer = new RelationshipHelper(connectionStrings);
         _hostNameDiscoverer.Discover();
     }
@@ -132,6 +133,8 @@ public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgre
             if (appInsights != null) CreateFlowTo(appInsights, "apm", Plane.Diagnostics);
         }
 
+        GroupSlot(allResources);
+
         if (_dockerRepo != null)
         {
             this.CreateFlowToHostName(allResources, _dockerRepo, "container pull", Plane.Runtime);
@@ -150,6 +153,29 @@ public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgre
         }
 
         base.BuildRelationships(allResources);
+    }
+
+    private void GroupSlot(IEnumerable<AzureResource> allResources)
+    {
+        if (IsSlotContainerByAnotherApp(allResources, out var parent))
+        {
+            parent!.AddSlot(this);
+        }
+    }
+
+    internal bool IsSlotContainerByAnotherApp(IEnumerable<AzureResource> allResources, out AzureResource? parent)
+    {
+        if (Type.Contains("/slots"))
+        {
+            var parentWebAppId = string.Join('/', Id.Split('/')[..^2]);
+            var parentWebApp = allResources.SingleOrDefault(x =>
+                x.Id.Equals(parentWebAppId, StringComparison.InvariantCultureIgnoreCase));
+            parent = parentWebApp;
+            return parentWebApp != null;
+        }
+
+        parent = null;
+        return false;
     }
 
     public VNetIntegration? VNetIntegration { get; private set; }

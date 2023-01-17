@@ -17,6 +17,7 @@ public class AppServicePlan : AzureResource
     {
         Id = id;
         Name = name;
+        Type = "microsoft.web/serverfarms";
     }
 
     /// <summary>
@@ -40,9 +41,16 @@ public class AppServicePlan : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var apps = allResources.OfType<AppServiceApp>().Where(x =>
-            string.Equals(Id, x.ServerFarmId, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        var apps = allResources.OfType<AppServiceApp>()
+            .Where(x => string.Equals(Id, x.ServerFarmId, StringComparison.InvariantCultureIgnoreCase))
+            .Where(x => IsNotSlotContainerByAnotherApp(x, allResources))
+            .ToArray();
         apps.ForEach(OwnsResource);
         base.BuildRelationships(allResources);
+    }
+
+    private bool IsNotSlotContainerByAnotherApp(AppServiceApp appServiceApp, IEnumerable<AzureResource> allResources)
+    {
+        return !appServiceApp.IsSlotContainerByAnotherApp(allResources, out _);
     }
 }
