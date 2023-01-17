@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AzureDiagrams.Resources.Retrievers.Custom;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
+public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 {
     private string? _dockerRepo;
     private string? _searchService;
@@ -27,6 +28,25 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
     public string? AppInsightsKeyOrConnectionString { get; set; }
 
     public string[] EnabledHostNames { get; set; } = default!;
+
+    public AppServiceApp(string id, string serverFarmId, string name, bool isSlot, string[] connectionStrings, string[] hostNames)
+    {
+        Id = id;
+        ServerFarmId = serverFarmId;
+        Name = name;
+        EnabledHostNames = hostNames;
+        Type = isSlot ? "microsoft.web/sites" : "microsoft.web/sites/slots";
+        _hostNameDiscoverer = new RelationshipHelper(connectionStrings);
+        _hostNameDiscoverer.Discover();
+    }
+
+    /// <summary>
+    /// Used for json deserialization
+    /// </summary>
+    [JsonConstructor]
+    public AppServiceApp()
+    {
+    }
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
@@ -58,7 +78,7 @@ public class App : AzureResource, ICanBeAccessedViaAHostName, ICanEgressViaAVnet
 
         var appSettings = config?["properties"]!.ToObject<Dictionary<string, object>>() ??
                           new Dictionary<string, object>();
-        var potentialConnectionStrings = appSettings.Values.Union(connectionStrings).ToArray();
+        var potentialConnectionStrings = appSettings.Values.Union(connectionStrings).OfType<string>().ToArray();
         _hostNameDiscoverer = new RelationshipHelper(potentialConnectionStrings);
         _hostNameDiscoverer.Discover();
 

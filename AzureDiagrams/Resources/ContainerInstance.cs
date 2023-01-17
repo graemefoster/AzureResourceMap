@@ -32,7 +32,7 @@ public class ContainerInstance : AzureResource, ICanInjectIntoASubnet
             properties = properties.Concat(imageSource.Select(x => $"https://{x}")).Distinct();
 
         _hostNameDiscoverer =
-            new RelationshipHelper(properties.Where(x => x != null).Select(x => (object)x!).ToArray());
+            new RelationshipHelper(properties.Where(x => x != null).Select(x => x!).ToArray());
 
         _hostNameDiscoverer.Discover();
     }

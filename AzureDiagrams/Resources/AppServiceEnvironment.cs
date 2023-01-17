@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-public class ASE : AzureResource, ICanInjectIntoASubnet
+public class AppServiceEnvironment : AzureResource, ICanInjectIntoASubnet
 {
     public override string Image => "img/lib/azure2/app_services/App_Service_Environments.svg";
 
@@ -20,7 +20,7 @@ public class ASE : AzureResource, ICanInjectIntoASubnet
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var asps = allResources.OfType<ASP>().Where(x =>
+        var asps = allResources.OfType<AppServicePlan>().Where(x =>
             string.Equals(Id, x.ASE, StringComparison.InvariantCultureIgnoreCase)).ToArray();
         asps.ForEach(OwnsResource);
         base.BuildRelationships(allResources);

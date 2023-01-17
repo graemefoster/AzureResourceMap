@@ -1,0 +1,32 @@
+﻿<mxGraphModel>
+	<root>
+		<mxCell id="0" />
+		<mxCell id="1" parent="0" />
+<mxCell id="6a85b7d7-096b-1579-a0c3-b337e682a059" value="TestAppServicePlan" style="html=1;image;image=img/lib/azure2/app_services/App_Service_Plans.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="6a85b7d7-096b-1579-a0c3-b337e682a059.container">
+    <mxGeometry x="50" y="200" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="b9641d25-a3dc-78b1-0335-0e993fd82315" value="TestApp" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="6a85b7d7-096b-1579-a0c3-b337e682a059.container">
+    <mxGeometry x="50" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="096ef928-8f7b-ca81-15df-4355ed3635b0" value="TestApp-green" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="6a85b7d7-096b-1579-a0c3-b337e682a059.container">
+    <mxGeometry x="200" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="284a104c-c151-da28-ac34-89f01cfa6156" value="TestApp" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="6a85b7d7-096b-1579-a0c3-b337e682a059.container">
+    <mxGeometry x="350" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="6de0e261-a65c-a927-680b-2b19dd9c5503" value="TestApp" style="html=1;image;image=img/lib/azure2/app_services/App_Services.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="6a85b7d7-096b-1579-a0c3-b337e682a059.container">
+    <mxGeometry x="500" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="6a85b7d7-096b-1579-a0c3-b337e682a059.container" value="TestAppServicePlan&lt;br/&gt;(AppServicePlan)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;verticalAlign=top" vertex="1" parent="1">
+    <mxGeometry x="0" y="0" width="600" height="310" 
+    as="geometry" />
+</mxCell>
+
+
+	</root>
+</mxGraphModel>

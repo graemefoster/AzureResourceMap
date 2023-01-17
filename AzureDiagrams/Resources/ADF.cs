@@ -25,7 +25,7 @@ public class ADF : AzureResource
             _linkedServices["value"]!
                 .SelectMany(x =>
                     x["properties"]!["typeProperties"]?.ToObject<Dictionary<string, object>>()
-                        ?.Select(kvp => kvp.Value) ?? Array.Empty<object>())
+                        ?.Select(kvp => kvp.Value.ToString() ?? "") ?? Array.Empty<string>())
                 .ToArray());
 
         possibleConnections.Discover();
