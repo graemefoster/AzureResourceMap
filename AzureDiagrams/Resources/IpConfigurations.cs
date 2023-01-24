@@ -6,6 +6,20 @@ namespace AzureDiagrams.Resources;
 
 public class IpConfigurations
 {
+    public IpConfigurations()
+    {
+    }
+
+    public static IpConfigurations ForPrivateEndpoint(string ipAddress, string subnetId, string hostName)
+    {
+        return new IpConfigurations()
+        {
+            PrivateIpAddresses = new[] { ipAddress },
+            SubnetAttachments = new[] { subnetId },
+            HostNames = new[] { hostName }
+        };
+    }
+
     public IpConfigurations(JObject jObject, string propertyName = "ipConfigurations")
     {
         PublicIpAddresses = jObject["properties"]![propertyName]?

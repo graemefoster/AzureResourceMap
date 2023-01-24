@@ -110,4 +110,12 @@ public class VNet : AzureResource
 
         public List<NSG> NSGs { get; } = new();
     }
+
+    /// <summary>
+    /// Setup a link from a vnet to a hub
+    /// </summary>
+    public void LinksToVHub(VirtualHubVirtualNetworkConnection virtualHubVirtualNetworkConnection)
+    {
+        OwnsResource(virtualHubVirtualNetworkConnection);
+    }
 }

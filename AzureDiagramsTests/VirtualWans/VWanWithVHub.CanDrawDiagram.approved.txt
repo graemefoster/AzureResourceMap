@@ -1,0 +1,53 @@
+﻿<mxGraphModel>
+	<root>
+		<mxCell id="0" />
+		<mxCell id="1" parent="0" />
+<mxCell id="823cbfb3-2d33-d09b-d582-df5b793b61f4" value="vwan" style="html=1;image;image=img/lib/azure2/networking/Virtual_WANs.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="823cbfb3-2d33-d09b-d582-df5b793b61f4.container">
+    <mxGeometry x="300" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="4b781b88-7e3d-9462-d7a0-69670644f6fe" value="Hub-1&lt;br/&gt;(VHub)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;verticalAlign=middle" vertex="1" parent="823cbfb3-2d33-d09b-d582-df5b793b61f4.container">
+    <mxGeometry x="50" y="50" width="150" height="75" 
+    as="geometry" />
+</mxCell>
+<mxCell id="bd3a1a44-a441-608a-7d61-14ee6b5f190c.subnets.empty" value="Empty&lt;br/&gt;(Subnet)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;verticalAlign=middle" vertex="1" parent="bd3a1a44-a441-608a-7d61-14ee6b5f190c">
+    <mxGeometry x="50" y="50" width="150" height="75" 
+    as="geometry" />
+</mxCell>
+<mxCell id="6278f6e0-78c3-8d53-0626-4965e13bdaa4" value="Virtual Hub Link" style="html=1;image;image=img/lib/azure2/networking/Virtual_WANs.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="bd3a1a44-a441-608a-7d61-14ee6b5f190c">
+    <mxGeometry x="300" y="50" width="50" height="50" 
+    as="geometry" />
+</mxCell>
+<mxCell id="823cbfb3-2d33-d09b-d582-df5b793b61f4.container" value="vwan&lt;br/&gt;(VWan)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;verticalAlign=top" vertex="1" parent="207c67fc-34bc-d9f0-369e-0f16975fc114.container">
+    <mxGeometry x="50" y="50" width="400" height="185" 
+    as="geometry" />
+</mxCell>
+<mxCell id="bd3a1a44-a441-608a-7d61-14ee6b5f190c" value="test-vnet" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="207c67fc-34bc-d9f0-369e-0f16975fc114.container">
+    <mxGeometry x="50" y="260" width="400" height="185" 
+    as="geometry" />
+</mxCell>
+<mxCell id="bd3a1a44-a441-608a-7d61-14ee6b5f190c.image.0" style="html=1;image;image=img/lib/azure2/networking/Virtual_Networks.svg;fontSize=12;labelPosition=bottom" vertex="1" parent="bd3a1a44-a441-608a-7d61-14ee6b5f190c">
+    <mxGeometry x="360" y="145" width="30" height="30" 
+    as="geometry" />
+</mxCell>
+<mxCell id="207c67fc-34bc-d9f0-369e-0f16975fc114.container" value="global&lt;br/&gt;(Region)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;verticalAlign=top" vertex="1" parent="1">
+    <mxGeometry x="0" y="0" width="500" height="505" 
+    as="geometry" />
+</mxCell>
+<mxCell id="c5131159-6fd2-a9d3-d3a0-10808df28731" 
+        style="jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;rounded=1;orthogonalLoop=1;;" edge="1" parent="1" 
+        source="6278f6e0-78c3-8d53-0626-4965e13bdaa4" target="4b781b88-7e3d-9462-d7a0-69670644f6fe">
+            <mxGeometry relative="1" as="geometry"><mxPoint x="350" y="335" as="sourcePoint" />
+<mxPoint x="249.99999999999994" y="137.5" as="targetPoint" />
+<Array as="points">
+    <mxPoint x="350" y="335" />
+<mxPoint x="308.3333333333333" y="335" />
+<mxPoint x="300" y="326.6666666666667" />
+<mxPoint x="300" y="145.83333333333334" />
+<mxPoint x="291.6666666666667" y="137.5" />
+</Array></mxGeometry>
+            </mxCell>
+            
+
+	</root>
+</mxGraphModel>

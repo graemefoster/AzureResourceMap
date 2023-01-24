@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureDiagrams.Resources.Retrievers.Extensions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
@@ -20,6 +21,18 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
     public string[] Nics { get; private set; } = default!;
 
     public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
+
+    public PrivateEndpoint(string id, string[] subnets, string[] nics, string[] customHostNames)
+    {
+        Id = id;
+        SubnetIdsIAmInjectedInto = subnets;
+        Nics = nics;
+        CustomHostNames = customHostNames;
+    }
+    
+    [JsonConstructor]
+    public PrivateEndpoint() { }
+    
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
