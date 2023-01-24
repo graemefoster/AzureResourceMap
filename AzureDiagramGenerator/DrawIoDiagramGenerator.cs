@@ -42,7 +42,9 @@ public static class DrawIoDiagramGenerator
             if (n is Cluster)
             {
                 if (n.ClusterParent == null)
+                {
                     graph.RootCluster.AddChild(n);
+                }
             }
             else
             {
@@ -57,7 +59,7 @@ public static class DrawIoDiagramGenerator
         {
             Padding = 5,
             BendPenalty = 10,
-            UseObstacleRectangles = true,
+            UseObstacleRectangles = false,
             EdgeRoutingMode = EdgeRoutingMode.Rectilinear
         };
 

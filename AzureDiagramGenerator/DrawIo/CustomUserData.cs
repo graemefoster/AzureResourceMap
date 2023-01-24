@@ -1,7 +1,9 @@
-﻿using Microsoft.Msagl.Core.Layout;
+﻿using System.Diagnostics;
+using Microsoft.Msagl.Core.Layout;
 
 namespace AzureDiagramGenerator.DrawIo;
 
+[DebuggerDisplay("{Name}-{Id}")]
 public class CustomUserData
 {
     public CustomUserData(Func<string> drawNode, string name, string id)
