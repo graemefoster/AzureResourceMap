@@ -16,6 +16,14 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
 
     public string[] HostNames => _ipConfigurations.HostNames;
 
+    public Nic()  {  }
+
+    public Nic(string id, IpConfigurations ipConfigurations)
+    {
+        Id = id;
+        _ipConfigurations = ipConfigurations;
+    }
+
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
         return _ipConfigurations.CanIAccessYouOnThisHostName(hostname);
@@ -28,7 +36,7 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         ConnectedPrivateEndpoint = allResources.OfType<PrivateEndpoint>().SingleOrDefault(x => x.Nics.Contains(Id));
-        ConnectedPrivateEndpoint?.CreateFlowTo(this, Plane.All);
+        if (ConnectedPrivateEndpoint != null) CreateFlowTo(ConnectedPrivateEndpoint, Plane.All);
         allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm, Plane.All));
         base.BuildRelationships(allResources);
     }

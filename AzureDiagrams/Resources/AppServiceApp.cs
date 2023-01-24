@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AzureDiagrams.Resources.Retrievers.Custom;
+using AzureDiagrams.Resources.Retrievers.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -30,7 +31,7 @@ public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgre
     public string[] EnabledHostNames { get; set; } = default!;
 
     public AppServiceApp(string id, string serverFarmId, string name, bool isSlot, string[] connectionStrings,
-        string[] hostNames)
+        string[] hostNames, string? virtualNetworkSubnetId = null, PrivateEndpointExtensions? privateEndpointExtension = null)
     {
         Id = id;
         ServerFarmId = serverFarmId;
@@ -39,6 +40,8 @@ public class AppServiceApp : AzureResource, ICanBeAccessedViaAHostName, ICanEgre
         Type = isSlot ? "microsoft.web/sites/slots" : "microsoft.web/sites";
         _hostNameDiscoverer = new RelationshipHelper(connectionStrings);
         _hostNameDiscoverer.Discover();
+        VirtualNetworkSubnetId = virtualNetworkSubnetId;
+        if (privateEndpointExtension != null) Extensions = new [] {privateEndpointExtension};
     }
 
     /// <summary>

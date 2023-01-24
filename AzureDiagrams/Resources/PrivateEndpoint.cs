@@ -21,6 +21,20 @@ public class PrivateEndpoint : AzureResource, IAssociateWithNic, ICanInjectIntoA
 
     public string[] SubnetIdsIAmInjectedInto { get; private set; } = default!;
 
+    public PrivateEndpoint(string id, string[] subnets, string[] nics, string[] customHostNames)
+    {
+        Id = id;
+        SubnetIdsIAmInjectedInto = subnets;
+        Nics = nics;
+        CustomHostNames = customHostNames;
+    }
+    
+    public PrivateEndpoint()
+    {
+        
+    }
+    
+
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
         var accessedByThisPrivateEndpoint = allResources
