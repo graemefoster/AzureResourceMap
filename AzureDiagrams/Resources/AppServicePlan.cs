@@ -10,7 +10,7 @@ namespace AzureDiagrams.Resources;
 public class AppServicePlan : AzureResource
 {
     public override string Image => "img/lib/azure2/app_services/App_Service_Plans.svg";
-    public override string? Fill => "#F5F5F5";
+    public override string? Fill => "#DAE8FC";
     public string? ASE { get; private set; }
     
     public AppServicePlan(string id, string name)

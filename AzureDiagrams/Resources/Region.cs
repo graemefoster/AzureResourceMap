@@ -7,7 +7,7 @@ namespace AzureDiagrams.Resources;
 public class Region : AzureResource
 {
     public override bool IsPureContainer => true;
-    public override string Fill => "#DAE8FC";
+    public override string Fill => "#F5F5F5";
 
     public Region(string? location)
     {
@@ -18,7 +18,8 @@ public class Region : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        allResources.Except(new [] {this}).Where(x => !x.ContainedByAnotherResource).Where(x => (x.Location ?? "global").Equals(Location, StringComparison.InvariantCultureIgnoreCase)).ForEach(OwnsResource);
+        var azureResources = allResources.Except(new [] {this}).Where(x => !x.ContainedByAnotherResource).Where(x => (x.Location ?? "global").Equals(Location, StringComparison.InvariantCultureIgnoreCase));
+        azureResources.ForEach(OwnsResource);
         base.BuildRelationships(allResources);
     }
 }

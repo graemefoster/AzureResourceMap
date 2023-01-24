@@ -59,8 +59,8 @@ public class VM : AzureResource, IAssociateWithNic
         {
             var vnetId = string.Join('/', injectedSubnets[0].Split('/')[..^2]);
             var vnet = allResources.OfType<VNet>()
-                .Single(x => x.Id.Equals(vnetId, StringComparison.InvariantCultureIgnoreCase));
-            vnet.GiveHomeToVirtualMachine(this, injectedSubnets[0].Split('/')[^1]);
+                .SingleOrDefault(x => x.Id.Equals(vnetId, StringComparison.InvariantCultureIgnoreCase));
+            vnet?.GiveHomeToVirtualMachine(this, injectedSubnets[0].Split('/')[^1]);
         }
         else
         {

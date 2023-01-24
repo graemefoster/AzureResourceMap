@@ -36,6 +36,14 @@ public class AzureModelRetriever
         var resources = new List<AzureResource>();
         await foreach (var resource in armClient.Retrieve(subscriptionId, expandedResourceGroups)
                            .WithCancellation(cancellationToken)) resources.Add(resource);
+        
+        var allNodes = ProcessResourcesAndAddStaticNodes(resources);
+
+        return allNodes;
+    }
+
+    public static AzureResource[] ProcessResourcesAndAddStaticNodes(List<AzureResource> resources)
+    {
         var additionalNodes = resources.SelectMany(x => x.DiscoverNewNodes(resources));
 
         //create some common nodes to represent common platform groupings (AAD, Diagnostics)
@@ -55,13 +63,12 @@ public class AzureModelRetriever
             .Concat(core)
             .Concat(diagnostics)
             .Concat(pips)
-            .Concat(regions) //needs to come last to make sure we don't assign owenership of things multiple times.
+            .Concat(regions) //needs to come last to make sure we don't assign ownership of things multiple times.
             .ToArray();
 
         //Discover hidden links that aren't obvious through the resource manager
         //For example, a NIC / private endpoint linked to a subnet
         foreach (var resource in allNodes) resource.BuildRelationships(allNodes);
-
         return allNodes;
     }
 }

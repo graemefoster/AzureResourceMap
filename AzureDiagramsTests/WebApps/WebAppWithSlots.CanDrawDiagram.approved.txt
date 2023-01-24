@@ -30,8 +30,12 @@
     <mxGeometry x="450" y="50" width="300" height="160" 
     as="geometry" />
 </mxCell>
-<mxCell id="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container" value="TestAppServicePlan&lt;br/&gt;(microsoft.web/serverfarms)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;verticalAlign=top" vertex="1" parent="1">
-    <mxGeometry x="0" y="0" width="950" height="270" 
+<mxCell id="5edd63b5-ec09-fe25-5a63-f2f6dadbc0bd.container" value="TestAppServicePlan&lt;br/&gt;(microsoft.web/serverfarms)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;verticalAlign=top" vertex="1" parent="207c67fc-34bc-d9f0-369e-0f16975fc114.container">
+    <mxGeometry x="50" y="50" width="950" height="270" 
+    as="geometry" />
+</mxCell>
+<mxCell id="207c67fc-34bc-d9f0-369e-0f16975fc114.container" value="global&lt;br/&gt;(Region)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;verticalAlign=top" vertex="1" parent="1">
+    <mxGeometry x="0" y="0" width="1050" height="380" 
     as="geometry" />
 </mxCell>
 

@@ -54,6 +54,14 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
             }
         }
 
+        if (_resource.Subnets.Length == 0)
+        {
+            var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("Subnet", "Empty",
+                _resource.InternalId + $".subnets.empty", backgroundColour:"#ffffff");
+            vnetNode.AddChild(emptyContents);
+            yield return (_resource, emptyContents);        
+        }
+
         foreach (var subnet in _resource.Subnets)
         {
             var images = new List<string>();

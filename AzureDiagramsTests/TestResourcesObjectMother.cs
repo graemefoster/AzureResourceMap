@@ -115,8 +115,7 @@ public class TestResourcesObjectMother
         }), new Dictionary<string, JObject?>());
 
         var allResources = new AzureResource[] { vnet, storage, pe, nic };
-        allResources.Process();
-        return allResources;
+        return allResources.Process();
     }
 
     public static async Task<IEnumerable<AzureResource>> VirtualNetwork(string subnet)

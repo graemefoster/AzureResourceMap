@@ -1,3 +1,4 @@
+using AzureDiagrams;
 using AzureDiagrams.Resources;
 
 namespace AzureDiagramsTests;
@@ -13,12 +14,7 @@ public static class AzResourceHelper
 
     public static AzureResource[] Process(this AzureResource[] resources)
     {
-        var initialResources = resources.ToList();
-        var allResources = initialResources.Concat(initialResources.SelectMany(x => x.DiscoverNewNodes(initialResources))).ToArray();
-        foreach (var resource in allResources)
-        {
-            resource.BuildRelationships(allResources);
-        }
+        var allResources = AzureModelRetriever.ProcessResourcesAndAddStaticNodes(resources.ToList());
         return allResources;
     }
 }

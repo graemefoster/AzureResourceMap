@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
@@ -16,7 +17,8 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
 
     public string[] HostNames => _ipConfigurations.HostNames;
 
-    public Nic()  {  }
+    [JsonConstructor]
+    public Nic()  { }
 
     public Nic(string id, IpConfigurations ipConfigurations)
     {
