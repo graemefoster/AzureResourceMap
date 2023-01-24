@@ -76,15 +76,25 @@ internal class VNetDiagramResourceBuilder : AzureResourceNodeBuilder
             }
             else
             {
+                var subnetContainsAnything = false;
                 foreach (var resource in subnet.ContainedResources)
                 {
                     var node = resourceNodeBuilders[resource];
                     foreach (var contained in CreateOtherResourceNodes(node, resourceNodeBuilders, diagramAdjustor))
                     {
                         if (contained.Item2.ClusterParent == null) subnetNode.AddChild(contained.Item2);
-
                         yield return contained;
+                        subnetContainsAnything = true;
                     }
+                }
+
+                if (!subnetContainsAnything)
+                {
+                    //must have condensed them all away. There won't be anything in the subnet, so show the empty box
+                    var emptyContents = AzureResourceDrawer.CreateSimpleRectangleNode("Subnet", "",
+                        _resource.InternalId + $".{subnet.Name}.empty", backgroundColour:"#ffffff");
+                    subnetNode.AddChild(emptyContents);
+                    yield return (_resource, emptyContents);
                 }
             }
 

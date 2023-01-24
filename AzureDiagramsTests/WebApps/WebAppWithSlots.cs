@@ -31,7 +31,7 @@ public class WebAppWithSlots
             app2,
             app2Slot
         };
-        azureResources.BuildRelationships();
+        azureResources.Process();
         
         var diagram = await AzureDiagramGenerator.DrawIoDiagramGenerator.DrawDiagram(
             azureResources,

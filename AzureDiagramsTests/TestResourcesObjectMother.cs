@@ -115,7 +115,7 @@ public class TestResourcesObjectMother
         }), new Dictionary<string, JObject?>());
 
         var allResources = new AzureResource[] { vnet, storage, pe, nic };
-        allResources.BuildRelationships();
+        allResources.Process();
         return allResources;
     }
 
