@@ -74,9 +74,9 @@ public class VM : AzureResource, IAssociateWithNic
         if (!string.IsNullOrEmpty(BootDiagnosticsStorageHost))
         {
             var hostname = BootDiagnosticsStorageHost.GetHostNameFromUrlString();
-            var storage = allResources.OfType<ICanBeAccessedViaAHostName>()
-                .SingleOrDefault(x =>
-                    x.CanIAccessYouOnThisHostName(BootDiagnosticsStorageHost.GetHostNameFromUrlString()));
+            var allPossibleStorageAccounts = allResources.OfType<ICanBeAccessedViaAHostName>().Where(x =>
+                x.CanIAccessYouOnThisHostName(BootDiagnosticsStorageHost.GetHostNameFromUrlString()));
+            var storage = allPossibleStorageAccounts.OfType<Nic>().SingleOrDefault() ?? allPossibleStorageAccounts.SingleOrDefault();
 
             if (storage != null)
             {

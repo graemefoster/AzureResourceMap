@@ -137,6 +137,7 @@ public static class Program
         try
         {
             Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Tenant: {tenantId}");
             Console.WriteLine($"Subscription: {subscriptionId}");
             Console.WriteLine($"Resource Groups: {string.Join(',', resourceGroups)}");
 
@@ -159,7 +160,10 @@ public static class Program
 
             var tokenCredential =
                 string.IsNullOrWhiteSpace(token)
-                    ? (TokenCredential)new AzureCliCredential()
+                    ? (TokenCredential)new AzureCliCredential(new AzureCliCredentialOptions()
+                    {
+                        TenantId = tenantId
+                    })
                     : new KnownTokenCredential(token);
 
             var cancellationTokenSource = new CancellationTokenSource();
