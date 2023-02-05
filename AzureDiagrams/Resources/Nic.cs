@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ public class Nic : AzureResource, ICanInjectIntoASubnet, ICanExposePublicIPAddre
     {
         ConnectedPrivateEndpoint = allResources.OfType<PrivateEndpoint>().SingleOrDefault(x => x.Nics.Contains(Id));
         if (ConnectedPrivateEndpoint != null) CreateFlowTo(ConnectedPrivateEndpoint, Plane.All);
-        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id)).ForEach(vm => CreateFlowTo(vm, Plane.All));
+        allResources.OfType<VM>().Where(x => x.Nics.Contains(Id, StringComparer.InvariantCultureIgnoreCase)).ForEach(vm => CreateFlowTo(vm, Plane.All));
         base.BuildRelationships(allResources);
     }
 

@@ -74,13 +74,13 @@ public class AzureResourceNodeBuilder
         IDiagramAdjustor diagramAdjustor)
     {
         Cluster? container = null;
+        var children = new List<(AzureResource, Node)>();
 
         if (_resource.ContainedResources.Count > 0)
         {
             container = AzureResourceDrawer.CreateContainerRectangleNode(_resource.Type ?? _resource.GetType().Name,
                 _resource.Name,
                 $"{_resource.InternalId}.container", _resource.Fill, TextAlignment.Top);
-            var children = new List<(AzureResource, Node)>();
             foreach (var contained in _resource.ContainedResources)
             {
                 var nodeBuilder = resourceNodeBuilders[contained];
@@ -90,17 +90,6 @@ public class AzureResourceNodeBuilder
                     if (containedNode.Item2.ClusterParent == null) container.AddChild(containedNode.Item2);
                     children.Add(containedNode);
                 }
-            }
-
-            //Only show if we had nodes
-            if (children.Any())
-            {
-                yield return (_resource, container);
-                foreach (var child in children)
-                {
-                    yield return child;
-                }
-                
             }
         }
 
@@ -112,7 +101,8 @@ public class AzureResourceNodeBuilder
                     AzureResourceDrawer.CreateSimpleRectangleNode(_resource.GetType().Name, _resource.Name,
                         _resource.InternalId, backgroundColour: _resource.Fill);
                 if (container != null) container.AddChild(resourceNode);
-                yield return (_resource, resourceNode);
+                var imageNode = (_resource, resourceNode);
+                children.Add(imageNode);
             }
             else
             {
@@ -120,9 +110,27 @@ public class AzureResourceNodeBuilder
                     _resource.Name,
                     _resource.InternalId);
                 if (container != null) container.AddChild(resourceNode);
-                yield return (_resource, resourceNode);
+                var theResourceNode = (_resource, resourceNode);
+                children.Add(theResourceNode);
             }
         }
+        
+        //If we put anything into the container, then we need to ensure we return the container.
+        //If we don't then we might end up with resources displayed on the drawing surface, missing their containers, and therefore not shown in the correct subnet.
+        if (children.Any())
+        {
+            if (container != null)
+            {
+                yield return (_resource, container);
+            }
+
+            foreach (var child in children)
+            {
+                yield return child;
+            }
+                
+        }
+
     }
 
     public static AzureResourceNodeBuilder CreateNodeBuilder(AzureResource resource, IDiagramAdjustor diagramAdjustor)
