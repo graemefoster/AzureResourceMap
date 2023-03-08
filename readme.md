@@ -13,7 +13,7 @@ dotnet tool install --global AzureDiagramGenerator
 
 az login
 
-AzureDiagramGenerator --subscription-id <subscription-id> --resource-group <resource-group> --resource-group <resource-group> --showRuntime --output c:/temp/
+AzureDiagramGenerator --tenant-id <tenant-id> --subscription-id <subscription-id> --resource-group <resource-group> --resource-group <resource-group> --show-runtime --output c:/temp/
 ```
 
 ## CLI flags
