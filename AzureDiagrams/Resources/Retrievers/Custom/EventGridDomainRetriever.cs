@@ -11,7 +11,7 @@ public class EventGridDomainRetriever : ResourceRetriever<EventGridDomain>
     public const string Topics = "topics";
 
     public EventGridDomainRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
-        fetchFullResource: true, apiVersion: "2021-06-01-preview",
+        apiVersion: "2021-06-01-preview",
         extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {
     }
@@ -22,7 +22,7 @@ public class EventGridDomainRetriever : ResourceRetriever<EventGridDomain>
         yield return (Topics, HttpMethod.Get, Topics, null);
     }
 
-    protected override IEnumerable<(string key, HttpMethod method, string api, string? version)> AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources, JObject? fullResource)
+    protected override IEnumerable<(string key, HttpMethod method, string api, string? version)> AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources)
     {
         foreach (var topic in additionalResources[Topics]!
                      ["value"]!.Select(x => x!.Value<string>("name")!))

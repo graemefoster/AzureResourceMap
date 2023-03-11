@@ -13,7 +13,7 @@ public class ApimServiceResourceRetriever : ResourceRetriever<APIm>
     public const string BackendList = "backends";
 
     public ApimServiceResourceRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
-        "2021-08-01", true,
+        "2021-08-01", 
         extensions: new IResourceExtension[]
             { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {

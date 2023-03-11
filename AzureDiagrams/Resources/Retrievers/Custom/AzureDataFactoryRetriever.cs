@@ -10,7 +10,7 @@ public class AzureDataFactoryRetriever : ResourceRetriever<ADF>
     public const string LinkedServices = "linkedservices";
 
     public AzureDataFactoryRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
-        fetchFullResource: true, apiVersion: "2018-06-01",
+        apiVersion: "2018-06-01",
         extensions: new IResourceExtension[]
             { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {

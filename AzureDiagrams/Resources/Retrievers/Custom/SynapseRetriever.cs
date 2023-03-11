@@ -21,7 +21,7 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
 
     public SynapseRetriever(JObject basicAzureResourceJObject, TokenCredential tokenCredential) : base(
         basicAzureResourceJObject,
-        fetchFullResource: true, apiVersion: "2021-06-01",
+        apiVersion: "2021-06-01",
         extensions: new IResourceExtension[]
             { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {
@@ -29,11 +29,11 @@ public class SynapseRetriever : ResourceRetriever<Synapse>
     }
 
     protected override async Task<Dictionary<string, JObject?>> AdditionalResourcesCustom(
-        BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> initialResources, JObject? fullResource)
+        BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> initialResources)
     {
         var token = await _tokenCredential.GetTokenAsync(
             new TokenRequestContext(new[] { "https://dev.azuresynapse.net" }), CancellationToken.None);
-        var devEndpoint = fullResource!["properties"]!["connectivityEndpoints"]!.Value<string>("dev")!;
+        var devEndpoint = basicInfo.Properties!["connectivityEndpoints"]!.Value<string>("dev")!;
         var client = new HttpClient(); //TODO - might be nice to pull this out so I'm not newing this up. Minor though.
         client.Timeout = TimeSpan.FromSeconds(5);
         var msg = new HttpRequestMessage(HttpMethod.Get,

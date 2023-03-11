@@ -33,10 +33,7 @@ public class AzureModelRetriever
             expandedResourceGroups.Add(rg);
         }
 
-        var resources = new List<AzureResource>();
-        await foreach (var resource in armClient.Retrieve(subscriptionId, expandedResourceGroups)
-                           .WithCancellation(cancellationToken)) resources.Add(resource);
-        
+        var resources = new List<AzureResource>(await armClient.RetrieveUsingQuery(subscriptionId, expandedResourceGroups));
         var allNodes = ProcessResourcesAndAddStaticNodes(resources);
 
         return allNodes;

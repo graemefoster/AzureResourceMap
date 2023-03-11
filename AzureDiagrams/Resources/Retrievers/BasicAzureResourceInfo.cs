@@ -1,4 +1,6 @@
-﻿namespace AzureDiagrams.Resources.Retrievers;
+﻿using Newtonsoft.Json.Linq;
+
+namespace AzureDiagrams.Resources.Retrievers;
 
 public class BasicAzureResourceInfo
 {
@@ -6,4 +8,5 @@ public class BasicAzureResourceInfo
     public string Type { get; init; } = default!;
     public string Name { get; init; } = default!;
     public string Location { get; set; } = default!;
+    public JObject Properties { get; set; }
 }

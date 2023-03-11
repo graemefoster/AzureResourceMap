@@ -13,31 +13,28 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
 {
     private readonly string _apiVersion;
     private readonly JObject _basicAzureResourceJObject;
-    private readonly bool _fetchFullResource;
     private readonly IEnumerable<IResourceExtension> _extensions;
 
     public ResourceRetriever(
         JObject basicAzureResourceJObject,
         string apiVersion = "2021-02-01",
-        bool fetchFullResource = false,
         IEnumerable<IResourceExtension>? extensions = null)
     {
         _basicAzureResourceJObject = basicAzureResourceJObject;
         _apiVersion = apiVersion;
-        _fetchFullResource = fetchFullResource;
         _extensions = extensions ?? Array.Empty<IResourceExtension>();
     }
 
     public async Task<AzureResource> FetchResource(HttpClient client)
     {
-        var basicResource = _basicAzureResourceJObject.ToObject<BasicAzureResourceInfo>()!;
+        var azureResource = _basicAzureResourceJObject.ToObject<BasicAzureResourceInfo>()!;
 
         var additionalResources = AdditionalResourcesInternal().ToDictionary(x => x.key,
             x =>
             {
                 try
                 {
-                    return client.GetAzResourceAsync<JObject>($"{basicResource.Id}/{x.suffix}",
+                    return client.GetAzResourceAsync<JObject>($"{azureResource.Id}/{x.suffix}",
                         x.version ?? _apiVersion, x.method).Result;
                 }
                 catch (AggregateException ae) when (ae.InnerException is HttpRequestException
@@ -46,27 +43,21 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
                                                     })
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"Forbidden retrieving {x.key} for {basicResource.Id}/{x.suffix}");
+                    Console.WriteLine($"Forbidden retrieving {x.key} for {azureResource.Id}/{x.suffix}");
                     Console.ResetColor();
                     return null;
                 }
             });
 
-        JObject? azureResource = default;
-        if (_fetchFullResource)
-        {
-            azureResource = await client.GetAzResourceAsync<JObject>(basicResource.Id, _apiVersion, HttpMethod.Get);
-        }
-
         var additionalResourcesEnhanced =
-            AdditionalResourcesInternalEnhanced(basicResource, additionalResources, azureResource).ToDictionary(
+            AdditionalResourcesInternalEnhanced(azureResource, additionalResources).ToDictionary(
                 x => x.key,
                 x =>
                 {
                     try
                     {
                         return client.GetAzResourceAsync<JObject>(
-                            $"{basicResource.Id}/{x.api}", x.version ?? _apiVersion,
+                            $"{azureResource.Id}/{x.api}", x.version ?? _apiVersion,
                             x.method).Result;
                     }
                     catch (AggregateException ae) when (ae.InnerException is HttpRequestException
@@ -79,18 +70,13 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
                 });
 
         var additionalResourcesCustom =
-            await AdditionalResourcesCustom(basicResource, additionalResources, azureResource);
+            await AdditionalResourcesCustom(azureResource, additionalResources);
 
         additionalResources = new Dictionary<string, JObject?>(additionalResources.Concat(additionalResourcesEnhanced)
             .Concat(additionalResourcesCustom));
 
-        if (!_fetchFullResource)
-        {
-            return await BuildResource(_basicAzureResourceJObject, additionalResources);
-        }
-
         Console.ForegroundColor = ConsoleColor.Yellow;
-        var resource = await BuildResource(azureResource!, additionalResources);
+        var resource = await BuildResource(additionalResources);
         Console.WriteLine($"\tProcessed resource {resource.Type}/{resource.Name}");
         Console.ResetColor();
         return resource;
@@ -120,7 +106,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     /// </summary>
     /// <returns></returns>
     protected virtual Task<Dictionary<string, JObject?>> AdditionalResourcesCustom(BasicAzureResourceInfo basicInfo,
-        Dictionary<string, JObject?> initialResources, JObject? fullResource)
+        Dictionary<string, JObject?> initialResources)
     {
         return Task.FromResult(new Dictionary<string, JObject?>());
     }
@@ -133,9 +119,9 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     /// <returns></returns>
     private IEnumerable<(string key, HttpMethod method, string api, string? version)>
         AdditionalResourcesInternalEnhanced(BasicAzureResourceInfo basicInfo,
-            Dictionary<string, JObject?> initialResources, JObject? fullResource)
+            Dictionary<string, JObject?> initialResources)
     {
-        foreach (var customResource in AdditionalResourcesEnhanced(basicInfo, initialResources, fullResource))
+        foreach (var customResource in AdditionalResourcesEnhanced(basicInfo, initialResources))
         {
             yield return customResource;
         }
@@ -153,23 +139,22 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
     /// <param name="additionalResources"></param>
     /// <returns></returns>
     protected virtual IEnumerable<(string key, HttpMethod method, string api, string? version)>
-        AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources,
-            JObject? fullResource)
+        AdditionalResourcesEnhanced(BasicAzureResourceInfo basicInfo, Dictionary<string, JObject?> additionalResources)
     {
         yield break;
     }
 
 
-    private async Task<AzureResource> BuildResource(JObject resource, Dictionary<string, JObject?> additionalResources)
+    private async Task<AzureResource> BuildResource(Dictionary<string, JObject?> additionalResources)
     {
-        var resourceRepresentation = resource.ToObject<T>()!;
+        var resourceRepresentation = _basicAzureResourceJObject.ToObject<T>()!;
         resourceRepresentation.Extensions = _extensions;
-        await resourceRepresentation.Enrich(resource, additionalResources);
+        await resourceRepresentation.Enrich(_basicAzureResourceJObject, additionalResources);
         _extensions.ForEach(x =>
         {
             try
             {
-                x.Enrich(resourceRepresentation, resource, additionalResources);
+                x.Enrich(resourceRepresentation, _basicAzureResourceJObject, additionalResources);
             }
             catch (Exception e)
             {

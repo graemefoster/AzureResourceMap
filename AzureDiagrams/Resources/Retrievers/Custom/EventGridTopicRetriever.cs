@@ -10,7 +10,7 @@ public class EventGridTopicRetriever : ResourceRetriever<EventGridTopic>
     public const string Subscriptions = "subscriptions";
 
     public EventGridTopicRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject,
-        fetchFullResource: true, apiVersion: "2021-06-01-preview",
+        apiVersion: "2021-06-01-preview",
         extensions: new IResourceExtension[]
             { new DiagnosticsExtensions(), new PrivateEndpointExtensions(), new ManagedIdentityExtension() })
     {

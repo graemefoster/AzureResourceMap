@@ -8,7 +8,7 @@ public class VHubRetriever : ResourceRetriever<VHub>
 {
     public const string VirtualNetworkConnections = "hubVirtualNetworkConnections";
     
-    public VHubRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-03-01", true)
+    public VHubRetriever(JObject basicAzureResourceJObject) : base(basicAzureResourceJObject, "2021-03-01")
     {
     }
 
