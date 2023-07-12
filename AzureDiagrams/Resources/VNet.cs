@@ -68,7 +68,13 @@ public class VNet : AzureResource
                 r.subnets.ForEach(s => InjectResourceInto(r.resource, s)));
 
         Subnets.Where(x => x.UdrId != null).ForEach(x =>
-            InjectResourceInto(allResources.OfType<UDR>().Single(udr => udr.Id.Equals(x.UdrId)), x.Name));
+        {
+            var udr = allResources.OfType<UDR>().SingleOrDefault(udr => udr.Id.Equals(x.UdrId));
+            if (udr != null) //Azure Firewall Management for example has a weird UDR!
+            {
+                InjectResourceInto(udr, x.Name);
+            }
+        });
         base.BuildRelationships(allResources);
     }
 
