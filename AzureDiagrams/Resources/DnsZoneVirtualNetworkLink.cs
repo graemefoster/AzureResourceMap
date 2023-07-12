@@ -20,8 +20,8 @@ public class DnsZoneVirtualNetworkLink : AzureResource
 
     public override void BuildRelationships(IEnumerable<AzureResource> allResources)
     {
-        var dnsZone = allResources.OfType<PrivateDnsZone>().Single(x => x.Id == _dnsZone);
-        var vnet = allResources.OfType<VNet>().SingleOrDefault(x => x.Id == _virtualNetwork);
+        var dnsZone = allResources.OfType<PrivateDnsZone>().Single(x => x.Id.Equals(_dnsZone, StringComparison.InvariantCultureIgnoreCase));
+        var vnet = allResources.OfType<VNet>().SingleOrDefault(x => x.Id.Equals(_virtualNetwork, StringComparison.InvariantCultureIgnoreCase));
         if (vnet != null)
         {
             vnet.AssignPrivateDnsZone(dnsZone);

@@ -145,7 +145,7 @@ internal class ArmClient
                 fetchFullResource: true, apiVersion: "2021-05-01-preview",
                 extensions: new[] { new DiagnosticsExtensions() }),
             "microsoft.cognitiveservices/accounts" => new ResourceRetriever<CognitiveServices>(basicAzureResourceInfo,
-                fetchFullResource: true, apiVersion: "2021-10-01", extensions: new[] { new DiagnosticsExtensions() }),
+                fetchFullResource: true, apiVersion: "2021-10-01", extensions: new IResourceExtension [] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
             "microsoft.search/searchservices" => new ResourceRetriever<CognitiveSearch>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-04-01-preview",
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
