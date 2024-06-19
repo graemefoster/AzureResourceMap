@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -15,7 +16,8 @@ public class CognitiveServices : AzureResource, ICanBeAccessedViaAHostName
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
-        return HostNames.Contains(hostname.ToLowerInvariant());
+        return HostNames.Contains(hostname.ToLowerInvariant()) 
+               || Name.Equals(hostname, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)

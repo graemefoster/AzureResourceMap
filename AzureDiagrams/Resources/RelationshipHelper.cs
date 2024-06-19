@@ -11,6 +11,7 @@ public class RelationshipHelper
     private readonly string[] _potentialConnectionStrings;
     private static readonly Regex KvRegex = new Regex(@"^\@Microsoft\.KeyVault\(VaultName\=(.*?);");
     private static readonly Regex HostNameLikeRegex = new Regex(@"\/\/(([A-Za-z0-9-]{2,100}\.?)+)\b");
+    private static readonly Regex SimpleHostNameLikeRegex = new Regex(@"^[A-Za-z0-9-_]{2,100}$");
 
     private (string storageName, string storageSuffix)[] _connectedStorageAccounts = default!;
     private (string serverName, string database)[] _databaseConnections = default!;
@@ -78,6 +79,8 @@ public class RelationshipHelper
                 }
             )
             .Where(x => !string.IsNullOrEmpty(x))
+            .Union(_potentialConnectionStrings.Where(x => SimpleHostNameLikeRegex.IsMatch(x)))
+            .Distinct()
             .ToArray();
     }
 

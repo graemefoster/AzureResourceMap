@@ -13,7 +13,9 @@ public class CognitiveSearch : AzureResource, ICanBeAccessedViaAHostName
 
     public bool CanIAccessYouOnThisHostName(string hostname)
     {
-        return string.Compare(HostName, hostname, StringComparison.InvariantCultureIgnoreCase) == 0;
+        return string.Compare(HostName, hostname, StringComparison.InvariantCultureIgnoreCase) == 0
+               || Name.Equals(hostname, StringComparison.InvariantCultureIgnoreCase);
+        ;
     }
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)

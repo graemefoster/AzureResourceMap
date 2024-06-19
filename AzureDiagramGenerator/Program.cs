@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Binding;
 using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using Azure.Core;
@@ -79,32 +79,30 @@ public static class Program
             outputFileNameOption,
             outputPngOption
         };
-        rootCommand.Handler =
-            CommandHandler.Create(
-                (string subscriptionId, string? tenantId, string[] resourceGroup, string output, bool condensed,
-                    bool showDiagnostics, bool showInferred, bool showRuntime, bool showIdentity, string? token,
-                    string? outputFileName, bool outputPng) =>
-                {
-                    var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
-                    if (isGithubAction && token == null)
-                        throw new ArgumentException("To run in a Github action you must provide an access token");
+        
+        rootCommand.SetHandler(cmd =>
+        {
+            var isGithubAction = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTION"));
+            if (isGithubAction && cmd.Token == null)
+                throw new ArgumentException("To run in a Github action you must provide an access token");
 
-                    output = isGithubAction ? "/github/workspace" : output;
-                    DrawDiagram(
-                            Guid.Parse(subscriptionId),
-                            tenantId,
-                            resourceGroup,
-                            output,
-                            condensed,
-                            showDiagnostics,
-                            showInferred,
-                            showRuntime,
-                            showIdentity,
-                            token,
-                            outputFileName,
-                            outputPng)
-                        .Wait();
-                });
+            cmd.Output = isGithubAction ? "/github/workspace" : cmd.Output;
+            DrawDiagram(
+                    Guid.Parse(cmd.SubscriptionId),
+                    cmd.TenantId,
+                    cmd.ResourceGroup,
+                    cmd.Output,
+                    cmd.Condensed,
+                    cmd.ShowDiagnostics,
+                    cmd.ShowInferred,
+                    cmd.ShowRuntime,
+                    cmd.ShowIdentity,
+                    cmd.Token,
+                    cmd.OutputFileName,
+                    cmd.OutputPng)
+                .Wait();
+            
+        }, new DiagramGeneratorCommandBinder(subscriptionIdOption, tenantIdOption, resourceGroupsOption, outputOption, condensedOption, showDiagnosticsOption, showInferredOption, showRuntimeOption, showIdentityOption, tokenOption, outputFileNameOption, outputPngOption));
 
         var parser =
             new CommandLineBuilder(rootCommand)
@@ -212,6 +210,74 @@ public static class Program
             Console.ResetColor();
         }
     }
+}
+
+public class DiagramGeneratorCommand
+{
+    public string SubscriptionId { get; init; }
+    public string? TenantId { get; init; }
+    public string[] ResourceGroup { get; init; }
+    public string Output { get; set; }
+    public bool Condensed { get; init; }
+    public bool ShowDiagnostics { get; init; }
+    public bool ShowInferred { get; init; }
+    public bool ShowRuntime { get; init; }
+    public bool ShowIdentity { get; init; }
+    public string? Token { get; init; }
+    public string? OutputFileName { get; init; }
+    public bool OutputPng { get; init; }
+}
+
+public class DiagramGeneratorCommandBinder : BinderBase<DiagramGeneratorCommand>
+{
+    private readonly Option<string> _subscriptionIdOption;
+    private readonly Option<string> _tenantIdOption;
+    private readonly Option<string[]> _resourceGroupsOption;
+    private readonly Option<string> _outputOption;
+    private readonly Option<bool> _condensedOption;
+    private readonly Option<bool> _showDiagnosticsOption;
+    private readonly Option<bool> _showInferredOption;
+    private readonly Option<bool> _showRuntimeOption;
+    private readonly Option<bool> _showIdentityOption;
+    private readonly Option<string> _tokenOption;
+    private readonly Option<string> _outputFileNameOption;
+    private readonly Option<bool> _outputPngOption;
+
+    public DiagramGeneratorCommandBinder(Option<string> subscriptionIdOption, Option<string> tenantIdOption,
+        Option<string[]> resourceGroupsOption, Option<string> outputOption, Option<bool> condensedOption,
+        Option<bool> showDiagnosticsOption, Option<bool> showInferredOption, Option<bool> showRuntimeOption,
+        Option<bool> showIdentityOption, Option<string> tokenOption, Option<string> outputFileNameOption,
+        Option<bool> outputPngOption)
+    {
+        _subscriptionIdOption = subscriptionIdOption;
+        _tenantIdOption = tenantIdOption;
+        _resourceGroupsOption = resourceGroupsOption;
+        _outputOption = outputOption;
+        _condensedOption = condensedOption;
+        _showDiagnosticsOption = showDiagnosticsOption;
+        _showInferredOption = showInferredOption;
+        _showRuntimeOption = showRuntimeOption;
+        _showIdentityOption = showIdentityOption;
+        _tokenOption = tokenOption;
+        _outputFileNameOption = outputFileNameOption;
+        _outputPngOption = outputPngOption;
+    }
+    protected override DiagramGeneratorCommand GetBoundValue(BindingContext bindingContext) =>
+        new DiagramGeneratorCommand
+        {
+            SubscriptionId = bindingContext.ParseResult.GetValueForOption(_subscriptionIdOption)!,
+            TenantId = bindingContext.ParseResult.GetValueForOption(_tenantIdOption),
+            Condensed = bindingContext.ParseResult.GetValueForOption(_condensedOption),
+            Output = bindingContext.ParseResult.GetValueForOption(_outputOption)!,
+            OutputPng = bindingContext.ParseResult.GetValueForOption(_outputPngOption),
+            Token = bindingContext.ParseResult.GetValueForOption(_tokenOption),
+            ResourceGroup = bindingContext.ParseResult.GetValueForOption(_resourceGroupsOption)!,
+            ShowDiagnostics = bindingContext.ParseResult.GetValueForOption(_showDiagnosticsOption),
+            ShowIdentity = bindingContext.ParseResult.GetValueForOption(_showIdentityOption),
+            ShowInferred = bindingContext.ParseResult.GetValueForOption(_showInferredOption),
+            ShowRuntime = bindingContext.ParseResult.GetValueForOption(_showRuntimeOption),
+            OutputFileName = bindingContext.ParseResult.GetValueForOption(_outputFileNameOption),
+        };
 }
 
 internal class KnownTokenCredential : TokenCredential
