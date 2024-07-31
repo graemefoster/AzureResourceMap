@@ -176,6 +176,7 @@ internal class ArmClient
             "microsoft.servicebus/namespaces" => new ResourceRetriever<ServiceBus>(basicAzureResourceInfo,
                 fetchFullResource: true, apiVersion: "2021-06-01-preview",
                 extensions: new IResourceExtension[] { new DiagnosticsExtensions(), new PrivateEndpointExtensions() }),
+            "microsoft.eventgrid/systemtopics" => new EventGridTopicRetriever(basicAzureResourceInfo),
             "microsoft.eventgrid/topics" => new EventGridTopicRetriever(basicAzureResourceInfo),
             "microsoft.eventgrid/domains" => new EventGridDomainRetriever(basicAzureResourceInfo),
             "microsoft.datafactory/factories" => new AzureDataFactoryRetriever(basicAzureResourceInfo),
