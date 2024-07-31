@@ -182,7 +182,7 @@ internal static class AzureResourceDrawer
 
     private static string DrawSimpleEdge(Edge edge, Guid edgeId, string fromId, string toId, string? details,
         Pattern pattern,
-        bool isLinkVisible, 
+        bool isLinkVisible,
         bool isTwoWay)
     {
         if (!isLinkVisible) return string.Empty;
@@ -199,45 +199,69 @@ internal static class AzureResourceDrawer
             _ => ""
         };
 
-        var points = string.Empty;
-        if (edge.EdgeGeometry.Curve is Curve curve)
-        {
-            points = @$"<mxPoint x=""{curve.Start.X}"" y=""{curve.Start.Y}"" as=""sourcePoint"" />
-<mxPoint x=""{curve.End.X}"" y=""{curve.End.Y}"" as=""targetPoint"" />
-<Array as=""points"">
-    {string.Join(Environment.NewLine, curve.Segments.Select(x => $"<mxPoint x=\"{x.Start.X}\" y=\"{x.Start.Y}\" />"))}
-</Array>";
-
-            patternStyle += "rounded=1;orthogonalLoop=1;";
-        }
-        else if (edge.EdgeGeometry.Curve is LineSegment line)
-        {
-            points = @$"<Array as=""points"">
-    <mxPoint x=""{line.Start.X}"" y=""{line.Start.Y}"" as=""sourcePoint"" />
-    <mxPoint x=""{line.End.X}"" y=""{line.End.Y}"" as=""targetPoint"" />
-</Array>";
-            patternStyle += "rounded=0;orthogonalLoop=1;";
-        }
-        else
-        {
-            patternStyle += "edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=1";
-        }
-
         var drawIoEdge = @$"<mxCell id=""{edgeId}"" 
-        style=""jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle};{(isTwoWay ? "startArrow=classic" : "")}"" edge=""1"" parent=""1"" 
-        source=""{fromId}"" target=""{toId}"">
-            <mxGeometry relative=""1"" as=""geometry"">{points}</mxGeometry>
-            </mxCell>
-            ";
+         style=""edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1{patternStyle};{(isTwoWay ? "startArrow=classic" : "")}"" edge=""1"" parent=""1"" 
+         source=""{fromId}"" target=""{toId}"">
+            <mxGeometry relative=""1"" as=""geometry"" />
+             </mxCell>
+             ";
         if (string.IsNullOrEmpty(details)) return drawIoEdge;
 
         drawIoEdge +=
             @$"<mxCell id=""{edgeId}--1"" value=""{details}"" style=""edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];"" vertex=""1"" connectable=""0"" parent=""{edgeId}"">
-            <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
-            <mxPoint as=""offset"" />
-            </mxGeometry>
-            </mxCell>";
+             <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
+             <mxPoint as=""offset"" />
+             </mxGeometry>
+             </mxCell>";
 
         return drawIoEdge;
+
+//             <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
+//             <mxPoint as=""offset"" />
+//             </mxGeometry>
+//             </mxCell>";
+
+
+//        var points = string.Empty;
+//         if (edge.EdgeGeometry.Curve is Curve curve)
+//         {
+//             points = @$"<mxPoint x=""{curve.Start.X}"" y=""{curve.Start.Y}"" as=""sourcePoint"" />
+// <mxPoint x=""{curve.End.X}"" y=""{curve.End.Y}"" as=""targetPoint"" />
+// <Array as=""points"">
+//     {string.Join(Environment.NewLine, curve.Segments.Select(x => $"<mxPoint x=\"{x.Start.X}\" y=\"{x.Start.Y}\" />"))}
+// </Array>";
+//
+//             patternStyle += "rounded=1;orthogonalLoop=1;";
+//         }
+//         else if (edge.EdgeGeometry.Curve is LineSegment line)
+//         {
+//             points = @$"<Array as=""points"">
+//     <mxPoint x=""{line.Start.X}"" y=""{line.Start.Y}"" as=""sourcePoint"" />
+//     <mxPoint x=""{line.End.X}"" y=""{line.End.Y}"" as=""targetPoint"" />
+// </Array>";
+//             patternStyle += "rounded=0;orthogonalLoop=1;";
+//         }
+//         else
+//         {
+//             patternStyle += "edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;rounded=1";
+//         }
+//
+//         var drawIoEdge = @$"<mxCell id=""{edgeId}"" 
+//         style=""jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;{patternStyle};{(isTwoWay ? "startArrow=classic" : "")}"" edge=""1"" parent=""1"" 
+//         source=""{fromId}"" target=""{toId}"">
+//             <mxGeometry relative=""1"" as=""geometry"">{points}</mxGeometry>
+//             </mxCell>
+//             ";
+//         if (string.IsNullOrEmpty(details)) return drawIoEdge;
+//
+//         drawIoEdge +=
+//             @$"<mxCell id=""{edgeId}--1"" value=""{details}"" style=""edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];"" vertex=""1"" connectable=""0"" parent=""{edgeId}"">
+//             <mxGeometry x=""-0.5"" relative=""1"" as=""geometry"">
+//             <mxPoint as=""offset"" />
+//             </mxGeometry>
+//             </mxCell>";
+//
+//         return drawIoEdge;
+//     }
     }
 }

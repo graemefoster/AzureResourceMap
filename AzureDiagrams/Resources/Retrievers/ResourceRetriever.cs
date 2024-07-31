@@ -89,7 +89,7 @@ public class ResourceRetriever<T> : IRetrieveResource where T : AzureResource
             return await BuildResource(_basicAzureResourceJObject, additionalResources);
         }
 
-        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.ForegroundColor = ConsoleColor.Green;
         var resource = await BuildResource(azureResource!, additionalResources);
         Console.WriteLine($"\tProcessed resource {resource.Type}/{resource.Name}");
         Console.ResetColor();

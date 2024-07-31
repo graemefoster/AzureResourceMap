@@ -61,7 +61,7 @@ internal class ArmClient
     private IRetrieveResource GetResourceRetriever(JObject basicAzureResourceInfo)
     {
         var type = basicAzureResourceInfo.Value<string>("type")!;
-        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine(
             $"\tFound resource {type.ToLowerInvariant()}: {basicAzureResourceInfo.Value<string>("name")!}");
         Console.ResetColor();
@@ -221,6 +221,8 @@ internal class ArmClient
                 basicAzureResourceInfo,
                 "2021-12-01",
                 true),
+            "microsoft.machinelearningservices/workspaces" => new ResourceRetriever<MachineLearningWorkspace>(basicAzureResourceInfo,
+                fetchFullResource: true, apiVersion: "2024-04-01", extensions: new IResourceExtension[] { new ManagedIdentityExtension(), new PrivateEndpointExtensions(), new DiagnosticsExtensions() }),
 
             _ => Unknown()
         };
