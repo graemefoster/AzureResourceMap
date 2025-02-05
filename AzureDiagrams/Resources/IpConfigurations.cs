@@ -22,33 +22,39 @@ public class IpConfigurations
 
     public IpConfigurations(JObject jObject, string propertyName = "ipConfigurations")
     {
-        PublicIpAddresses = jObject["properties"]![propertyName]?
+        var ipConfigurations = jObject["properties"]![propertyName];
+        if (ipConfigurations?.Type == JTokenType.Object)
+        {
+            ipConfigurations = new JArray(ipConfigurations);
+        }
+        
+        PublicIpAddresses = ipConfigurations?
             .Select(x =>
                 x["properties"]!["publicIPAddress"] != null
                     ? x["properties"]!["publicIPAddress"]!.Value<string>("id")!.ToLowerInvariant()
                     : null)
             .Where(x => x != null)
             .Select(x => x!.ToLowerInvariant())
-            .ToArray() ?? Array.Empty<string>();
+            .ToArray() ?? [];
 
-        PrivateIpAddresses = jObject["properties"]![propertyName]?
+        PrivateIpAddresses = ipConfigurations?
             .Select(x => x["properties"]!.Value<string>("privateIPAddress"))
             .Where(x => x != null)
             .Select(x => x!)
-            .ToArray() ?? Array.Empty<string>();
+            .ToArray() ?? [];
 
-        SubnetAttachments = jObject["properties"]![propertyName]?
+        SubnetAttachments = ipConfigurations?
             .Select(x => x["properties"]!["subnet"]?.Value<string>("id")!.ToLowerInvariant())
             .Where(x => x != null)
             .Select(x => x!)
-            .ToArray() ?? Array.Empty<string>();
+            .ToArray() ?? [];
 
-        HostNames = jObject["properties"]![propertyName]?
+        HostNames = ipConfigurations?
             .SelectMany(x =>
                 x["properties"]!["privateLinkConnectionProperties"]?["fqdns"]?.Values<string>() ??
                 Array.Empty<string>())
             .Select(x => x!.ToLowerInvariant())
-            .ToArray() ?? Array.Empty<string>();
+            .ToArray() ?? [];
     }
 
     public string[] PrivateIpAddresses { get; set; }

@@ -9,6 +9,8 @@ namespace AzureDiagrams.Resources;
 
 public class VNet : AzureResource
 {
+    private string[] _peerings;
+
     public VNet(string id, string name, Subnet[] subnets)
     {
         Id = id;
@@ -37,6 +39,12 @@ public class VNet : AzureResource
             x["properties"]!.Value<string>("addressPrefix")!,
             x["properties"]!["routeTable"]?.Value<string>("id")
         )).ToArray();
+
+        _peerings =
+            full["properties"]!
+                ["virtualNetworkPeerings"]?
+                .Select(x => x["properties"]!["remoteVirtualNetwork"]!.Value<string>("id")!)
+                .ToArray() ?? [];
 
         return Task.CompletedTask;
     }
@@ -75,6 +83,17 @@ public class VNet : AzureResource
                 InjectResourceInto(udr, x.Name);
             }
         });
+
+        foreach (var peeredVnet in _peerings)
+        {
+            var peeredVnetResource = allResources.SingleOrDefault(x =>
+                string.Equals(x.Id, peeredVnet, StringComparison.InvariantCultureIgnoreCase));
+            if (peeredVnetResource != null)
+            {
+                CreateFlowTo(peeredVnetResource, "peering", Plane.Runtime);
+            }
+        }
+            
         base.BuildRelationships(allResources);
     }
 

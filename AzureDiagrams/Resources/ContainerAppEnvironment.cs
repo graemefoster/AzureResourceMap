@@ -4,9 +4,10 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDiagrams.Resources;
 
-internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsWorkspaces
+internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsWorkspaces, ICanInjectIntoASubnet
 {
-    public override string Image => "img/lib/mscae/Kubernetes_Services.svg";
+    private string[] _subnets;
+    public override string Image => "img/lib/azure2/other/Container_App_Environments.svg";
     public string? LogAnalyticsCustomerId { get; private set; }
 
     public bool DoYouWriteTo(string customerId)
@@ -21,8 +22,17 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
 
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
-        LogAnalyticsCustomerId = full["properties"]!["appLogsConfiguration"]?["logAnalyticsConfiguration"]
-            ?.Value<string>("customerId");
+        var jToken = full["properties"]!
+            ["appLogsConfiguration"]?
+            ["logAnalyticsConfiguration"];
+
+        jToken = jToken?.Type == JTokenType.Null ? null : jToken;
+        
+        LogAnalyticsCustomerId = jToken?.Value<string>("customerId");
+
+        var subnet = full["properties"]!["vnetConfiguration"]?.Value<string>("infrastructureSubnetId");
+        _subnets = subnet != null ? [subnet] : [];
+        
         return base.Enrich(full, additionalResources);
     }
 
@@ -30,4 +40,6 @@ internal class ContainerAppEnvironment : AzureResource, ICanWriteToLogAnalyticsW
     {
         OwnsResource(containerApp);
     }
+
+    public string[] SubnetIdsIAmInjectedInto => _subnets;
 }

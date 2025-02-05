@@ -72,7 +72,8 @@ internal static class AzureResourceDrawer
                 parent = ((CustomUserData)node.ClusterParent.UserData).Id;
 
         var text = name;
-        if (images.Length == 0 && !string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
+        //if (images.Length == 0 && !string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
+        if (!string.IsNullOrEmpty(type)) text += $"&lt;br/&gt;({type})";
 
         var container =
             @$"<mxCell id=""{id}"" value=""{text}"" style=""rounded=0;whiteSpace=wrap;html=1;fillColor={backgroundColour};verticalAlign={textAlignment.ToString().ToLowerInvariant()}"" vertex=""1"" parent=""{parent}"">

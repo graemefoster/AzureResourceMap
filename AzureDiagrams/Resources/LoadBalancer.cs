@@ -19,12 +19,20 @@ public class LoadBalancer : AzureResource, ICanInjectIntoASubnet, ICanExposePubl
     public override Task Enrich(JObject full, Dictionary<string, JObject?> additionalResources)
     {
         _frontendIpConfigurations = new IpConfigurations(full, "frontendIPConfigurations");
-        _backendNics = full["properties"]!["backendAddressPools"]!.SelectMany(x =>
-                x["properties"]!["loadBalancerBackendAddresses"]?.Select(
-                    lbba => lbba["properties"]!["networkInterfaceIPConfiguration"]?.Value<string>("id")!) ??
-                Array.Empty<string>())
-            .Select(x => string.Join('/', x.Split("/")[0..^2]))
-            .ToArray();
+        _backendNics =
+            full["properties"]!
+                ["backendAddressPools"]!
+                .SelectMany(x =>
+                    x["properties"]!["loadBalancerBackendAddresses"]?
+                        .Select(lbba =>
+                            lbba["properties"]!
+                                ["networkInterfaceIPConfiguration"]?
+                                .Value<string>("id") ?? null) ?? Array.Empty<string>()
+                )
+                .Where(x => x != null)
+                .Select(x => string.Join('/', x.Split("/")[0..^2])
+                )
+                .ToArray();
 
         return base.Enrich(full, additionalResources);
     }

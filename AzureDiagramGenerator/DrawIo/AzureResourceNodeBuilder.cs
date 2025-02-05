@@ -52,9 +52,20 @@ public class AzureResourceNodeBuilder
             else
             {
                 var from = nodes[fromResource]
-                    .Single(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId);
-                var to = nodes[toResource].Single(x => ((CustomUserData)x.UserData).Id == toResource.InternalId);
-                yield return AzureResourceDrawer.CreateSimpleEdge(link.From, link.To, from, to, link.Details,
+                    .Where(x => ((CustomUserData)x.UserData).Id == fromResource.InternalId).ToArray();
+
+                if (from.Count() > 1)
+                {
+                    throw new InvalidOperationException($"Multiple nodes representing {fromResource.Id} were found.");
+                }
+
+                var to = nodes[toResource].Where(x => ((CustomUserData)x.UserData).Id == toResource.InternalId).ToArray();
+                if (to.Count() > 1)
+                {
+                    throw new InvalidOperationException($"Multiple nodes representing {toResource.Id} were found.");
+                }
+
+                yield return AzureResourceDrawer.CreateSimpleEdge(link.From, link.To, from.Single(), to.Single(), link.Details,
                     link.Plane, isLinkVisible, link.IsTwoWay);
             }
         }

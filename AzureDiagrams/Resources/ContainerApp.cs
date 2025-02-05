@@ -9,7 +9,7 @@ namespace AzureDiagrams.Resources;
 internal class ContainerApp : AzureResource, ICanBeAccessedViaAHostName
 {
     public string ContainerAppEnvironmentId { get; set; } = default!;
-    public override string Image => "img/lib/azure2/compute/Container_Instances.svg";
+    public override string Image => "img/lib/azure2/other/Worker_Container_App.svg";
 
     public string IngressFqdn { get; private set; } = default!;
 
