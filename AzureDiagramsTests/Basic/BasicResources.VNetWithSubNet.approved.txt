@@ -10,7 +10,7 @@
     <mxGeometry x="50" y="50" width="250" height="185" 
     as="geometry" />
 </mxCell>
-<mxCell id="c220f485-7c6f-3c98-7a2e-fb9c4275067b" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="c220f485-7c6f-3c98-7a2e-fb9c4275067b" value="&lt;br/&gt;(VNet)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="1">
     <mxGeometry x="0" y="0" width="350" height="295" 
     as="geometry" />
 </mxCell>

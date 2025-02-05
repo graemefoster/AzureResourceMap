@@ -9,7 +9,7 @@ namespace AzureDiagrams.Resources;
 
 public class VNet : AzureResource
 {
-    private string[] _peerings;
+    private string[] _peerings = [];
 
     public VNet(string id, string name, Subnet[] subnets)
     {

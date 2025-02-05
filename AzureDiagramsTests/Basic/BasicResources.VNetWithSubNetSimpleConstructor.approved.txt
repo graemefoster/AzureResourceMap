@@ -18,7 +18,7 @@
     <mxGeometry x="400" y="50" width="250" height="185" 
     as="geometry" />
 </mxCell>
-<mxCell id="da6247fd-0679-ddbd-3294-b327594e85ba" value="vnet" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="1">
+<mxCell id="da6247fd-0679-ddbd-3294-b327594e85ba" value="vnet&lt;br/&gt;(VNet)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="1">
     <mxGeometry x="0" y="0" width="700" height="295" 
     as="geometry" />
 </mxCell>

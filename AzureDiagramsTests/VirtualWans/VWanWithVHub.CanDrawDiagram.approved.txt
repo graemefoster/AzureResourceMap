@@ -22,7 +22,7 @@
     <mxGeometry x="50" y="50" width="400" height="185" 
     as="geometry" />
 </mxCell>
-<mxCell id="bd3a1a44-a441-608a-7d61-14ee6b5f190c" value="test-vnet" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="207c67fc-34bc-d9f0-369e-0f16975fc114.container">
+<mxCell id="bd3a1a44-a441-608a-7d61-14ee6b5f190c" value="test-vnet&lt;br/&gt;(VNet)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;verticalAlign=top" vertex="1" parent="207c67fc-34bc-d9f0-369e-0f16975fc114.container">
     <mxGeometry x="50" y="260" width="400" height="185" 
     as="geometry" />
 </mxCell>
@@ -35,19 +35,11 @@
     as="geometry" />
 </mxCell>
 <mxCell id="c5131159-6fd2-a9d3-d3a0-10808df28731" 
-        style="jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;rounded=1;orthogonalLoop=1;;" edge="1" parent="1" 
-        source="6278f6e0-78c3-8d53-0626-4965e13bdaa4" target="4b781b88-7e3d-9462-d7a0-69670644f6fe">
-            <mxGeometry relative="1" as="geometry"><mxPoint x="350" y="335" as="sourcePoint" />
-<mxPoint x="249.99999999999994" y="137.5" as="targetPoint" />
-<Array as="points">
-    <mxPoint x="350" y="335" />
-<mxPoint x="308.3333333333333" y="335" />
-<mxPoint x="300" y="326.6666666666667" />
-<mxPoint x="300" y="145.83333333333334" />
-<mxPoint x="291.6666666666667" y="137.5" />
-</Array></mxGeometry>
-            </mxCell>
-            
+         style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" 
+         source="6278f6e0-78c3-8d53-0626-4965e13bdaa4" target="4b781b88-7e3d-9462-d7a0-69670644f6fe">
+            <mxGeometry relative="1" as="geometry" />
+             </mxCell>
+             
 
 	</root>
 </mxGraphModel>
